@@ -382,39 +382,7 @@ class Interface(Frame):
     # Action on bouton Generation code VHDL
     def on_buttonGenerate_clicked(self):
         print("Generate the NOC files")
-        error_found=0
-        if self.entry_nbr_routeur.get()=="":
-            error_found=1
-        else:
-            for r in range(int(self.entry_nbr_routeur.get())):
-                if self.damierNbrMaitre[r].get()=="" or self.damierNbrEsclave[r].get()=="":
-                    error_found=1
-        if error_found:
-            showerror("Erreur", 'Vous devez specifier le nombre des routeurs, le nombre des Maitres et le nombre des Esclaves' )
-        else:
-            for r in range(int(self.entry_nbr_routeur.get())):
-                self.nbr_M_Global+=int(self.damierNbrMaitre[r].get())
-                self.nbr_S_Global+=int(self.damierNbrEsclave[r].get())
-
-
-            copyothersfiles("Noc0__")
-            
-            #Vérifier que le dossier existe, il est créé si nécessaire
-            outputdir = "./Noc0__"
-            if not os.path.exists(outputdir):
-                os.makedirs(outputdir)
-     
-            # génère le fichier de sortie
-            with open(outputdir + "/noc_address_pack.vhd",'w') as new_file:
-                with open("./base/noc_address_pack.vhd") as old_file:
-                    for line in old_file:   
-                        # Cherche le mot clé et le met à jour.          
-                        line = line.replace("$$TOTAL_MASTER_NB$$"                    , str(self.nbr_M_Global))         
-                        line = line.replace("$$TOTAL_SLAVE_NB$$"                     , str(self.nbr_S_Global))         
-                        line = line.replace("$$TOTAL_ROUTING_PORT_NB$$"              , "16")         
-                        line = line.replace("$$TOTAL_ROUTER_NB$$"                    , str(self.entry_nbr_routeur.get()))    
-                        new_file.write(line)
-            self.generate_vhdl_file()
+        self.generate_vhdl_file()
 
 
     def generate_configurable_part1(self):
