@@ -161,7 +161,7 @@ class Interface(Frame):
         self.checkbouton_moniteur_securite = Checkbutton(self, text="Activation des moniteurs \n de securite", command= self.checkbouton_moniteur_securite_action)
         self.checkbouton_moniteur_securite.grid(row =13, column = 0, rowspan = 8,columnspan = 8, sticky=NSEW)
         # bouton "Configuration des moniteurs de sécurité"
-        self.bouton_moniteur_securite = Button(self, text="Configuration des moniteurs \n de securite", command=self.quit)
+        self.bouton_moniteur_securite = Button(self, text="Configuration des moniteurs \n de securite", command=self.quit, state=DISABLED)
         self.bouton_moniteur_securite.grid(row = 21, column = 0, rowspan = 8,columnspan = 8, sticky=NSEW)
         
         # checkbutton "IP toutes connectees en local"
@@ -205,13 +205,13 @@ class Interface(Frame):
     def run_action(self):
         # Get variable entry in Box
         if self.entry_nbr_routeur.get()=="":
-            showerror("Erreur", 'Vous devez choisir un nombre entre 1 et 65' )
+            showerror("Erreur", 'Vous devez choisir un nombre de routeurs compris entre 3 et 64' )
         else:    
             self.var = int(self.entry_nbr_routeur.get())
             self.nbr_click_run +=1        
         
             # Check le nombre de routeurs autorisés & genère le damier pour le nbr de routeurs mis en entrée
-            if (int(self.entry_nbr_routeur.get()) < 66) and (int(self.entry_nbr_routeur.get()) > 1):
+            if (int(self.entry_nbr_routeur.get()) < 65) and (int(self.entry_nbr_routeur.get()) > 2):
                 for m_iterator in range(3,self.var+1):
                     for ligne in range(8,m_iterator+9):
                         for colonne in range (1,m_iterator+2):
@@ -264,7 +264,7 @@ class Interface(Frame):
                 self.bouton_verification.grid(row = m_iterator+18, column = 34, rowspan = 8,columnspan = 8, sticky=NSEW)
                 self.bouton_generation_vhdl.grid(row = m_iterator+18, column = 42, rowspan = 8,columnspan = 8, sticky=NSEW)
             else:
-                showerror("Erreur", 'Vous devez choisir un nombre entre 1 et 65' )
+                showerror("Erreur", 'Vous devez choisir un nombre de routeurs compris entre 3 et 64')
        
     # Fonction de re-initialisation du damier par defaut 2x2
     def damier_init_defaut(self):
@@ -1487,5 +1487,9 @@ if __name__ == "__main__":
     fenetre.title("Outil de generation d'IOmux-NoC Version 1")
     interface = Interface(fenetre)
     print('nbr_R_Global in Main = %d' % Interface.nbr_R_Global)
+	
+    #definit une taille minimale pour la fenêtre (en dessous de laquelle on ne peut descendre)
+    fenetre.update()
+    fenetre.minsize(fenetre.winfo_width(), fenetre.winfo_height())
 
     interface.mainloop()
