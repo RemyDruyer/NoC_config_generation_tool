@@ -203,10 +203,13 @@ class Interface(Frame):
     
     # Action du bouton "RUN"
     def run_action(self):
+	
         # Get variable entry in Box
         if self.entry_nbr_routeur.get()=="":
             showerror("Erreur", 'Vous devez choisir un nombre de routeurs compris entre 3 et 64' )
         else:    
+            nbr_maitre_esclave_init_value = StringVar()
+            nbr_maitre_esclave_init_value.set = "0"
             self.var = int(self.entry_nbr_routeur.get())
             self.nbr_click_run +=1        
         
@@ -240,16 +243,16 @@ class Interface(Frame):
                                 self.damierX[self.idamierX].grid(row = ligne, column = colonne, sticky=NSEW)
                                 self.idamierX +=1
                                 if colonne == (self.var+1):
-                                    self.damierNbrMaitre.append( Entry(self.fenetre_canvas.interior, justify=CENTER,  width = 5))
+                                    self.damierNbrMaitre.append( Entry(self.fenetre_canvas.interior, justify=CENTER,  width = 5, textvariable = nbr_maitre_esclave_init_value))
                                     self.damierNbrMaitre[self.nbr_ligne].grid(row = ligne, column = colonne+1, columnspan = 8, sticky= NSEW)
-                                    self.damierNbrEsclave.append( Entry(self.fenetre_canvas.interior, justify=CENTER,  width = 5))
+                                    self.damierNbrEsclave.append( Entry(self.fenetre_canvas.interior, justify=CENTER,  width = 5, textvariable = nbr_maitre_esclave_init_value))
                                     self.damierNbrEsclave[self.nbr_ligne].grid(row = ligne, column = colonne+10, columnspan = 8, sticky= NSEW)
 
                                     if ligne == (self.var+7):
                                         self.nbr_ligne +=1
-                                        self.damierNbrMaitre.append( Entry(self.fenetre_canvas.interior, justify=CENTER,  width = 5))
+                                        self.damierNbrMaitre.append( Entry(self.fenetre_canvas.interior, justify=CENTER,  width = 5, textvariable = nbr_maitre_esclave_init_value))
                                         self.damierNbrMaitre[self.nbr_ligne].grid(row = ligne+1, column = colonne+1, columnspan = 8, sticky= NSEW)
-                                        self.damierNbrEsclave.append( Entry(self.fenetre_canvas.interior, justify=CENTER, width = 5))
+                                        self.damierNbrEsclave.append( Entry(self.fenetre_canvas.interior, justify=CENTER, width = 5, textvariable = nbr_maitre_esclave_init_value))
                                         self.damierNbrEsclave[self.nbr_ligne].grid(row = ligne+1, column = colonne+10, columnspan = 8, sticky= NSEW)
                                     self.nbr_ligne +=1
                 
@@ -308,6 +311,7 @@ class Interface(Frame):
             if error_found:
                 showerror("Erreur", 'Vous devez specifier le nombre des Maitres et le nbr des Esclaves' )
             else:
+				#récupération du nombre de maître et d'esclave à partir des cases
                 for r in range(int(self.entry_nbr_routeur.get())):
                     self.nbr_M[r] = int(self.damierNbrMaitre[r].get())
                     self.nbr_S[r] = int(self.damierNbrEsclave[r].get())
