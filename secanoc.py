@@ -103,7 +103,7 @@ class Interface(Frame):
         self.champ_nbr_routeur.grid(row = 0, column = 0, columnspan = 9, sticky= NW)
         self.entry_nbr_routeur = Entry(self)
         self.entry_nbr_routeur.grid(row = 0, column = 10, columnspan = 9, sticky= W)
-        
+        self.entry_nbr_routeur.insert(0,"3")
         # Canvas & Scrollbar
         self.fenetre_canvas = VerticalScrolledFrame(self)
         self.fenetre_canvas.grid(row=8, column=1, columnspan = 40)
@@ -243,17 +243,21 @@ class Interface(Frame):
                                 self.damierX[self.idamierX].grid(row = ligne, column = colonne, sticky=NSEW)
                                 self.idamierX +=1
                                 if colonne == (self.var+1):
-                                    self.damierNbrMaitre.append( Entry(self.fenetre_canvas.interior, justify=CENTER,  width = 5, textvariable = nbr_maitre_esclave_init_value))
+                                    self.damierNbrMaitre.append( Entry(self.fenetre_canvas.interior, justify=CENTER,  width = 5))
                                     self.damierNbrMaitre[self.nbr_ligne].grid(row = ligne, column = colonne+1, columnspan = 8, sticky= NSEW)
-                                    self.damierNbrEsclave.append( Entry(self.fenetre_canvas.interior, justify=CENTER,  width = 5, textvariable = nbr_maitre_esclave_init_value))
+                                    self.damierNbrEsclave.append( Entry(self.fenetre_canvas.interior, justify=CENTER,  width = 5))
                                     self.damierNbrEsclave[self.nbr_ligne].grid(row = ligne, column = colonne+10, columnspan = 8, sticky= NSEW)
-
+                                    self.damierNbrMaitre[self.nbr_ligne].insert(0,"0")
+                                    self.damierNbrEsclave[self.nbr_ligne].insert(0,"0")
+									
                                     if ligne == (self.var+7):
                                         self.nbr_ligne +=1
-                                        self.damierNbrMaitre.append( Entry(self.fenetre_canvas.interior, justify=CENTER,  width = 5, textvariable = nbr_maitre_esclave_init_value))
+                                        self.damierNbrMaitre.append( Entry(self.fenetre_canvas.interior, justify=CENTER,  width = 5))
                                         self.damierNbrMaitre[self.nbr_ligne].grid(row = ligne+1, column = colonne+1, columnspan = 8, sticky= NSEW)
-                                        self.damierNbrEsclave.append( Entry(self.fenetre_canvas.interior, justify=CENTER, width = 5, textvariable = nbr_maitre_esclave_init_value))
+                                        self.damierNbrEsclave.append( Entry(self.fenetre_canvas.interior, justify=CENTER, width = 5))
                                         self.damierNbrEsclave[self.nbr_ligne].grid(row = ligne+1, column = colonne+10, columnspan = 8, sticky= NSEW)
+                                        self.damierNbrMaitre[self.nbr_ligne].insert(0,"0")
+                                        self.damierNbrEsclave[self.nbr_ligne].insert(0,"0")
                                     self.nbr_ligne +=1
                 
                 # Bouge les boutons du bas pour laisser la place au Damier
