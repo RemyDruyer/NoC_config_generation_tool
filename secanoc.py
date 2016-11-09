@@ -99,7 +99,7 @@ class Interface(Frame):
         fenetre.config(menu=self.barremenu)
         
         # nombre routeurs Label & Entry
-        self.champ_nbr_routeur = Label(self, text="Nombre total de routeurs dans le reseau:")
+        self.champ_nbr_routeur = Label(self, text="Nombre de routeurs dans le reseau (entre 3 et 64):")
         self.champ_nbr_routeur.grid(row = 0, column = 0, columnspan = 9, sticky= NW)
         self.entry_nbr_routeur = Entry(self)
         self.entry_nbr_routeur.grid(row = 0, column = 10, columnspan = 9, sticky= W)
@@ -154,7 +154,7 @@ class Interface(Frame):
             self.damierDiag[self.idamierDiag].grid_forget()
         
         # Bouton RUN
-        self.bouton_run = Button(self, text=" RUN ", command=self.run_action)
+        self.bouton_run = Button(self, text=" Generation de la matrice de connexions des routeurs ", command=self.run_action)
         self.bouton_run.grid(row = 0, column = 20, columnspan = 9, sticky=NSEW)
                 
         # checkbutton "Activation des moniteurs de securite"
@@ -580,7 +580,7 @@ type array_ROUTING_PORT_REQ_PS is array (0 to TOTAL_ROUTER_NB-1) of std_logic_ve
 type array_ROUTING_PORT_DIN_PS is array (0 to TOTAL_ROUTER_NB-1) of arrayDATA(0 to 15);
 type array_ROUTING_PORT_ACK_PS is array (0 to TOTAL_ROUTER_NB-1) of std_logic_vector(0 to 15);
 
---IOmux local matrix
+-- local matrix
 type integer_vector is array (0 to 16) of integer;
 type local_connexion_matrix is array (0 to 16) of integer_vector;
 type array_all_local_connexion_matrix is array (0 to TOTAL_ROUTER_NB-1) of local_connexion_matrix;
@@ -2198,7 +2198,7 @@ class Decodeur_d_adresse(Tk):
 if __name__ == "__main__":
     
     fenetre = Tk()
-    fenetre.title("Outil de generation d'IOmux-NoC Version 1")
+    fenetre.title("Outil de generation de configurations NoC (Version 0.1)")
     interface = Interface(fenetre)
     print('nbr_R_Global in Main = %d' % Interface.nbr_R_Global)
 	
