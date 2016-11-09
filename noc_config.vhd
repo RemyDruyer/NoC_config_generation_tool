@@ -20,26 +20,26 @@ package noc_config is
 ----------------------------------------------------------------
 constant 	TOTAL_MASTER_NB   				: integer := 16;
 constant 	TOTAL_SLAVE_NB   				: integer := 13;
-constant 	TOTAL_ROUTER_CONNEXIONS 		: integer := 7;
-constant 	TOTAL_ROUTING_PORT_NB 			: integer := TOTAL_ROUTER_CONNEXIONS*2;
+constant 	TOTAL_ROUTER_CONNEXIONS 	: integer := 7;
+constant 	TOTAL_ROUTING_PORT_NB 		: integer := TOTAL_ROUTER_CONNEXIONS*2;
 constant 	TOTAL_ROUTER_NB   				: integer := 6;
 	
-constant 	SECURITY_MONITOR_ACTIVATION   	: integer := 1; -- 0 = monitors deactivated ; 1 = monitors activated
+constant 	SECURITY_MONITOR_ACTIVATION   : integer := 1; -- 0 = monitors deactivated ; 1 = monitors activated
 
 ----------------------------------------------------------------
 						----- FIXED PART -----
 ----------------------------------------------------------------
 -- INTEGER --
 constant	DATA_WIDTH						: integer := 32; 	--(in bits)
-constant	ADD_SIZE   						: integer := 32; 	--(in bits)
-constant	PORT_ADD_SIZE 					: integer := 4; 	--(in bits)
-constant	ROUTER_ADD_SIZE 				: integer := 6; 	--(in bits)
-constant	NOC_ADD_SIZE   					: integer := PORT_ADD_SIZE + ROUTER_ADD_SIZE; --(in bits)
+constant	ADD_SIZE   							: integer := 32; 	--(in bits)
+constant	PORT_ADD_SIZE 						: integer := 4; 	--(in bits)
+constant	ROUTER_ADD_SIZE 					: integer := 6; 	--(in bits)
+constant	NOC_ADD_SIZE   						: integer := PORT_ADD_SIZE + ROUTER_ADD_SIZE; --(in bits)
 constant	BYTEENABLE_SIZE					: integer := 4;	--(in 4-bits)
 constant	REQSIZE_VECTOR_SIZE				: integer := 8;	--(define the size of the std_logic_vector of REQSIZE) example : if REQSIZE_VECTOR_SIZE = 8 -> REQSIZE can count 2^REQSIZE_VECTOR_SIZE = 256 bytes
 constant 	MAX_PORT_NB_BY_ROUTER			: integer := 16;
 constant	PACKET_PAYLOAD_MAXIMUM_FLITSIZE	: integer := 8; 						--(in 32 bits words)
-constant 	MAX_REQSIZE_in_byte				: integer := PACKET_PAYLOAD_MAXIMUM_FLITSIZE*4; 	--(in 32 bits words)
+constant 	MAX_REQSIZE_in_byte					: integer := PACKET_PAYLOAD_MAXIMUM_FLITSIZE*4; 	--(in 32 bits words)
 constant 	MASTER_ADDRESS_DECODER_RANGE	: integer := 32;
 
 -- FIFO ALTERA --
@@ -59,7 +59,7 @@ constant	ACK_PACKETIZER_FIFO_ADDR_WIDTH 	: integer := 4;
 
 -- SUBTYPE --
 subtype 	regADD			is std_logic_vector((ADD_SIZE-1) downto 0);
-subtype 	regPORTADD 		is std_logic_vector((PORT_ADD_SIZE-1) downto 0);
+subtype 	regPORTADD 	is std_logic_vector((PORT_ADD_SIZE-1) downto 0);
 subtype 	regROUTERADD 	is std_logic_vector((ROUTER_ADD_SIZE-1) downto 0);
 subtype 	regNOCADD 		is std_logic_vector((NOC_ADD_SIZE-1) downto 0);
 subtype 	regDATA 		is std_logic_vector((DATA_WIDTH-1) downto 0);
@@ -74,7 +74,7 @@ constant	reg_PACKET_PAYLOAD_MAX_BYTESIZE 	: regREQSIZE := std_logic_vector(to_un
 -- SIZE ARRAY --
 type 	arrayADD			is array(natural RANGE <>) of regADD;
 type 	arrayPORTADD 		is array(natural RANGE <>) of regPORTADD;
-type 	arrayROUTERADD 		is array(natural RANGE <>) of regROUTERADD;
+type 	arrayROUTERADD 	is array(natural RANGE <>) of regROUTERADD;
 type 	arrayNOCADD 		is array(natural RANGE <>) of regNOCADD;
 type 	arrayDATA 			is array(natural RANGE <>) of regDATA;
 type 	arrayBYTEENAB 		is array(natural RANGE <>) of regBYTEENAB;
@@ -236,16 +236,16 @@ constant ROUTER61 : regROUTERADD:= "111101";
 constant ROUTER62 : regROUTERADD:= "111110";
 constant ROUTER63 : regROUTERADD:= "111111";
 
-constant MASTER0 	: regPORTADD:= "0000";
-constant MASTER1 	: regPORTADD:= "0001";
-constant MASTER2 	: regPORTADD:= "0010";
-constant MASTER3 	: regPORTADD:= "0011";
-constant MASTER4 	: regPORTADD:= "0100";
-constant MASTER5 	: regPORTADD:= "0101";
-constant MASTER6 	: regPORTADD:= "0110";
-constant MASTER7 	: regPORTADD:= "0111";
-constant MASTER8 	: regPORTADD:= "1000";
-constant MASTER9 	: regPORTADD:= "1001";
+constant MASTER0 		: regPORTADD:= "0000";
+constant MASTER1 		: regPORTADD:= "0001";
+constant MASTER2 		: regPORTADD:= "0010";
+constant MASTER3 		: regPORTADD:= "0011";
+constant MASTER4 		: regPORTADD:= "0100";
+constant MASTER5 		: regPORTADD:= "0101";
+constant MASTER6 		: regPORTADD:= "0110";
+constant MASTER7 		: regPORTADD:= "0111";
+constant MASTER8 		: regPORTADD:= "1000";
+constant MASTER9 		: regPORTADD:= "1001";
 constant MASTER10	: regPORTADD:= "1010";
 constant MASTER11	: regPORTADD:= "1011";
 constant MASTER12	: regPORTADD:= "1100";
@@ -253,22 +253,22 @@ constant MASTER13	: regPORTADD:= "1101";
 constant MASTER14	: regPORTADD:= "1110";
 constant MASTER15	: regPORTADD:= "1111";
 
-constant SLAVE0 	: regPORTADD:= "0000";
-constant SLAVE1 	: regPORTADD:= "0001";
-constant SLAVE2 	: regPORTADD:= "0010";
-constant SLAVE3 	: regPORTADD:= "0011";
-constant SLAVE4 	: regPORTADD:= "0100";
-constant SLAVE5 	: regPORTADD:= "0101";
-constant SLAVE6 	: regPORTADD:= "0110";
-constant SLAVE7 	: regPORTADD:= "0111";
-constant SLAVE8 	: regPORTADD:= "1000";
-constant SLAVE9 	: regPORTADD:= "1001";
-constant SLAVE10 	: regPORTADD:= "1010";
-constant SLAVE11 	: regPORTADD:= "1011";
-constant SLAVE12 	: regPORTADD:= "1100";
-constant SLAVE13 	: regPORTADD:= "1101";
-constant SLAVE14 	: regPORTADD:= "1110";
-constant SLAVE15 	: regPORTADD:= "1111";
+constant SLAVE0 		: regPORTADD:= "0000";
+constant SLAVE1 		: regPORTADD:= "0001";
+constant SLAVE2 		: regPORTADD:= "0010";
+constant SLAVE3 		: regPORTADD:= "0011";
+constant SLAVE4 		: regPORTADD:= "0100";
+constant SLAVE5 		: regPORTADD:= "0101";
+constant SLAVE6 		: regPORTADD:= "0110";
+constant SLAVE7 		: regPORTADD:= "0111";
+constant SLAVE8 		: regPORTADD:= "1000";
+constant SLAVE9 		: regPORTADD:= "1001";
+constant SLAVE10 		: regPORTADD:= "1010";
+constant SLAVE11 		: regPORTADD:= "1011";
+constant SLAVE12 		: regPORTADD:= "1100";
+constant SLAVE13 		: regPORTADD:= "1101";
+constant SLAVE14 		: regPORTADD:= "1110";
+constant SLAVE15 		: regPORTADD:= "1111";
 
 constant ROUTINGPORT0 	: regPORTADD:= "0000";
 constant ROUTINGPORT1 	: regPORTADD:= "0001";
@@ -376,7 +376,8 @@ constant ALL_ROUTER_PACKET_INTERFACE_PORT_ADD : array_all_router_packet_interfac
 	R2_PACKET_INTERFACE_PORT_ADD,
 	R3_PACKET_INTERFACE_PORT_ADD,
 	R4_PACKET_INTERFACE_PORT_ADD,
-	R5_PACKET_INTERFACE_PORT_ADD);
+	R5_PACKET_INTERFACE_PORT_ADD
+);
 	
 	
 ------ 5) ADDRESS DECODER TABLE SIZES  ------
