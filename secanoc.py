@@ -2009,7 +2009,7 @@ class LocalConnexion(Tk):
         var = []
         row_cont=0
         self.title("Configuration des connexions locales")
-        self.geometry("410x370")
+        self.geometry("475x370")
         self.frame = VerticalScrolledFrame(self)
         self.frame.grid(row=0, column=0,sticky=N)
         self.nbr_R = nbr_r_p
