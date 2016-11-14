@@ -2082,12 +2082,13 @@ class PaquetConnexion(Tk):
         self.var = []
         row_cont=0
         self.title("Configuration des connexions en paquets")
-        self.geometry("445x370")
+        self.geometry("520x370")
         self.frame = VerticalScrolledFrame(self)
         self.frame.grid(row=0, column=0,sticky=N)
         self.nbr_R = nbr_r_p
         self.nbr_M = nbr_m_p
         self.nbr_S = nbr_s_p
+        self.is_selected_flag=0
         Connexion_local =[[[ 0 for i in range(self.nbr_R) ] for j in range(len(self.nbr_M))] for j in range(len(self.nbr_S)) ]
         label_0    = []
         Routeurs   = []
@@ -2096,7 +2097,7 @@ class PaquetConnexion(Tk):
         self.Connexions = []
         label_0   .append(Label(self.frame.interior, text="", width=6))
         Routeurs  .append(Label(self.frame.interior, text="Routeur  "))
-        Maitres   .append(Label(self.frame.interior, text="  Interface "))
+        Maitres   .append(Label(self.frame.interior, text="  IP "))
         #Esclaves  .append(Label(self.frame.interior, text="Esclave  "))
         self.Connexions.append(Label(self.frame.interior, text="Connexion"))
 
@@ -2122,14 +2123,20 @@ class PaquetConnexion(Tk):
             Maitres[i]   .grid(row=i, column=3)
             #Esclaves[i]  .grid(row=i, column=4)
             self.Connexions[i].grid(row=i, column=4)
-        Button(self, text="Tout Connecter", width=12, command=self.on_buttonToutConnecter_clicked).grid(row=18, column=3)
-        Button(self, text="Save", width=12, command=self.on_buttonsave_clicked).grid(row=19, column=3)
+        Button(self, text="Tout Connecter/Deconnecter", width=22, command=self.on_buttonToutConnecter_clicked).grid(row=18, column=3)
+        Button(self, text="Save", width=22, command=self.on_buttonsave_clicked).grid(row=19, column=3)
 
 
     def on_buttonToutConnecter_clicked(self):
-        print("Tout connecter")         
-        for i in range(1,len(self.Connexions)):
-            self.Connexions[i].select()
+        print("Tout connecter")
+        if self.is_selected_flag==0:
+            for i in range(1,len(self.Connexions)):
+                self.Connexions[i].select()
+            self.is_selected_flag=1
+        else:
+            for i in range(1,len(self.Connexions)):
+                self.Connexions[i].deselect()
+            self.is_selected_flag=0
 
     def on_buttonsave_clicked(self):
         print("Configuration des connexions en paquets")    
