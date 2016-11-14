@@ -400,13 +400,13 @@ class Interface(Frame):
         self.nbr_R = int(self.entry_nbr_routeur.get())
         #self.nbr_M = [0 for i in range(self.nbr_R)]
         #self.nbr_S = [0 for i in range(self.nbr_R)]
-        self.nbr_M =0
-        self.nbr_S =0
+        self.sum_nbr_M =0
+        self.sum_nbr_S =0
 		
 		# Calcul de la somme totale d'interface maître et d'interface esclave dans le réseau
         for r in range(int(self.entry_nbr_routeur.get())):
-            self.nbr_M = int(self.damierNbrMaitre[r].get()) + self.nbr_M
-            self.nbr_S = int(self.damierNbrEsclave[r].get()) + self.nbr_S
+            self.sum_nbr_M = int(self.damierNbrMaitre[r].get()) + self.sum_nbr_M
+            self.sum_nbr_S = int(self.damierNbrEsclave[r].get()) + self.sum_nbr_S
 			
         ch='''
 --------------------------------------------------------------
@@ -434,8 +434,8 @@ package noc_config is
         fw= open(outputdir + "/noc_config_configurable_part1.vhd", 'w')
         
         fw.write("%s" %ch)
-        fw.write('constant TOTAL_MASTER_NB          : integer := %d ;\n' %self.nbr_M)
-        fw.write('constant TOTAL_SLAVE_NB           : integer := %d ;\n' %self.nbr_S)
+        fw.write('constant TOTAL_MASTER_NB          : integer := %d ;\n' %self.sum_nbr_M)
+        fw.write('constant TOTAL_SLAVE_NB           : integer := %d ;\n' %self.sum_nbr_S)
         fw.write('constant TOTAL_ROUTING_PORT_NB    : integer := %d ;\n' %self.nbr_RP_Global)
         fw.write('constant TOTAL_ROUTER_NB          : integer := %d ;\n' %self.nbr_R)
         fw.close()
