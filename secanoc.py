@@ -99,11 +99,11 @@ class Interface(Frame):
         fenetre.config(menu=self.barremenu)
         
         # nombre routeurs Label & Entry
-        self.champ_nbr_routeur = Label(self, text="Nombre total de routeurs dans le reseau:")
+        self.champ_nbr_routeur = Label(self, text="Nombre de routeurs dans le reseau (entre 3 et 64):")
         self.champ_nbr_routeur.grid(row = 0, column = 0, columnspan = 9, sticky= NW)
         self.entry_nbr_routeur = Entry(self)
         self.entry_nbr_routeur.grid(row = 0, column = 10, columnspan = 9, sticky= W)
-        
+        self.entry_nbr_routeur.insert(0,"3")
         # Canvas & Scrollbar
         self.fenetre_canvas = VerticalScrolledFrame(self)
         self.fenetre_canvas.grid(row=8, column=1, columnspan = 40)
@@ -154,7 +154,7 @@ class Interface(Frame):
             self.damierDiag[self.idamierDiag].grid_forget()
         
         # Bouton RUN
-        self.bouton_run = Button(self, text=" RUN ", command=self.run_action)
+        self.bouton_run = Button(self, text=" Generation de la matrice de connexions des routeurs ", command=self.run_action)
         self.bouton_run.grid(row = 0, column = 20, columnspan = 9, sticky=NSEW)
                 
         # checkbutton "Activation des moniteurs de securite"
@@ -164,15 +164,15 @@ class Interface(Frame):
         self.bouton_moniteur_securite = Button(self, text="Configuration des moniteurs \n de securite", command=self.quit, state=DISABLED)
         self.bouton_moniteur_securite.grid(row = 21, column = 0, rowspan = 8,columnspan = 8, sticky=NSEW)
         
-        # checkbutton "IP toutes connectees en local"
-        self.checkbouton_connexions_locales = Checkbutton(self, text="IP toutes \n connectees en local", command= self.checkbouton_connexions_locales_action)
+        # checkbutton "Interfaces toutes connectees en local"
+        self.checkbouton_connexions_locales = Checkbutton(self, text="Interfaces toutes \n connectees en local", command= self.checkbouton_connexions_locales_action)
         self.checkbouton_connexions_locales.grid(row =13, column = 8, rowspan = 8, columnspan = 8, sticky=NSEW)
         # bouton "Configuration des connexions locales"
         self.bouton_connexions_locales = Button(self, text="Configuration des \n connexions locales", command=self.bouton_connexions_locales_action)
         self.bouton_connexions_locales.grid(row = 21, column = 8, rowspan = 8, columnspan = 8, sticky=NSEW)
         
-        # checkbutton "IP toutes connectees en paquets"
-        self.checkbouton_connexions_paquets = Checkbutton(self, text="IP toutes \n connectees en paquets", command= self.checkbouton_connexions_paquets_action)
+        # checkbutton "Interfaces toutes connectees en paquets"
+        self.checkbouton_connexions_paquets = Checkbutton(self, text="Interfaces toutes \n connectees en paquets", command= self.checkbouton_connexions_paquets_action)
         self.checkbouton_connexions_paquets.grid(row =13, column = 16, rowspan = 8,columnspan = 8, sticky=NSEW)
         # bouton "Configuration des connexions en paquets"
         self.bouton_connexions_paquets = Button(self, text="Configuration des \n connexions en paquets", command=self.bouton_connexions_paquets_action)
@@ -228,10 +228,10 @@ class Interface(Frame):
                                 self.damierAChiffreLigne[self.iAChiffreLigne].grid(row = ligne, column = colonne, sticky=NSEW)
                                 self.iAChiffreLigne +=1
                                 if self.iAChiffreLigne == self.var:
-                                    self.champ_nbr_ip_maitre = Button(self.fenetre_canvas.interior, bd = 1, text="Nombre IP maitres \n du routeur")
-                                    self.champ_nbr_ip_maitre.grid(row = ligne-1, column = colonne+1, rowspan = 2, columnspan = 8, sticky= NW)
-                                    self.champ_nbr_ip_esclave = Button(self.fenetre_canvas.interior, bd=1, text="Nombre IP \n esclaves du routeur")
-                                    self.champ_nbr_ip_esclave.grid(row = ligne-1, column = colonne+10,rowspan = 2, columnspan = 8, sticky= NW)
+                                    self.champ_nbr_interface_maitre = Button(self.fenetre_canvas.interior, bd = 1, text="Nombre d'interfaces maitres \n du routeur")
+                                    self.champ_nbr_interface_maitre.grid(row = ligne-1, column = colonne+1, rowspan = 2, columnspan = 8, sticky= NW)
+                                    self.champ_nbr_interface_esclave = Button(self.fenetre_canvas.interior, bd=1, text="Nombre d'interfaces \n esclaves du routeur")
+                                    self.champ_nbr_interface_esclave.grid(row = ligne-1, column = colonne+10,rowspan = 2, columnspan = 8, sticky= NW)
                             elif colonne == 1 and ligne > (8+m_iterator-1):
                                 self.damierAChiffreColonne[self.iAChiffreColonne].grid(row = ligne, column = colonne, sticky=NSEW)
                                 self.iAChiffreColonne +=1
@@ -243,17 +243,21 @@ class Interface(Frame):
                                 self.damierX[self.idamierX].grid(row = ligne, column = colonne, sticky=NSEW)
                                 self.idamierX +=1
                                 if colonne == (self.var+1):
-                                    self.damierNbrMaitre.append( Entry(self.fenetre_canvas.interior, justify=CENTER,  width = 5, textvariable = nbr_maitre_esclave_init_value))
+                                    self.damierNbrMaitre.append( Entry(self.fenetre_canvas.interior, justify=CENTER,  width = 5))
                                     self.damierNbrMaitre[self.nbr_ligne].grid(row = ligne, column = colonne+1, columnspan = 8, sticky= NSEW)
-                                    self.damierNbrEsclave.append( Entry(self.fenetre_canvas.interior, justify=CENTER,  width = 5, textvariable = nbr_maitre_esclave_init_value))
+                                    self.damierNbrEsclave.append( Entry(self.fenetre_canvas.interior, justify=CENTER,  width = 5))
                                     self.damierNbrEsclave[self.nbr_ligne].grid(row = ligne, column = colonne+10, columnspan = 8, sticky= NSEW)
-
+                                    self.damierNbrMaitre[self.nbr_ligne].insert(0,"0")
+                                    self.damierNbrEsclave[self.nbr_ligne].insert(0,"0")
+									
                                     if ligne == (self.var+7):
                                         self.nbr_ligne +=1
-                                        self.damierNbrMaitre.append( Entry(self.fenetre_canvas.interior, justify=CENTER,  width = 5, textvariable = nbr_maitre_esclave_init_value))
+                                        self.damierNbrMaitre.append( Entry(self.fenetre_canvas.interior, justify=CENTER,  width = 5))
                                         self.damierNbrMaitre[self.nbr_ligne].grid(row = ligne+1, column = colonne+1, columnspan = 8, sticky= NSEW)
-                                        self.damierNbrEsclave.append( Entry(self.fenetre_canvas.interior, justify=CENTER, width = 5, textvariable = nbr_maitre_esclave_init_value))
+                                        self.damierNbrEsclave.append( Entry(self.fenetre_canvas.interior, justify=CENTER, width = 5))
                                         self.damierNbrEsclave[self.nbr_ligne].grid(row = ligne+1, column = colonne+10, columnspan = 8, sticky= NSEW)
+                                        self.damierNbrMaitre[self.nbr_ligne].insert(0,"0")
+                                        self.damierNbrEsclave[self.nbr_ligne].insert(0,"0")
                                     self.nbr_ligne +=1
                 
                 # Bouge les boutons du bas pour laisser la place au Damier
@@ -394,12 +398,15 @@ class Interface(Frame):
         if not os.path.exists(outputdir):
             os.makedirs(outputdir)
         self.nbr_R = int(self.entry_nbr_routeur.get())
-        self.nbr_M = [0 for i in range(self.nbr_R)]
-        self.nbr_S = [0 for i in range(self.nbr_R)]
-
+        #self.nbr_M = [0 for i in range(self.nbr_R)]
+        #self.nbr_S = [0 for i in range(self.nbr_R)]
+        self.nbr_M =0
+        self.nbr_S =0
+		
+		# Calcul de la somme totale d'interface maître et d'interface esclave dans le réseau
         for r in range(int(self.entry_nbr_routeur.get())):
-            self.nbr_M[r] = int(self.damierNbrMaitre[r].get())
-            self.nbr_S[r] = int(self.damierNbrEsclave[r].get())
+            self.nbr_M = int(self.damierNbrMaitre[r].get()) + self.nbr_M
+            self.nbr_S = int(self.damierNbrEsclave[r].get()) + self.nbr_S
 			
         ch='''
 --------------------------------------------------------------
@@ -427,8 +434,8 @@ package noc_config is
         fw= open(outputdir + "/noc_config_configurable_part1.vhd", 'w')
         
         fw.write("%s" %ch)
-        fw.write('constant TOTAL_MASTER_NB          : integer := %d ;\n' %self.nbr_M_Global)
-        fw.write('constant TOTAL_SLAVE_NB           : integer := %d ;\n' %self.nbr_S_Global)
+        fw.write('constant TOTAL_MASTER_NB          : integer := %d ;\n' %self.nbr_M)
+        fw.write('constant TOTAL_SLAVE_NB           : integer := %d ;\n' %self.nbr_S)
         fw.write('constant TOTAL_ROUTING_PORT_NB    : integer := %d ;\n' %self.nbr_RP_Global)
         fw.write('constant TOTAL_ROUTER_NB          : integer := %d ;\n' %self.nbr_R)
         fw.close()
@@ -576,7 +583,7 @@ type array_ROUTING_PORT_REQ_PS is array (0 to TOTAL_ROUTER_NB-1) of std_logic_ve
 type array_ROUTING_PORT_DIN_PS is array (0 to TOTAL_ROUTER_NB-1) of arrayDATA(0 to 15);
 type array_ROUTING_PORT_ACK_PS is array (0 to TOTAL_ROUTER_NB-1) of std_logic_vector(0 to 15);
 
---IOmux local matrix
+-- local matrix
 type integer_vector is array (0 to 16) of integer;
 type local_connexion_matrix is array (0 to 16) of integer_vector;
 type array_all_local_connexion_matrix is array (0 to TOTAL_ROUTER_NB-1) of local_connexion_matrix;
@@ -2081,7 +2088,7 @@ class PaquetConnexion(Tk):
         self.Connexions = []
         label_0   .append(Label(self.frame.interior, text="", width=6))
         Routeurs  .append(Label(self.frame.interior, text="Routeur  "))
-        Maitres   .append(Label(self.frame.interior, text="  IP "))
+        Maitres   .append(Label(self.frame.interior, text="  Interface "))
         #Esclaves  .append(Label(self.frame.interior, text="Esclave  "))
         self.Connexions.append(Label(self.frame.interior, text="Connexion"))
 
@@ -2144,8 +2151,8 @@ class Decodeur_d_adresse(Tk):
         self.Adresse_basse   = []
         self.Adresse_haute = []
         label_0.append(Label(self.frame.interior, text="", width=6))
-        Routeurs.append(Label(self.frame.interior, text="Routeur Num  "))
-        Esclaves.append(Label(self.frame.interior, text="Esclave Num   "))
+        Routeurs.append(Label(self.frame.interior, text="Routeur"))
+        Esclaves.append(Label(self.frame.interior, text="Esclave"))
         self.Adresse_basse.append(Label(self.frame.interior, text="Adresse basse (Hex)  "))
         self.Adresse_haute.append(Label(self.frame.interior, text="Adresse haute (Hex)"))
         for r in range(self.nbr_R):
@@ -2154,6 +2161,8 @@ class Decodeur_d_adresse(Tk):
                 Esclaves   .append(Button(self.frame.interior, text=str(s+1), state=DISABLED, width=10))
                 self.Adresse_basse  .append(Entry(self.frame.interior))
                 self.Adresse_haute.append(Entry(self.frame.interior))
+				# self.Adresse_basse.insert("00000000")
+				# self.Adresse_haute.insert("00000000")
                 row_cont=row_cont +1
         
         label_0[0]      .grid(row=0, column=1)
@@ -2194,7 +2203,7 @@ class Decodeur_d_adresse(Tk):
 if __name__ == "__main__":
     
     fenetre = Tk()
-    fenetre.title("Outil de generation d'IOmux-NoC Version 1")
+    fenetre.title("Outil de generation de configurations NoC (Version 0.1)")
     interface = Interface(fenetre)
     print('nbr_R_Global in Main = %d' % Interface.nbr_R_Global)
 	
