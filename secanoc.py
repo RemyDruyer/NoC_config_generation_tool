@@ -2218,7 +2218,7 @@ class Decodeur_d_adresse(Tk):
 if __name__ == "__main__":
     
     fenetre = Tk()
-    fenetre.title("Outil de generation de configurations NoC (Version 0.1)")
+    fenetre.title("Outil de generation de configurations NoC (Version 0.2)")
     interface = Interface(fenetre)
     print('nbr_R_Global in Main = %d' % Interface.nbr_R_Global)
 	
