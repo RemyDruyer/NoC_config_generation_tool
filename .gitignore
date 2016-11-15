@@ -119,4 +119,4 @@ $RECYCLE.BIN/
 # Notepad++ backups #
 *.bak
 
-noc_config.vhd
+*.vhd
