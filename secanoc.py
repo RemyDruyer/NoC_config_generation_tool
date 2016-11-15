@@ -2153,7 +2153,7 @@ class Decodeur_d_adresse(Tk):
         var = []
         row_cont=0
         self.title("Configuration des decodeurs d'adresses")
-        self.geometry("580x310")
+        self.geometry("760x310")
         self.frame = VerticalScrolledFrame(self)
         self.frame.grid(row=0, column=0,sticky=N)
         #print('nbr_R_Global in Decodeur dadresse = %d' % args)
