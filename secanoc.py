@@ -9,6 +9,7 @@
 
 from tkinter import *
 from tkinter.messagebox import *
+from functools import partial
 import os
 import shutil
 import re
@@ -73,6 +74,7 @@ class Interface(Frame):
         self.damierNbrMaitre = list()
         self.damierNbrEsclave = list()
         self.nbr_ligne = 0
+        self.nbr_max_routeur = 64
         self.iAChiffreLigne = 0
         self.iAChiffreColonne = 0
         self.idamierDiag = 0
@@ -99,9 +101,10 @@ class Interface(Frame):
         fenetre.config(menu=self.barremenu)
         
         # nombre routeurs Label & Entry
-        self.champ_nbr_routeur = Label(self, text="Nombre de routeurs dans le reseau (entre 3 et 64):")
+        self.champ_nbr_routeur = Label(self, text="Nombre de routeurs dans le reseau (entre 3 et 64) :")
         self.champ_nbr_routeur.grid(row = 0, column = 0, columnspan = 9, sticky= NW)
-        self.entry_nbr_routeur = Entry(self)
+        #création de la case d'entrée "nombre de routeurs" : largeur 5, texte centré
+        self.entry_nbr_routeur = Entry(self, width = 5, justify = CENTER)
         self.entry_nbr_routeur.grid(row = 0, column = 10, columnspan = 9, sticky= W)
         self.entry_nbr_routeur.insert(0,"3")
         # Canvas & Scrollbar
@@ -116,25 +119,31 @@ class Interface(Frame):
         # Création de 2 boutons "vide" ou "X" en position A2 et B1 (sur la grid => [ligne 9 colonne 3] & [ligne 10colonne 2])
         for ligne in range(8,74):
             for colonne in range (1,67):
+                #case grise
                 if ligne == 8 and colonne == 1:
                     self.damierAA = Button(self.fenetre_canvas.interior, text =" ", borderwidth=1, bg="grey",height = 1, width = 1)
                     self.damierAA.grid(row = ligne, column = colonne, sticky=NSEW)
+                #ligne "numéro du routeur" horizontale
                 elif ligne == 8:
                     self.damierAChiffreLigne.append( Button(self.fenetre_canvas.interior, text ="%s" % (colonne-1), borderwidth=1, height = 1, width = 1))
                     self.damierAChiffreLigne[self.iAChiffreLigne].grid(row = ligne, column = colonne, sticky=NSEW)
                     self.iAChiffreLigne +=1
+                #ligne "numéro du routeur" verticale
                 elif colonne == 1:
                     self.damierAChiffreColonne.append( Button(self.fenetre_canvas.interior, text ="%s" % (ligne-8), borderwidth=1, height = 1, width = 1))
                     self.damierAChiffreColonne[self.iAChiffreColonne].grid(row = ligne, column = colonne, sticky=NSEW)
                     self.iAChiffreColonne +=1
+                #diagonale de case grise
                 elif (ligne-7) == colonne:
                     self.damierDiag.append( Button(self.fenetre_canvas.interior, text =" ", borderwidth=1, bg="grey", height = 1, width = 1))
                     self.damierDiag[self.idamierDiag].grid(row = ligne, column = colonne, sticky=NSEW)
                     self.idamierDiag +=1
+                #case en Y=1;X=2
                 elif ligne == 9 and colonne == 3:
                     self.damierX.append( Button(self.fenetre_canvas.interior, text =" ", borderwidth=1, height = 1, width = 1, command = self.cliquer0))
                     self.damierX[self.idamierX].grid(row = ligne, column = colonne, sticky=NSEW)
                     self.idamierX +=1
+                #case en Y=2;X=1
                 elif ligne == 10 and colonne == 2:
                     self.damierX.append( Button(self.fenetre_canvas.interior, text =" ", borderwidth=1, height = 1, width = 1, command = self.cliquer0))
                     self.damierX[self.idamierX].grid(row = ligne, column = colonne, sticky=NSEW)
@@ -155,7 +164,7 @@ class Interface(Frame):
         
         # Bouton RUN
         self.bouton_run = Button(self, text=" Generation de la matrice de connexions des routeurs ", command=self.run_action)
-        self.bouton_run.grid(row = 0, column = 20, columnspan = 9, sticky=NSEW)
+        self.bouton_run.grid(row = 0, column = 23, columnspan = 9, sticky=NSEW)
                 
         # checkbutton "Activation des moniteurs de securite"
         self.checkbouton_moniteur_securite = Checkbutton(self, text="Activation des moniteurs \n de securite", command= self.checkbouton_moniteur_securite_action)
@@ -189,17 +198,18 @@ class Interface(Frame):
         # bouton "Génération du VHDL"
         self.bouton_generation_vhdl = Button(self, text="Generation \n du VHDL", command= self.on_buttonGenerate_clicked)
         self.bouton_generation_vhdl.grid(row = 21, column = 40, rowspan = 8,columnspan = 8, sticky=NSEW)
-    
-    # Fonction associé à l'action sur le bouton DamierX[0] & DamierX[1]
+
     def cliquer0(self):
-        if self.flag_cliquer0 == 0:
+        
+        if self.damierX[0].config(text = "X") == 0:
             self.damierX[0].config(text = "X")
             self.damierX[1].config(text = "X")
             self.flag_cliquer0 = 1
         elif self.flag_cliquer0 == 1:
             self.damierX[0].config(text = " ")
             self.damierX[1].config(text = " ")
-            self.flag_cliquer0 = 0    
+            self.flag_cliquer0 = 0
+            
     
     # Action du bouton "RUN"
     def run_action(self):
@@ -214,7 +224,7 @@ class Interface(Frame):
             self.nbr_click_run +=1        
         
             # Check le nombre de routeurs autorisés & genère le damier pour le nbr de routeurs mis en entrée
-            if (int(self.entry_nbr_routeur.get()) < 65) and (int(self.entry_nbr_routeur.get()) > 2):
+            if (int(self.entry_nbr_routeur.get()) <= self.nbr_max_routeur) and (int(self.entry_nbr_routeur.get()) > 2):
                 for m_iterator in range(3,self.var+1):
                     for ligne in range(8,m_iterator+9):
                         for colonne in range (1,m_iterator+2):
@@ -239,7 +249,7 @@ class Interface(Frame):
                                 self.damierDiag[self.idamierDiag].grid(row = ligne, column = colonne, sticky=NSEW)
                                 self.idamierDiag +=1
                             elif ligne == m_iterator+8 or colonne == m_iterator+1 :
-                                self.damierX.append( Button(self.fenetre_canvas.interior, text =" ", borderwidth=1, height = 1, width = 1))
+                                self.damierX.append( Button(self.fenetre_canvas.interior, text =" ", borderwidth=1, height = 1, width = 1, command = self.cliquer0))
                                 self.damierX[self.idamierX].grid(row = ligne, column = colonne, sticky=NSEW)
                                 self.idamierX +=1
                                 if colonne == (self.var+1):
@@ -392,20 +402,20 @@ class Interface(Frame):
         print("Generate the NOC files")
         self.generate_vhdl_file()
 
-
+    # Génération du VHDL pour les variables : TOTAL_MASTER_NB, TOTAL_SLAVE_NB, TOTAL_ROUTING_PORT_NB, TOTAL_ROUTER_NB
     def generate_configurable_part1(self):
         outputdir = "./Noc0__"
         if not os.path.exists(outputdir):
             os.makedirs(outputdir)
         self.nbr_R = int(self.entry_nbr_routeur.get())
-        #self.nbr_M = [0 for i in range(self.nbr_R)]
-        #self.nbr_S = [0 for i in range(self.nbr_R)]
         self.sum_nbr_M =0
         self.sum_nbr_S =0
 		
 		# Calcul de la somme totale d'interface maître et d'interface esclave dans le réseau
         for r in range(int(self.entry_nbr_routeur.get())):
+            #calcul de la somme des interfaces maîtres
             self.sum_nbr_M = int(self.damierNbrMaitre[r].get()) + self.sum_nbr_M
+            #calcul de la somme des interfaces esclaves
             self.sum_nbr_S = int(self.damierNbrEsclave[r].get()) + self.sum_nbr_S
 			
         ch='''
@@ -430,7 +440,7 @@ package noc_config is
 ----------------------------------------------------------------
 
 '''
-
+        #génération du code VHDL dans un fichier spécifique
         fw= open(outputdir + "/noc_config_configurable_part1.vhd", 'w')
         
         fw.write("%s" %ch)
@@ -2176,8 +2186,6 @@ class Decodeur_d_adresse(Tk):
                 Esclaves   .append(Button(self.frame.interior, text=str(s+1), state=DISABLED, width=10))
                 self.Adresse_basse  .append(Entry(self.frame.interior))
                 self.Adresse_haute.append(Entry(self.frame.interior))
-				# self.Adresse_basse.insert("00000000")
-				# self.Adresse_haute.insert("00000000")
                 row_cont=row_cont +1
         
         label_0[0]      .grid(row=0, column=1)
@@ -2194,7 +2202,8 @@ class Decodeur_d_adresse(Tk):
         for i in range(1,len(self.Adresse_basse)):
             if not(re.match("^[A-Fa-f0-9_-]*$", self.Adresse_haute[i].get())) or len(self.Adresse_haute[i].get())!=8 or not(re.match("^[A-Fa-f0-9_-]*$", self.Adresse_basse[i].get())) or len(self.Adresse_basse[i].get())!=8:
                 showerror("Erreur", '[%s] n\'est pas une adresse Hexadecimale valide \n Info: Une adresse valide contient 8 caracteres [A-F ; a-f ; 0-9]' %self.Adresse_haute[i].get())
-                error_flag=1
+                # error_flag=1
+                # break
         if error_flag==0:
             outputdir = "./Noc0__"
             if not os.path.exists(outputdir):
