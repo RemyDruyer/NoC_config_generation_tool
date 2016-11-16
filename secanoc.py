@@ -2193,7 +2193,7 @@ class Decodeur_d_adresse(Tk):
         print("Configuration du  decodeur d'adresses enregistree")    
         for i in range(1,len(self.Adresse_basse)):
             if not(re.match("^[A-Fa-f0-9_-]*$", self.Adresse_haute[i].get())) or len(self.Adresse_haute[i].get())!=8 or not(re.match("^[A-Fa-f0-9_-]*$", self.Adresse_basse[i].get())) or len(self.Adresse_basse[i].get())!=8:
-                showerror("Erreur", '[%s] n\'est pas une adresse Hexadecimale valide \n Info: Une adresse valide contient 8 caracteres [A-Fa-f0-9]' %self.Adresse_haute[i].get())
+                showerror("Erreur", '[%s] n\'est pas une adresse Hexadecimale valide \n Info: Une adresse valide contient 8 caracteres [A-F ; a-f ; 0-9]' %self.Adresse_haute[i].get())
                 error_flag=1
         if error_flag==0:
             outputdir = "./Noc0__"
