@@ -15,6 +15,7 @@ import shutil
 import re
 from tkinter.messagebox import showerror
 
+
 # Classe Vertical Scroll
 # Crée une scroll bar verticale coté droit ajustable
 class VerticalScrolledFrame(Frame):
@@ -56,6 +57,76 @@ class VerticalScrolledFrame(Frame):
                 # update the inner frame's width to fill the canvas
                 canvas.itemconfigure(interior_id, width=canvas.winfo_width())
         canvas.bind('<Configure>', _configure_canvas)
+        
+        
+
+class ScrollableTable(Frame):
+    def __init__(self, parent, *args, **kw):
+        Frame.__init__(self, parent, *args, **kw)
+        self.grid()
+        
+        # barre de défilement verticale
+        self.VerticalScrollBar = Scrollbar(self, orient="vertical")
+        self.VerticalScrollBar.grid(row=0, column=20, sticky = N+S)
+        # barre de défilement horizontale 
+        self.HorizontalScrollBar = Scrollbar(self, orient="horizontal")
+        self.HorizontalScrollBar.grid(row=20, column=0, sticky = E+W)
+        
+        # CANVAS PRINCIPAL : contient tous les autres Canvas de la "ScrollableTable"
+        # réglage de la taille du widget Scrollabable table
+        self.Canvas_principal = Canvas(self, width = 1000, height = 570, highlightthickness=0)
+        self.Canvas_principal.grid_propagate(False)
+        self.Canvas_principal.grid(row=0, column=0)
+        
+        # CANVAS EMPTY : positionné tout en haut à gauche contient une case vide
+        self.Canvas_empty = Canvas(self.Canvas_principal, width = 13, height = 35, highlightthickness=0)
+        self.Canvas_empty.grid(row=1, column=1, sticky=N+W)
+        self.Canvas_empty.grid_propagate(False)
+        
+        # CANVAS LEFT : axe vertical de numérotation des routeurs
+        #affecté par la barre de défilement verticale
+        self.Canvas_left = Canvas(self.Canvas_principal , width = 22, height = 550, highlightthickness=0, yscrollcommand = self.VerticalScrollBar.set)
+        self.Canvas_left.grid(row=2, column=1, sticky=NW)
+        self.Canvas_left.grid_propagate(False)
+        
+        # CANVAS TOP : axe horizontal de numérotation des routeurs
+        #affecté par la barre de défilement horizontale
+        self.Canvas_top = Canvas(self.Canvas_principal, width = 950, height = 35, highlightthickness=0, xscrollcommand = self.HorizontalScrollBar.set)
+        self.Canvas_top.grid(row=1, column=2, sticky=N+W)
+        self.Canvas_top.grid_propagate(False)
+        
+        # CANVAS CENTER : damier au centre contenant les cases pour l'initialisation des connexions entre les routeurs
+        #affecté par les barres de défilement verticales et horizontales
+        self.Canvas_center = Canvas(self.Canvas_principal, width = 950, height = 550, highlightthickness=0, yscrollcommand = self.VerticalScrollBar.set, xscrollcommand = self.HorizontalScrollBar.set)
+        self.Canvas_center.grid(row=2, column=2, sticky=N+W)
+        self.Canvas_center.grid_propagate(False)
+        
+        #action des deux barres de défilement sur les CANVAS via les fonctions "_vb_yview" et "_vb_xview"
+        self.VerticalScrollBar.config(command=self._vb_yview)
+        self.HorizontalScrollBar.config(command=self._vb_xview)
+        
+        #déclaration des frames contenant les cases -> nécessaires pour le fonctinnement des barres de défilement
+        self.Canvas_left_interior_Frame = Canvas_left_interior_Frame = Frame(self.Canvas_left)
+        Canvas_left_interior_Frame_id = self.Canvas_left.create_window(0, 0, window=Canvas_left_interior_Frame, anchor =NW)
+        
+        self.Canvas_top_interior_Frame = Canvas_top_interior_Frame = Frame(self.Canvas_top)
+        Canvas_top_interior_Frame_id = self.Canvas_top.create_window(0, 0, window=Canvas_top_interior_Frame, anchor=NW)
+
+        self.Canvas_center_interior_Frame = Canvas_center_interior_Frame = Frame(self.Canvas_center)
+        Canvas_center_interior_Frame_id = self.Canvas_center.create_window(0, 0, window=Canvas_center_interior_Frame, anchor=NW)
+
+        
+    ### Fonctions de défilement des Canvas
+    # pour la barre de défilement verticale : Canvas_left & Canvas_center
+    def _vb_yview(self, *args):
+        self.Canvas_left.yview(*args)
+        self.Canvas_center.yview(*args)
+    # pour la barre de défilement horizontale : Canvas_top & Canvas_center
+    def _vb_xview(self, *args):
+        self.Canvas_top.xview(*args)
+        self.Canvas_center.xview(*args)
+
+
 # Creation of one class which inherit from Tkinter.Tk
 class Interface(Frame):
     nbr_R_Global=64
@@ -65,21 +136,23 @@ class Interface(Frame):
 
     # Init
     def __init__(self, fenetre, **kwargs):
-        Frame.__init__(self, fenetre, width=768, height=576, **kwargs)
+        Frame.__init__(self, fenetre, width=1000, height=670, **kwargs)
         self.grid()
-        self.damierAChiffreLigne = list()
-        self.damierAChiffreColonne = list()
-        self.damierDiag = list()
-        self.damierX = list()
-        self.damierNbrMaitre = list()
-        self.damierNbrEsclave = list()
-        self.nbr_ligne = 0
-        self.nbr_max_routeur = 64
-        self.iAChiffreLigne = 0
-        self.iAChiffreColonne = 0
-        self.idamierDiag = 0
-        self.idamierX = 0
-        self.nbr_click_run = 0
+        #axe horizontal de n° du routeur
+        self.liste_num_routeur_top = list()
+        #axe vertial de n° du routeur
+        self.liste_num_routeur_gauche = list()
+        self.liste_Cases_Connexions_Routeurs = list()
+        self.liste_EntryNbrMaitre = list()
+        self.liste_EntryNbrEsclave = list()
+        self.i_num_routeur_top = 0
+        self.i_num_routeur_gauche = 0
+        self.i_Cases_Connexions_Routeurs = 0
+        self.i_EntryNbr_Maitre_Esclave = 0
+        #variable de contrôles de saisie du nombre de routeurs
+        self.NbrMinRouteurAutorise = 3
+        self.NbrMaxRouteurAutorise = 64
+        
         self.flag_checkbouton_moniteur_securite = 0
         self.flag_checkbouton_connexions_locales = 0
         self.flag_checkbouton_decodeurs_adresse =0
@@ -101,205 +174,146 @@ class Interface(Frame):
         fenetre.config(menu=self.barremenu)
         
         # nombre routeurs Label & Entry
-        self.champ_nbr_routeur = Label(self, text="Nombre de routeurs dans le reseau (entre 3 et 64) :")
-        self.champ_nbr_routeur.grid(row = 0, column = 0, columnspan = 9, sticky= NW)
+        self.var_NbrRouteurs = Label(self, text="Nombre de routeurs dans le reseau (entre 3 et 64) :")
+        self.var_NbrRouteurs.grid(row=0, column=1)
         #création de la case d'entrée "nombre de routeurs" : largeur 5, texte centré
-        self.entry_nbr_routeur = Entry(self, width = 5, justify = CENTER)
-        self.entry_nbr_routeur.grid(row = 0, column = 10, columnspan = 9, sticky= W)
-        self.entry_nbr_routeur.insert(0,"3")
-        # Canvas & Scrollbar
-        self.fenetre_canvas = VerticalScrolledFrame(self)
-        self.fenetre_canvas.grid(row=8, column=1, columnspan = 40)
+        self.EntryNbrRouteur = Entry(self, width = 5, justify = CENTER)
+        self.EntryNbrRouteur.grid(row=0, column=2)
+        self.EntryNbrRouteur.insert(0,"3")
         
-        # Init du damier dans le canva
-        # Crée un damier avec un bouton Gris sur la case A1 (la grid commence à la ligne 8 colonne 1)
-        # Création des 64 boutons sur la ligne A (sur la grid => ligne 8) "1 2 3 ... 64"
-        # Création des 64 boutons sur la colonne 1 (sur la grid => colonne 1) "1 2 3 ... 64"
-        # Création des 64 boutons diagonales en gris
-        # Création de 2 boutons "vide" ou "X" en position A2 et B1 (sur la grid => [ligne 9 colonne 3] & [ligne 10colonne 2])
-        for ligne in range(8,74):
-            for colonne in range (1,67):
-                #case grise
-                if ligne == 8 and colonne == 1:
-                    self.damierAA = Button(self.fenetre_canvas.interior, text =" ", borderwidth=1, bg="grey",height = 1, width = 1)
-                    self.damierAA.grid(row = ligne, column = colonne, sticky=NSEW)
-                #ligne "numéro du routeur" horizontale
-                elif ligne == 8:
-                    self.damierAChiffreLigne.append( Button(self.fenetre_canvas.interior, text ="%s" % (colonne-1), borderwidth=1, height = 1, width = 1))
-                    self.damierAChiffreLigne[self.iAChiffreLigne].grid(row = ligne, column = colonne, sticky=NSEW)
-                    self.iAChiffreLigne +=1
-                #ligne "numéro du routeur" verticale
-                elif colonne == 1:
-                    self.damierAChiffreColonne.append( Button(self.fenetre_canvas.interior, text ="%s" % (ligne-8), borderwidth=1, height = 1, width = 1))
-                    self.damierAChiffreColonne[self.iAChiffreColonne].grid(row = ligne, column = colonne, sticky=NSEW)
-                    self.iAChiffreColonne +=1
-                #diagonale de case grise
-                elif (ligne-7) == colonne:
-                    self.damierDiag.append( Button(self.fenetre_canvas.interior, text =" ", borderwidth=1, bg="grey", height = 1, width = 1))
-                    self.damierDiag[self.idamierDiag].grid(row = ligne, column = colonne, sticky=NSEW)
-                    self.idamierDiag +=1
-                #case en Y=1;X=2
-                elif ligne == 9 and colonne == 3:
-                    self.damierX.append( Button(self.fenetre_canvas.interior, text =" ", borderwidth=1, height = 1, width = 1, command = self.cliquer0))
-                    self.damierX[self.idamierX].grid(row = ligne, column = colonne, sticky=NSEW)
-                    self.idamierX +=1
-                #case en Y=2;X=1
-                elif ligne == 10 and colonne == 2:
-                    self.damierX.append( Button(self.fenetre_canvas.interior, text =" ", borderwidth=1, height = 1, width = 1, command = self.cliquer0))
-                    self.damierX[self.idamierX].grid(row = ligne, column = colonne, sticky=NSEW)
-                    self.idamierX +=1
-                    
-        # On cache des cases pour avoir un petit damier 2x2 par defaut            
-        # Damier avec les cases cachées
-        for ligne_ in range(65, 2, -1):
-            # Decremente les indices pour arriver sur le dernier elt
-            self.iAChiffreLigne -=1
-            self.iAChiffreColonne -=1
-            self.idamierDiag -=1
-            
-            # Cache les derniers cases "chiffres" et "diag"
-            self.damierAChiffreLigne[self.iAChiffreLigne].grid_forget()
-            self.damierAChiffreColonne[self.iAChiffreColonne].grid_forget()
-            self.damierDiag[self.idamierDiag].grid_forget()
+        Matrice_connexions_routeurs_LabelFrame = LabelFrame(self, text="Matrice de parametrage des connexions et du nombre d'interaces maitres/esclaves des routeurs", padx=5, pady=5)
+        Matrice_connexions_routeurs_LabelFrame.grid(row=1, column=0, columnspan=8)
+        
+        self.Scrollable_Table = ScrollableTable(Matrice_connexions_routeurs_LabelFrame)
+        self.Scrollable_Table.grid(row=0, column=0)
+        
         
         # Bouton RUN
         self.bouton_run = Button(self, text=" Generation de la matrice de connexions des routeurs ", command=self.run_action)
-        self.bouton_run.grid(row = 0, column = 23, columnspan = 9, sticky=NSEW)
+        self.bouton_run.grid(row=0, column=3, sticky = NSEW)
                 
-        # checkbutton "Activation des moniteurs de securite"
+        # Case à cocher "Activation des moniteurs de securite"
         self.checkbouton_moniteur_securite = Checkbutton(self, text="Activation des moniteurs \n de securite", command= self.checkbouton_moniteur_securite_action)
-        self.checkbouton_moniteur_securite.grid(row =13, column = 0, rowspan = 8,columnspan = 8, sticky=NSEW)
-        # bouton "Configuration des moniteurs de sécurité"
+        self.checkbouton_moniteur_securite.grid(row=2, column=0, sticky=NSEW)
+        # Bouton - appel fenêtre secondaire "Configuration des moniteurs de sécurité"
         self.bouton_moniteur_securite = Button(self, text="Configuration des moniteurs \n de securite", command=self.quit, state=DISABLED)
-        self.bouton_moniteur_securite.grid(row = 21, column = 0, rowspan = 8,columnspan = 8, sticky=NSEW)
+        self.bouton_moniteur_securite.grid(row=3, column=0, sticky=NSEW)
         
-        # checkbutton "Interfaces toutes connectees en local"
+        # # Case à cocher "Interfaces toutes connectees en local"
         self.checkbouton_connexions_locales = Checkbutton(self, text="Interfaces toutes \n connectees en local", command= self.checkbouton_connexions_locales_action)
-        self.checkbouton_connexions_locales.grid(row =13, column = 8, rowspan = 8, columnspan = 8, sticky=NSEW)
-        # bouton "Configuration des connexions locales"
+        self.checkbouton_connexions_locales.grid(row=2, column=1, sticky=NSEW)
+        # # Bouton - appel fenêtre secondaire "Configuration des connexions locales"
         self.bouton_connexions_locales = Button(self, text="Configuration des \n connexions locales", command=self.bouton_connexions_locales_action)
-        self.bouton_connexions_locales.grid(row = 21, column = 8, rowspan = 8, columnspan = 8, sticky=NSEW)
+        self.bouton_connexions_locales.grid(row=3, column=1, sticky=NSEW)
         
-        # checkbutton "Interfaces toutes connectees en paquets"
+        # # Case à cocher "Interfaces toutes connectees en paquets"
         self.checkbouton_connexions_paquets = Checkbutton(self, text="Interfaces toutes \n connectees en paquets", command= self.checkbouton_connexions_paquets_action)
-        self.checkbouton_connexions_paquets.grid(row =13, column = 16, rowspan = 8,columnspan = 8, sticky=NSEW)
-        # bouton "Configuration des connexions en paquets"
+        self.checkbouton_connexions_paquets.grid(row=2, column=2, sticky=NSEW)
+        # # Bouton - appel fenêtre secondaire "Configuration des connexions en paquets"
         self.bouton_connexions_paquets = Button(self, text="Configuration des \n connexions en paquets", command=self.bouton_connexions_paquets_action)
-        self.bouton_connexions_paquets.grid(row = 21, column = 16, rowspan = 8,columnspan = 8, sticky=NSEW)
-        
-        # bouton "Configuration des décodeurs d'adresse"
+        self.bouton_connexions_paquets.grid(row= 3, column=2, sticky=NSEW)
+        # # Bouton - appel fenêtre secondaire "Configuration des décodeurs d'adresse"
         self.bouton_decodeurs_adresses = Button(self, text="Configuration des decodeurs \n d'adresse", command=self.bouton_decodeurs_adresse_action)
-        self.bouton_decodeurs_adresses.grid(row = 21, column = 24, rowspan = 8,columnspan = 8, sticky=NSEW)
-        
-        # bouton "Verification"
-        self.bouton_verification = Button(self, text="Verification", command=self.quit)
-        self.bouton_verification.grid(row = 21, column = 32, rowspan = 8,columnspan = 8, sticky=NSEW)
-        
-        # bouton "Génération du VHDL"
+        self.bouton_decodeurs_adresses.grid(row= 3, column=3, sticky=NSEW)
+       
+        # # bouton "Génération du VHDL"
         self.bouton_generation_vhdl = Button(self, text="Generation \n du VHDL", command= self.on_buttonGenerate_clicked)
-        self.bouton_generation_vhdl.grid(row = 21, column = 40, rowspan = 8,columnspan = 8, sticky=NSEW)
+        self.bouton_generation_vhdl.grid(row= 3, column=5, sticky=NSEW)
 
-    def cliquer0(self):
+    # def cliquer0(self):
         
-        if self.damierX[0].config(text = "X") == 0:
-            self.damierX[0].config(text = "X")
-            self.damierX[1].config(text = "X")
-            self.flag_cliquer0 = 1
-        elif self.flag_cliquer0 == 1:
-            self.damierX[0].config(text = " ")
-            self.damierX[1].config(text = " ")
-            self.flag_cliquer0 = 0
+        # if self.damierX[0].config(text = "X") == 0:
+            # self.damierX[0].config(text = "X")
+            # self.damierX[1].config(text = "X")
+            # self.flag_cliquer0 = 1
+        # elif self.flag_cliquer0 == 1:
+            # self.damierX[0].config(text = " ")
+            # self.damierX[1].config(text = " ")
+            # self.flag_cliquer0 = 0
             
-    
-    # Action du bouton "RUN"
+        # Action du bouton "RUN/Génération de la matrice de connexions des routeurs"
     def run_action(self):
 	
-        # Get variable entry in Box
-        if self.entry_nbr_routeur.get()=="":
+        # Contrôle de saisie : champ "Nombre de routeurs" non vide et contient une valeur comprise entre 3 et 64
+        if self.EntryNbrRouteur.get()=="" or not  ((int(self.EntryNbrRouteur.get()) >= self.NbrMinRouteurAutorise) and (int(self.EntryNbrRouteur.get()) <= self.NbrMaxRouteurAutorise)) :
             showerror("Erreur", 'Vous devez choisir un nombre de routeurs compris entre 3 et 64' )
         else:    
-            nbr_maitre_esclave_init_value = StringVar()
-            nbr_maitre_esclave_init_value.set = "0"
-            self.var = int(self.entry_nbr_routeur.get())
-            self.nbr_click_run +=1        
         
-            # Check le nombre de routeurs autorisés & genère le damier pour le nbr de routeurs mis en entrée
-            if (int(self.entry_nbr_routeur.get()) <= self.nbr_max_routeur) and (int(self.entry_nbr_routeur.get()) > 2):
-                for m_iterator in range(3,self.var+1):
-                    for ligne in range(8,m_iterator+9):
-                        for colonne in range (1,m_iterator+2):
-                            if ligne == 8 and colonne == 1:
-                                continue
-                            elif ligne == 8 and colonne < 4:
-                                continue
-                            elif colonne == 1 and ligne < 11:
-                                continue
-                            elif ligne == 8 and colonne > m_iterator:
-                                self.damierAChiffreLigne[self.iAChiffreLigne].grid(row = ligne, column = colonne, sticky=NSEW)
-                                self.iAChiffreLigne +=1
-                                if self.iAChiffreLigne == self.var:
-                                    self.champ_nbr_interface_maitre = Button(self.fenetre_canvas.interior, bd = 1, text="Nombre d'interfaces maitres \n du routeur")
-                                    self.champ_nbr_interface_maitre.grid(row = ligne-1, column = colonne+1, rowspan = 2, columnspan = 8, sticky= NW)
-                                    self.champ_nbr_interface_esclave = Button(self.fenetre_canvas.interior, bd=1, text="Nombre d'interfaces \n esclaves du routeur")
-                                    self.champ_nbr_interface_esclave.grid(row = ligne-1, column = colonne+10,rowspan = 2, columnspan = 8, sticky= NW)
-                            elif colonne == 1 and ligne > (8+m_iterator-1):
-                                self.damierAChiffreColonne[self.iAChiffreColonne].grid(row = ligne, column = colonne, sticky=NSEW)
-                                self.iAChiffreColonne +=1
-                            elif (ligne-7) == colonne and ((colonne > m_iterator) or (ligne > (8+m_iterator-1))):
-                                self.damierDiag[self.idamierDiag].grid(row = ligne, column = colonne, sticky=NSEW)
-                                self.idamierDiag +=1
-                            elif ligne == m_iterator+8 or colonne == m_iterator+1 :
-                                self.damierX.append( Button(self.fenetre_canvas.interior, text =" ", borderwidth=1, height = 1, width = 1, command = self.cliquer0))
-                                self.damierX[self.idamierX].grid(row = ligne, column = colonne, sticky=NSEW)
-                                self.idamierX +=1
-                                if colonne == (self.var+1):
-                                    self.damierNbrMaitre.append( Entry(self.fenetre_canvas.interior, justify=CENTER,  width = 5))
-                                    self.damierNbrMaitre[self.nbr_ligne].grid(row = ligne, column = colonne+1, columnspan = 8, sticky= NSEW)
-                                    self.damierNbrEsclave.append( Entry(self.fenetre_canvas.interior, justify=CENTER,  width = 5))
-                                    self.damierNbrEsclave[self.nbr_ligne].grid(row = ligne, column = colonne+10, columnspan = 8, sticky= NSEW)
-                                    self.damierNbrMaitre[self.nbr_ligne].insert(0,"0")
-                                    self.damierNbrEsclave[self.nbr_ligne].insert(0,"0")
-									
-                                    if ligne == (self.var+7):
-                                        self.nbr_ligne +=1
-                                        self.damierNbrMaitre.append( Entry(self.fenetre_canvas.interior, justify=CENTER,  width = 5))
-                                        self.damierNbrMaitre[self.nbr_ligne].grid(row = ligne+1, column = colonne+1, columnspan = 8, sticky= NSEW)
-                                        self.damierNbrEsclave.append( Entry(self.fenetre_canvas.interior, justify=CENTER, width = 5))
-                                        self.damierNbrEsclave[self.nbr_ligne].grid(row = ligne+1, column = colonne+10, columnspan = 8, sticky= NSEW)
-                                        self.damierNbrMaitre[self.nbr_ligne].insert(0,"0")
-                                        self.damierNbrEsclave[self.nbr_ligne].insert(0,"0")
-                                    self.nbr_ligne +=1
+            #Conversion du contenu du champ "Nombre de routeurs" en int et initialisation de la variable "var_NbrRouteurs"
+            self.var_NbrRouteurs = int(self.EntryNbrRouteur.get())
+            #placement d'une case inactive dans le coin en haut à gauche de la matrice/damier de connexions de routeurs 
+            self.TopLeft_Corner_Case = Button(self.Scrollable_Table.Canvas_empty, text =" ", borderwidth=1, height = 32, width = 2)
+            self.TopLeft_Corner_Case.grid(row=1, column=1, padx=2)
+            self.TopLeft_Corner_Case.grid_propagate(False)
+            
+            #Cases de numéro des routeurs sur l'axe horizontal dans Canvas_top_interior_frame
+            for colonne in range (3,self.var_NbrRouteurs+3):
+                ligne = 2
+                self.liste_num_routeur_top.append( Button(self.Scrollable_Table.Canvas_top_interior_Frame, text ="%s" % (colonne-2), borderwidth=1, height = 1, width = 2, background = "gainsboro"))
+                self.liste_num_routeur_top[self.i_num_routeur_top].grid(row= ligne, column=colonne, sticky=W+E+N+S)
+                self.i_num_routeur_top +=1
+            #Placement des champs d'entête de saisie du nombre d'interface maître et esclave par routeurs dans Canvas_top_interior_frame
+            self.Case_LabelNbrMaitre = Button(self.Scrollable_Table.Canvas_top_interior_Frame, width=20, bd=1, text="Nombre d'interfaces \n maitres du routeur")
+            self.Case_LabelNbrMaitre.grid(row= 2, column=colonne+1, sticky= NW)
+            self.Case_LabelNbrEsclave = Button(self.Scrollable_Table.Canvas_top_interior_Frame, width=20, bd=1, text="Nombre d'interfaces \n esclaves du routeur")
+            self.Case_LabelNbrEsclave.grid(row= 2, column=colonne+2, sticky= NW)
+          
+            #Cases de numéro des routeurs de l'axe vertical dans Canvas_left_interior_Frame
+            for ligne in range (3,self.var_NbrRouteurs+3):
+                colonne = 2
+                #si ligne pair : couleur grise claire
+                if (ligne %2 ==0):
+                    self.liste_num_routeur_gauche.append( Button(self.Scrollable_Table.Canvas_left_interior_Frame, text ="%s" % (ligne-2), height = 1, width = 2, background = "gainsboro", borderwidth=1))
+                #sinon case de couleur normale
+                else:
+                    self.liste_num_routeur_gauche.append( Button(self.Scrollable_Table.Canvas_left_interior_Frame, text ="%s" % (ligne-2), height = 1, width = 2, borderwidth=1))
+                self.liste_num_routeur_gauche[self.i_num_routeur_gauche].grid(row= ligne, column=colonne, sticky=W+E+N+S)
+                self.i_num_routeur_gauche +=1
                 
-                # Bouge les boutons du bas pour laisser la place au Damier
-                self.checkbouton_moniteur_securite.grid(row =m_iterator+10, column = 0, rowspan = 8,columnspan = 8, sticky=NSEW)
-                self.bouton_moniteur_securite.grid(row = m_iterator+18, column = 0, rowspan = 8,columnspan = 8, sticky=NSEW)
-                self.checkbouton_connexions_locales.grid(row =m_iterator+10, column = 8, rowspan = 9,columnspan = 9, sticky=NSEW)
-                self.bouton_connexions_locales.grid(row = m_iterator+18, column = 8, rowspan = 9,columnspan = 9, sticky=NSEW)
-                self.checkbouton_connexions_paquets.grid(row =m_iterator+10, column = 17, rowspan = 9,columnspan = 9, sticky=NSEW)
-                self.bouton_connexions_paquets.grid(row = m_iterator+18, column = 17, rowspan = 9,columnspan = 9, sticky=NSEW)
-                self.bouton_decodeurs_adresses.grid(row = m_iterator+18, column = 26, rowspan = 8,columnspan = 8, sticky=NSEW)
-                self.bouton_verification.grid(row = m_iterator+18, column = 34, rowspan = 8,columnspan = 8, sticky=NSEW)
-                self.bouton_generation_vhdl.grid(row = m_iterator+18, column = 42, rowspan = 8,columnspan = 8, sticky=NSEW)
-            else:
-                showerror("Erreur", 'Vous devez choisir un nombre de routeurs compris entre 3 et 64')
-       
-    # Fonction de re-initialisation du damier par defaut 2x2
-    def damier_init_defaut(self):
-        # Get max value
-        self.max = int(self.entry_nbr_routeur.get())
-        
-        # Cache les boutons Chiffres Diagonales Nbr Esclave Maitre du damier
-        for m_i in range(self.max-1,1,-1):
-            self.damierAChiffreLigne[m_i].grid_forget()
-            self.damierAChiffreColonne[m_i].grid_forget()
-            self.damierDiag[m_i].grid_forget()
-            self.damierNbrMaitre[m_i].grid_forget()
-            self.damierNbrEsclave[m_i].grid_forget()
-        
-        # Cache les cases de Damier
-        for m_i2 in range (self.idamierX-1,1,-1 ):
-            self.damierX[m_i2].grid_forget()
-    
+            #déclaration des cases du centre du damier/matrice de connexion des routeurs dans Canvas_center
+            for ligne in range (3,self.var_NbrRouteurs+3):
+                for colonne in range (3,self.var_NbrRouteurs+3):
+                    #cases grises inactive pour la diagonale
+                    if ligne == colonne:
+                        self.liste_Cases_Connexions_Routeurs.append( Button(self.Scrollable_Table.Canvas_center_interior_Frame, bg="grey", borderwidth=1, height = 1, width = 2))
+                        self.liste_Cases_Connexions_Routeurs[self.i_Cases_Connexions_Routeurs].grid(row= ligne, column=colonne, sticky=W+E+N+S)
+                        self.i_Cases_Connexions_Routeurs +=1
+                    #cases différentes de la diagonale
+                    if ligne != colonne:
+                        #si ligne paire : case grise claire
+                        if (ligne %2 ==0):
+                            self.liste_Cases_Connexions_Routeurs.append( Button(self.Scrollable_Table.Canvas_center_interior_Frame, text =" ", height = 1, width = 2, background = "gainsboro", borderwidth=1))
+                        #sinon case de couleur normale
+                        else:
+                            self.liste_Cases_Connexions_Routeurs.append( Button(self.Scrollable_Table.Canvas_center_interior_Frame, text =" ", height = 1, width = 2, borderwidth=1))
+                        self.liste_Cases_Connexions_Routeurs[self.i_Cases_Connexions_Routeurs].grid(row= ligne, column=colonne, sticky=W+E+N+S)
+                        self.i_Cases_Connexions_Routeurs +=1
+            
+            #Champs de saisies nombre d'interface maître / nombre d'interface esclave par routeur 
+            for ligne in range (3,self.var_NbrRouteurs+3):
+                colonne = self.var_NbrRouteurs+3
+                self.liste_EntryNbrMaitre.append(Entry(self.Scrollable_Table.Canvas_center_interior_Frame, justify=CENTER, width=24))
+                self.liste_EntryNbrMaitre[self.i_EntryNbr_Maitre_Esclave].grid(row= ligne, column=self.var_NbrRouteurs+4, sticky= NSEW)
+                #valeur contenue dans la case initialisée à 0
+                self.liste_EntryNbrMaitre[self.i_EntryNbr_Maitre_Esclave].insert(0,"0")
+                self.liste_EntryNbrEsclave.append(Entry(self.Scrollable_Table.Canvas_center_interior_Frame, justify=CENTER, width=24))
+                self.liste_EntryNbrEsclave[self.i_EntryNbr_Maitre_Esclave].grid(row= ligne, column=self.var_NbrRouteurs+5, sticky= NSEW)
+                #valeur contenue dans la case initialisée à 0
+                self.liste_EntryNbrEsclave[self.i_EntryNbr_Maitre_Esclave].insert(0,"0")
+                self.i_EntryNbr_Maitre_Esclave +=1
+            
+            
+            #Mise à jour des zones défilables de Canvas_top, Canvas_left & Canvas_center pour le fonctionnement des barres de fonctionnement
+            self.Scrollable_Table.Canvas_top_interior_Frame.update_idletasks()
+            self.Scrollable_Table.Canvas_top.configure(scrollregion=self.Scrollable_Table.Canvas_top.bbox("all"))
+            
+            self.Scrollable_Table.Canvas_left_interior_Frame.update_idletasks()
+            self.Scrollable_Table.Canvas_left.configure(scrollregion=self.Scrollable_Table.Canvas_left.bbox("all"))
+            
+            self.Scrollable_Table.Canvas_center_interior_Frame.update_idletasks()
+            self.Scrollable_Table.Canvas_center.configure(scrollregion=self.Scrollable_Table.Canvas_center.bbox("all"))
+  
+
     def checkbouton_moniteur_securite_action(self):
         if self.flag_checkbouton_moniteur_securite == 0:
             self.bouton_moniteur_securite.config(state = DISABLED)
@@ -309,26 +323,26 @@ class Interface(Frame):
             self.flag_checkbouton_moniteur_securite = 0
     
     def bouton_connexions_locales_action(self):
-        if self.entry_nbr_routeur.get()=="":
+        if self.EntryNbrRouteur.get()=="":
             showerror("Erreur", 'Vous devez specifier le nombre de Routeurs' )
         else: 
-            self.nbr_R = int(self.entry_nbr_routeur.get())
+            self.nbr_R = int(self.EntryNbrRouteur.get())
             self.nbr_M = [0 for i in range(self.nbr_R)]
             self.nbr_S = [0 for i in range(self.nbr_R)]
             error_found=0
-            if self.entry_nbr_routeur.get()=="":
+            if self.EntryNbrRouteur.get()=="":
                 error_found=1
             else:
-                for r in range(int(self.entry_nbr_routeur.get())):
-                    if self.damierNbrMaitre[r].get()=="" or self.damierNbrEsclave[r].get()=="":
+                for r in range(int(self.EntryNbrRouteur.get())):
+                    if self.liste_EntryNbrMaitre[r].get()=="" or self.liste_EntryNbrEsclave[r].get()=="":
                         error_found=1
             if error_found:
                 showerror("Erreur", 'Vous devez specifier le nombre des Maitres et le nbr des Esclaves' )
             else:
 				#récupération du nombre de maître et d'esclave à partir des cases
-                for r in range(int(self.entry_nbr_routeur.get())):
-                    self.nbr_M[r] = int(self.damierNbrMaitre[r].get())
-                    self.nbr_S[r] = int(self.damierNbrEsclave[r].get())
+                for r in range(int(self.EntryNbrRouteur.get())):
+                    self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
+                    self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
                 app_localConnexion = LocalConnexion(self.nbr_R,self.nbr_M,self.nbr_S)
                 app_localConnexion.mainloop()
                 app_localConnexion.destroy()
@@ -342,49 +356,49 @@ class Interface(Frame):
             self.flag_checkbouton_connexions_locales = 0
 
     def bouton_decodeurs_adresse_action(self):
-        if self.entry_nbr_routeur.get()=="":
+        if self.EntryNbrRouteur.get()=="":
             showerror("Erreur", 'Vous devez specifier le nombre de Routeurs' )
         else: 
-            self.nbr_R = int(self.entry_nbr_routeur.get())
+            self.nbr_R = int(self.EntryNbrRouteur.get())
             self.nbr_M = [0 for i in range(self.nbr_R)]
             self.nbr_S = [0 for i in range(self.nbr_R)]
             error_found=0
-            if self.entry_nbr_routeur.get()=="":
+            if self.EntryNbrRouteur.get()=="":
                 error_found=1
             else:
-                for r in range(int(self.entry_nbr_routeur.get())):
-                    if self.damierNbrMaitre[r].get()=="" or self.damierNbrEsclave[r].get()=="":
+                for r in range(int(self.EntryNbrRouteur.get())):
+                    if self.liste_EntryNbrMaitre[r].get()=="" or self.liste_EntryNbrEsclave[r].get()=="":
                         error_found=1
             if error_found:
                 showerror("Erreur", 'Vous devez specifier le nombre des Maitres et le nbr des Esclaves' )
             else:
-                for r in range(int(self.entry_nbr_routeur.get())):
-                    self.nbr_M[r] = int(self.damierNbrMaitre[r].get())
-                    self.nbr_S[r] = int(self.damierNbrEsclave[r].get())
+                for r in range(int(self.EntryNbrRouteur.get())):
+                    self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
+                    self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
                 app_Decodeur_d_adresse = Decodeur_d_adresse(self.nbr_R,self.nbr_M,self.nbr_S)
                 app_Decodeur_d_adresse.mainloop()
                 app_Decodeur_d_adresse.destroy()
 
     def bouton_connexions_paquets_action(self):
-        if self.entry_nbr_routeur.get()=="":
+        if self.EntryNbrRouteur.get()=="":
             showerror("Erreur", 'Vous devez specifier le nombre de Routeurs' )
         else: 
-            self.nbr_R = int(self.entry_nbr_routeur.get())
+            self.nbr_R = int(self.EntryNbrRouteur.get())
             self.nbr_M = [0 for i in range(self.nbr_R)]
             self.nbr_S = [0 for i in range(self.nbr_R)]
             error_found=0
-            if self.entry_nbr_routeur.get()=="":
+            if self.EntryNbrRouteur.get()=="":
                 error_found=1
             else:
-                for r in range(int(self.entry_nbr_routeur.get())):
-                    if self.damierNbrMaitre[r].get()=="" or self.damierNbrEsclave[r].get()=="":
+                for r in range(int(self.EntryNbrRouteur.get())):
+                    if self.liste_EntryNbrMaitre[r].get()=="" or self.liste_EntryNbrEsclave[r].get()=="":
                         error_found=1
             if error_found:
                 showerror("Erreur", 'Vous devez specifier le nombre des Maitres et le nbr des Esclaves' )
             else:
-                for r in range(int(self.entry_nbr_routeur.get())):
-                    self.nbr_M[r] = int(self.damierNbrMaitre[r].get())
-                    self.nbr_S[r] = int(self.damierNbrEsclave[r].get())
+                for r in range(int(self.EntryNbrRouteur.get())):
+                    self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
+                    self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
                 app_PaquetConnexion = PaquetConnexion(self.nbr_R,self.nbr_M,self.nbr_S)
                 app_PaquetConnexion.mainloop()
                 app_PaquetConnexion.destroy()
@@ -407,16 +421,16 @@ class Interface(Frame):
         outputdir = "./Noc0__"
         if not os.path.exists(outputdir):
             os.makedirs(outputdir)
-        self.nbr_R = int(self.entry_nbr_routeur.get())
+        self.nbr_R = int(self.EntryNbrRouteur.get())
         self.sum_nbr_M =0
         self.sum_nbr_S =0
 		
 		# Calcul de la somme totale d'interface maître et d'interface esclave dans le réseau
-        for r in range(int(self.entry_nbr_routeur.get())):
+        for r in range(int(self.EntryNbrRouteur.get())):
             #calcul de la somme des interfaces maîtres
-            self.sum_nbr_M = int(self.damierNbrMaitre[r].get()) + self.sum_nbr_M
+            self.sum_nbr_M = int(self.liste_EntryNbrMaitre[r].get()) + self.sum_nbr_M
             #calcul de la somme des interfaces esclaves
-            self.sum_nbr_S = int(self.damierNbrEsclave[r].get()) + self.sum_nbr_S
+            self.sum_nbr_S = int(self.liste_EntryNbrEsclave[r].get()) + self.sum_nbr_S
 			
         ch='''
 --------------------------------------------------------------
@@ -456,13 +470,13 @@ package noc_config is
         outputdir = "./Noc0__"
         if not os.path.exists(outputdir):
             os.makedirs(outputdir)
-        self.nbr_R = int(self.entry_nbr_routeur.get())
+        self.nbr_R = int(self.EntryNbrRouteur.get())
         self.nbr_M = [0 for i in range(self.nbr_R)]
         self.nbr_S = [0 for i in range(self.nbr_R)]
 
-        for r in range(int(self.entry_nbr_routeur.get())):
-            self.nbr_M[r] = int(self.damierNbrMaitre[r].get())
-            self.nbr_S[r] = int(self.damierNbrEsclave[r].get())
+        for r in range(int(self.EntryNbrRouteur.get())):
+            self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
+            self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
 
         ch='''
 ----------------------------------------------------------------
@@ -738,13 +752,13 @@ constant ROUTINGPORT15 	: regPORTADD:= "1111";
         outputdir = "./Noc0__"
         if not os.path.exists(outputdir):
             os.makedirs(outputdir)
-        self.nbr_R = int(self.entry_nbr_routeur.get())
+        self.nbr_R = int(self.EntryNbrRouteur.get())
         self.nbr_M = [0 for i in range(self.nbr_R)]
         self.nbr_S = [0 for i in range(self.nbr_R)]
 
-        for r in range(int(self.entry_nbr_routeur.get())):
-            self.nbr_M[r] = int(self.damierNbrMaitre[r].get())
-            self.nbr_S[r] = int(self.damierNbrEsclave[r].get())
+        for r in range(int(self.EntryNbrRouteur.get())):
+            self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
+            self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
         ch='''
 ----------------------------------------------------------------
 				 ----- CONFIGURABLE PART  -----
@@ -779,13 +793,13 @@ constant ALL_ROUTER_MASTER_SLAVE_ROUTPORT_NB : array_all_record_master_routport_
         
     def generate_configurable_part2_2(self):
         outputdir = "./Noc0__"
-        self.nbr_R = int(self.entry_nbr_routeur.get())
+        self.nbr_R = int(self.EntryNbrRouteur.get())
         self.nbr_M = [0 for i in range(self.nbr_R)]
         self.nbr_S = [0 for i in range(self.nbr_R)]
 
-        for r in range(int(self.entry_nbr_routeur.get())):
-            self.nbr_M[r] = int(self.damierNbrMaitre[r].get())
-            self.nbr_S[r] = int(self.damierNbrEsclave[r].get())
+        for r in range(int(self.EntryNbrRouteur.get())):
+            self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
+            self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
         ch='''
 ------ 2) MASTER and SLAVE RANKS ------
 --a vector composed of all the masters and a vector composed of all the slaves are used to assignate
@@ -810,13 +824,13 @@ constant SLAVE_RANK  : slave_rank_in_vector  := (0,5,7,0,8,12);
         outputdir = "./Noc0__"
         if not os.path.exists(outputdir):
             os.makedirs(outputdir)
-        self.nbr_R = int(self.entry_nbr_routeur.get())
+        self.nbr_R = int(self.EntryNbrRouteur.get())
         self.nbr_M = [0 for i in range(self.nbr_R)]
         self.nbr_S = [0 for i in range(self.nbr_R)]
 
-        for r in range(int(self.entry_nbr_routeur.get())):
-            self.nbr_M[r] = int(self.damierNbrMaitre[r].get())
-            self.nbr_S[r] = int(self.damierNbrEsclave[r].get())
+        for r in range(int(self.EntryNbrRouteur.get())):
+            self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
+            self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
         ch='''
 ------ 3) ROUTER CONNEXIONS (topology)------
 --define a record for each connexion between routers
@@ -852,13 +866,13 @@ constant ALL_ROUTER_CONNEXIONS : array_all_router_connexion:=(
         
     def generate_configurable_part2_4(self):
         outputdir = "./Noc0__"
-        self.nbr_R = int(self.entry_nbr_routeur.get())
+        self.nbr_R = int(self.EntryNbrRouteur.get())
         self.nbr_M = [0 for i in range(self.nbr_R)]
         self.nbr_S = [0 for i in range(self.nbr_R)]
 
-        for r in range(int(self.entry_nbr_routeur.get())):
-            self.nbr_M[r] = int(self.damierNbrMaitre[r].get())
-            self.nbr_S[r] = int(self.damierNbrEsclave[r].get())
+        for r in range(int(self.EntryNbrRouteur.get())):
+            self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
+            self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
         ch='''
 ------ 4) PACKET INTERFACE DECLARATION ------
 --define a Ri_PACKET_INTERFACE_PORT_ADD constant for each router.
@@ -896,13 +910,13 @@ constant ALL_ROUTER_PACKET_INTERFACE_PORT_ADD : array_all_router_packet_interfac
 		
     def generate_configurable_part2_5(self):
         outputdir = "./Noc0__"
-        self.nbr_R = int(self.entry_nbr_routeur.get())
+        self.nbr_R = int(self.EntryNbrRouteur.get())
         self.nbr_M = [0 for i in range(self.nbr_R)]
         self.nbr_S = [0 for i in range(self.nbr_R)]
 
-        for r in range(int(self.entry_nbr_routeur.get())):
-            self.nbr_M[r] = int(self.damierNbrMaitre[r].get())
-            self.nbr_S[r] = int(self.damierNbrEsclave[r].get())
+        for r in range(int(self.EntryNbrRouteur.get())):
+            self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
+            self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
         ch='''
 ------ 5) ADDRESS DECODER TABLE SIZES  ------
 --define the size of each address decoding table of each master of each router (in the number of rules that it contain)
@@ -940,13 +954,13 @@ constant TOTAL_ADDRESS_DECOD_SIZE 				: integer := 130;
 		
     def generate_configurable_part2_6(self):
         outputdir = "./Noc0__"
-        self.nbr_R = int(self.entry_nbr_routeur.get())
+        self.nbr_R = int(self.EntryNbrRouteur.get())
         self.nbr_M = [0 for i in range(self.nbr_R)]
         self.nbr_S = [0 for i in range(self.nbr_R)]
 
-        for r in range(int(self.entry_nbr_routeur.get())):
-            self.nbr_M[r] = int(self.damierNbrMaitre[r].get())
-            self.nbr_S[r] = int(self.damierNbrEsclave[r].get())
+        for r in range(int(self.EntryNbrRouteur.get())):
+            self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
+            self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
         ch='''
 ------ 6) SLAVE ADDRESS MAPPING (32-bits) ------
 --This address mapping is used inside the address decoding tables.
@@ -1242,13 +1256,13 @@ constant	ROUTER5_MASTER0_address_mapping_for_ROUTER0_SLAVE4_HIGH_ADD 	: std_logi
         outputdir = "./Noc0__"
         if not os.path.exists(outputdir):
             os.makedirs(outputdir)
-        self.nbr_R = int(self.entry_nbr_routeur.get())
+        self.nbr_R = int(self.EntryNbrRouteur.get())
         self.nbr_M = [0 for i in range(self.nbr_R)]
         self.nbr_S = [0 for i in range(self.nbr_R)]
 
-        for r in range(int(self.entry_nbr_routeur.get())):
-            self.nbr_M[r] = int(self.damierNbrMaitre[r].get())
-            self.nbr_S[r] = int(self.damierNbrEsclave[r].get())
+        for r in range(int(self.EntryNbrRouteur.get())):
+            self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
+            self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
         ch='''
 ---- 7) ROUTING TABLE CONTENTS ------
 --define the address port that must take a packet to reach the DESTINATION ROUTER FROM the current ROUTER
@@ -1298,13 +1312,13 @@ constant from_ROUTER5_to_ROUTER4_destination_port : regPORTADD:= ROUTINGPORT2;
         outputdir = "./Noc0__"
         if not os.path.exists(outputdir):
             os.makedirs(outputdir)
-        self.nbr_R = int(self.entry_nbr_routeur.get())
+        self.nbr_R = int(self.EntryNbrRouteur.get())
         self.nbr_M = [0 for i in range(self.nbr_R)]
         self.nbr_S = [0 for i in range(self.nbr_R)]
 
-        for r in range(int(self.entry_nbr_routeur.get())):
-            self.nbr_M[r] = int(self.damierNbrMaitre[r].get())
-            self.nbr_S[r] = int(self.damierNbrEsclave[r].get())
+        for r in range(int(self.EntryNbrRouteur.get())):
+            self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
+            self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
         ch='''
 ------ 8) ADDRESS DECODER TYPES ------
 --define the size of each address decoding table of each master of each router (in the number of rules that it contain)
@@ -1343,13 +1357,13 @@ type unconstrained_array_record_address_decod_table is array (natural range <>) 
         outputdir = "./Noc0__"
         if not os.path.exists(outputdir):
             os.makedirs(outputdir)
-        self.nbr_R = int(self.entry_nbr_routeur.get())
+        self.nbr_R = int(self.EntryNbrRouteur.get())
         self.nbr_M = [0 for i in range(self.nbr_R)]
         self.nbr_S = [0 for i in range(self.nbr_R)]
 
-        for r in range(int(self.entry_nbr_routeur.get())):
-            self.nbr_M[r] = int(self.damierNbrMaitre[r].get())
-            self.nbr_S[r] = int(self.damierNbrEsclave[r].get())
+        for r in range(int(self.EntryNbrRouteur.get())):
+            self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
+            self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
         ch='''
 ------ 9) ADDRESS DECODER TABLES ------
 
@@ -1682,13 +1696,13 @@ constant ALL_MASTER_ADDRESS_DECODER_TABLES : unconstrained_array_record_address_
         outputdir = "./Noc0__"
         if not os.path.exists(outputdir):
             os.makedirs(outputdir)
-        self.nbr_R = int(self.entry_nbr_routeur.get())
+        self.nbr_R = int(self.EntryNbrRouteur.get())
         self.nbr_M = [0 for i in range(self.nbr_R)]
         self.nbr_S = [0 for i in range(self.nbr_R)]
 
-        for r in range(int(self.entry_nbr_routeur.get())):
-            self.nbr_M[r] = int(self.damierNbrMaitre[r].get())
-            self.nbr_S[r] = int(self.damierNbrEsclave[r].get())
+        for r in range(int(self.EntryNbrRouteur.get())):
+            self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
+            self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
         ch='''
 ------ 10) ADDRESS DECODER PARAMETER MATRIX ------
 --one line for each router (from 0 to y)
@@ -1717,13 +1731,13 @@ constant ADD_DECODER_PARAMETER_MX :  matrix_add_decoder_parameter :=(
         outputdir = "./Noc0__"
         if not os.path.exists(outputdir):
             os.makedirs(outputdir)
-        self.nbr_R = int(self.entry_nbr_routeur.get())
+        self.nbr_R = int(self.EntryNbrRouteur.get())
         self.nbr_M = [0 for i in range(self.nbr_R)]
         self.nbr_S = [0 for i in range(self.nbr_R)]
 
-        for r in range(int(self.entry_nbr_routeur.get())):
-            self.nbr_M[r] = int(self.damierNbrMaitre[r].get())
-            self.nbr_S[r] = int(self.damierNbrEsclave[r].get())
+        for r in range(int(self.EntryNbrRouteur.get())):
+            self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
+            self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
         ch='''
 ------ 11) ROUTING TABLE  -------
 --define for each router a routing table that gives the destination port to take
@@ -1790,13 +1804,13 @@ constant ALL_ROUTING_TABLES : array_all_routing_tables:=(
 	
     def generate_configurable_part2_12_1(self):
         outputdir = "./Noc0__"
-        self.nbr_R = int(self.entry_nbr_routeur.get())
+        self.nbr_R = int(self.EntryNbrRouteur.get())
         self.nbr_M = [0 for i in range(self.nbr_R)]
         self.nbr_S = [0 for i in range(self.nbr_R)]
 
-        for r in range(int(self.entry_nbr_routeur.get())):
-            self.nbr_M[r] = int(self.damierNbrMaitre[r].get())
-            self.nbr_S[r] = int(self.damierNbrEsclave[r].get())
+        for r in range(int(self.EntryNbrRouteur.get())):
+            self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
+            self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
         ch='''
         
         '''
@@ -1840,13 +1854,13 @@ constant ALL_ROUTING_TABLES : array_all_routing_tables:=(
         outputdir = "./Noc0__"
         if not os.path.exists(outputdir):
             os.makedirs(outputdir)
-        self.nbr_R = int(self.entry_nbr_routeur.get())
+        self.nbr_R = int(self.EntryNbrRouteur.get())
         self.nbr_M = [0 for i in range(self.nbr_R)]
         self.nbr_S = [0 for i in range(self.nbr_R)]
 
-        for r in range(int(self.entry_nbr_routeur.get())):
-            self.nbr_M[r] = int(self.damierNbrMaitre[r].get())
-            self.nbr_S[r] = int(self.damierNbrEsclave[r].get())
+        for r in range(int(self.EntryNbrRouteur.get())):
+            self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
+            self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
         ch='''
 
 -- => AGGREGATING ARRAY <= --
@@ -1868,13 +1882,13 @@ constant ALL_ROUTER_LOCAL_MATRIX : array_all_local_connexion_matrix:=(
         outputdir = "./Noc0__"
         if not os.path.exists(outputdir):
             os.makedirs(outputdir)
-        self.nbr_R = int(self.entry_nbr_routeur.get())
+        self.nbr_R = int(self.EntryNbrRouteur.get())
         self.nbr_M = [0 for i in range(self.nbr_R)]
         self.nbr_S = [0 for i in range(self.nbr_R)]
 
-        for r in range(int(self.entry_nbr_routeur.get())):
-            self.nbr_M[r] = int(self.damierNbrMaitre[r].get())
-            self.nbr_S[r] = int(self.damierNbrEsclave[r].get())
+        for r in range(int(self.EntryNbrRouteur.get())):
+            self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
+            self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
         ch='''
 
 end noc_address_pack;
@@ -2227,12 +2241,14 @@ class Decodeur_d_adresse(Tk):
 if __name__ == "__main__":
     
     fenetre = Tk()
-    fenetre.title("Outil de generation de configurations NoC (Version 0.2)")
+    fenetre.title("Outil de generation de configurations NoC (Version 0.3)")
+    fenetre.geometry('1050x750')
     interface = Interface(fenetre)
-    print('nbr_R_Global in Main = %d' % Interface.nbr_R_Global)
-	
+    
+    
+    # print('nbr_R_Global in Main = %d' % Interface.nbr_R_Global)
     #definit une taille minimale pour la fenêtre (en dessous de laquelle on ne peut descendre)
-    fenetre.update()
-    fenetre.minsize(fenetre.winfo_width(), fenetre.winfo_height())
+    # fenetre.update()
+    # fenetre.minsize(fenetre.winfo_width(), fenetre.winfo_height())
 
     interface.mainloop()
