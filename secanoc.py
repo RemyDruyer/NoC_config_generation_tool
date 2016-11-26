@@ -156,7 +156,11 @@ class Interface(Frame):
         self.flag_checkbouton_connexions_locales = 0
         self.flag_checkbouton_decodeurs_adresse =0
         self.flag_checkbouton_connexions_paquets = 0
-        self.flag_cliquer0 = 0
+        self.flag_clic_bouton_run = 0
+        self.i_Cases_Connexions_Routeurs_X = 0
+        self.i_Cases_Connexions_Routeurs_Y = 0
+        self.liste_Cases_Connexions_Routeurs = list()
+        self.nb_routeur_precedente_generation = 0
         
         # Espace Menu Barre
         # Creation de la menu barre
@@ -224,13 +228,12 @@ class Interface(Frame):
             
         # Action du bouton "RUN/Generation de la matrice de connexions des routeurs"
     def run_action(self):
-        self.i_Cases_Connexions_Routeurs = 0
-        self.liste_Cases_Connexions_Routeurs = list()
+
         
         ##fonction d'activation des cases : initialisation des connexions entre les routeurs
         #lors du clic sur un bouton, le colorer en orange ainsi que le bouton de coordonnees inverses
         #cela permet d'initialiser une connexion entre deux routeurs : par exemple clic sur le bouton 0 2 initialise aussi le bouton 2 0
-        def case_definir_connexion(event):
+        def _case_definir_connexion(event):
 
             #extrait les coordonnees du bouton : recherche de tous les nombres dans le string
             var_coord_bouton= re.findall('\d+', event.widget["text"])
@@ -251,12 +254,9 @@ class Interface(Frame):
                 event.widget.config(bg="orange")
                 self.liste_Cases_Connexions_Routeur_[int(var_coord_bouton[0])][int(var_coord_bouton[1])].config(bg="orange")
                
-                
-        # Contrôle de saisie : champ "Nombre de routeurs" non vide et contient une valeur comprise entre 3 et 64
-        if self.EntryNbrRouteur.get()=="" or not  ((int(self.EntryNbrRouteur.get()) >= self.NbrMinRouteurAutorise) and (int(self.EntryNbrRouteur.get()) <= self.NbrMaxRouteurAutorise)) :
-            showerror("Erreur", 'Vous devez choisir un nombre de routeurs compris entre 3 et 64' )
-        else:    
-            
+        def _generation_grille_routeur(self):
+            #initialiser le flag "bouton run cliqué"
+            self.flag_clic_bouton_run = 1
             #Conversion du contenu du champ "Nombre de routeurs" en int et initialisation de la variable "var_NbrRouteurs"
             self.var_NbrRouteurs = int(self.EntryNbrRouteur.get())
             #Initialisation d'un tableau a deux dimensions (nb_routeurs * nb_routeurs)
@@ -291,7 +291,7 @@ class Interface(Frame):
                 self.liste_num_routeur_gauche[self.i_num_routeur_gauche].grid(row= ligne, column=colonne, sticky=W+E+N+S)
                 self.i_num_routeur_gauche +=1
                 
-            
+            #Cases principales du damier
             self.i_Cases_Connexions_Routeurs_X = 0
             self.i_Cases_Connexions_Routeurs_Y = 0
             for ligne in range (self.offset_grid_ligne,self.var_NbrRouteurs+self.offset_grid_ligne):
@@ -314,15 +314,13 @@ class Interface(Frame):
                                 ,text ="%s %s" %(self.i_Cases_Connexions_Routeurs_X, self.i_Cases_Connexions_Routeurs_Y)
                                 ,height = 1, width = 2, borderwidth=1, font=("Helvetica", 6)))
                         self.liste_Cases_Connexions_Routeur_[self.i_Cases_Connexions_Routeurs_Y][self.i_Cases_Connexions_Routeurs_X].grid(row= ligne, column=colonne, sticky=W+E+N+S)
-                        self.liste_Cases_Connexions_Routeur_[self.i_Cases_Connexions_Routeurs_Y][self.i_Cases_Connexions_Routeurs_X].bind("<Button-1>",case_definir_connexion)
+                        self.liste_Cases_Connexions_Routeur_[self.i_Cases_Connexions_Routeurs_Y][self.i_Cases_Connexions_Routeurs_X].bind("<Button-1>",_case_definir_connexion)
                         self.i_Cases_Connexions_Routeurs_X +=1
                 #reinitialiser X pour la prochaine ligne
                 self.i_Cases_Connexions_Routeurs_X =0
                 #incrementer le nombre de ligne
                 self.i_Cases_Connexions_Routeurs_Y +=1
                 
-               
-            
             #Champs de saisies nombre d'interface maître / nombre d'interface esclave par routeur 
             for ligne in range (self.offset_grid_ligne,self.var_NbrRouteurs+self.offset_grid_ligne):
                 colonne = self.var_NbrRouteurs+3
@@ -346,11 +344,90 @@ class Interface(Frame):
             
             self.Scrollable_Table.Canvas_center_interior_Frame.update_idletasks()
             self.Scrollable_Table.Canvas_center.configure(scrollregion=self.Scrollable_Table.Canvas_center.bbox("all"))
-                        
-                        
+            
+            
+
+        def _reinitialisation_grille_routeur (self):
+
+            #case inactive dans le coin en haut a gauche de la matrice/damier de connexions de routeurs 
+            self.TopLeft_Corner_Case.destroy()
+            
+            #Cases de numero des routeurs sur l'axe horizontal dans Canvas_top_interior_frame
+            self.i_num_routeur_top = 0
+            for colonne in range (self.offset_grid_colonne,self.var_NbrRouteurs+self.offset_grid_colonne):
+                self.liste_num_routeur_top[self.i_num_routeur_top].destroy()
+                self.i_num_routeur_top +=1
+                
+            #Champs d'entête de saisie du nombre d'interface maître et esclave par routeurs dans Canvas_top_interior_frame
+            self.Case_LabelNbrMaitre.destroy()
+            self.Case_LabelNbrEsclave.destroy()
+            
+            #Cases de numero des routeurs de l'axe vertical dans Canvas_left_interior_Frame
+            self.i_num_routeur_gauche = 0
+            for ligne in range (self.offset_grid_ligne,self.var_NbrRouteurs+self.offset_grid_ligne):
+                colonne = 2
+                self.liste_num_routeur_gauche[self.i_num_routeur_gauche].destroy()
+                self.i_num_routeur_gauche +=1
+                
+            self.i_Cases_Connexions_Routeurs_X = 0
+            self.i_Cases_Connexions_Routeurs_Y = 0
+             #Cases principales du damier
+            for ligne in range (self.offset_grid_ligne,self.var_NbrRouteurs+self.offset_grid_ligne):
+                for colonne in range (self.offset_grid_colonne,self.var_NbrRouteurs+self.offset_grid_colonne):
+                    # cases grises inactive pour la diagonale
+                    if ligne == colonne:
+                        self.liste_Cases_Connexions_Routeur_[self.i_Cases_Connexions_Routeurs_Y][self.i_Cases_Connexions_Routeurs_X].destroy()
+                        self.i_Cases_Connexions_Routeurs_X +=1
+                    # cases differentes de la diagonale
+                    if ligne != colonne:
+                        self.liste_Cases_Connexions_Routeur_[self.i_Cases_Connexions_Routeurs_Y][self.i_Cases_Connexions_Routeurs_X].destroy()
+                        self.i_Cases_Connexions_Routeurs_X +=1
+                #reinitialiser X pour la prochaine ligne
+                self.i_Cases_Connexions_Routeurs_X =0
+                #incrementer le nombre de ligne
+                self.i_Cases_Connexions_Routeurs_Y +=1
+            
+            
+            #Champs de saisies nombre d'interface maître / nombre d'interface esclave par routeur
+            self.i_EntryNbr_Maitre_Esclave = 0
+            for ligne in range (self.offset_grid_ligne,self.var_NbrRouteurs+self.offset_grid_ligne):
+                colonne = self.var_NbrRouteurs+3
+                self.liste_EntryNbrMaitre[self.i_EntryNbr_Maitre_Esclave].destroy()
+                self.liste_EntryNbrEsclave[self.i_EntryNbr_Maitre_Esclave].destroy()
+                self.i_EntryNbr_Maitre_Esclave +=1
+            
+            
+            #Mise a jour des zones defilables de Canvas_top, Canvas_left & Canvas_center pour le fonctionnement des barres de fonctionnement
+            self.Scrollable_Table.Canvas_top_interior_Frame.update_idletasks()
+            self.Scrollable_Table.Canvas_top.configure(scrollregion=self.Scrollable_Table.Canvas_top.bbox("all"))
+            self.Scrollable_Table.Canvas_left_interior_Frame.update_idletasks()
+            self.Scrollable_Table.Canvas_left.configure(scrollregion=self.Scrollable_Table.Canvas_left.bbox("all"))
+            self.Scrollable_Table.Canvas_center_interior_Frame.update_idletasks()
+            self.Scrollable_Table.Canvas_center.configure(scrollregion=self.Scrollable_Table.Canvas_center.bbox("all"))
+            
+
+        # Contrôle de saisie : champ "Nombre de routeurs" non vide et contient une valeur comprise entre 3 et 64
+        if self.EntryNbrRouteur.get()=="" or not  ((int(self.EntryNbrRouteur.get()) >= self.NbrMinRouteurAutorise) and (int(self.EntryNbrRouteur.get()) <= self.NbrMaxRouteurAutorise)) :
+            showerror("Erreur", 'Vous devez choisir un nombre de routeurs compris entre 3 et 64' )
+        
+        
+        #bouton run déjà cliqué & nb routeur renseigné valide : réinitialisation de tous les paramètres après confirmation 
+        elif (self.flag_clic_bouton_run == 1):   
+            #nb routeurs différent du precedent nombre de routeurs générés
+            if (self.var_NbrRouteurs != int(self.EntryNbrRouteur.get())):
+                #message de demande de confirmation de la reinitialisation de la conf
+                if askyesno("Attention : reinitialisation de toute la configuration !", "Vous souhaitez modifier le nombre de routeurs dans le reseau, cela va reinitialiser de toute la configuration.\n\nEtes-vous sur ?"):
+                    _reinitialisation_grille_routeur(self)
+                    _generation_grille_routeur(self)
+
+        #bouton run jamais cliqué & nb de routeur renseigné valide
+        else :
+            _generation_grille_routeur(self)
+            
+                            
                         
     def infos_action(self):
-        showinfo("Fonctionnement de l'outil", "Cet outil permet de :\n- Selectionner le nombre de routeurs que vous souhaiter dans le reseau et lancer la generation de la grille d'initialisation des connexions entre les routeurs.\n- Choisir le nombre d'interface maitre et esclave que possede chaque routeur (attention pour chaque routeur : le nombre d'interface maitre, esclave et le nombre de connexions a d'autre routeurs ne doit pas depasser 16, car chaque routeur a 16 ports maximum).\n- Etablir des connexions en paquet entre les routeurs en cliquant sur la case correspondante (la case reciproque est automatiquement cochee).\n- Configurer les connexions locales des interfaces (si la case entre une interface maitre et une interface esclave est cochee , ces deux interfaces pourront communiquer entre elles au niveau local).\n- Configurer les connexions en paquets (les communications paquets permettent aux interfaces n'appartenant pas au meme routeur de communiquer entre elles).\n- Configurer le decodage d'adresse de chaque interface esclave pour chaque interface maitre (chaque maitre voit chaque esclave a une certaine adresse de 32 bits pouvant etre specifique).\n- Configurer la taille des tables de decodage d'adresse de chaque maitre : les maitres n'ont besoins de posseder seulement les adresses des esclaves avec lesquels ils souhaitent communiquer.\n- Une fois tous ces parametres enregistres -> lancer la generation du fichier de configuration du NoC : noc_config.vhd.\n\nInfo :\n- Les routeurs sont numerotes de 0 a i (nb de routeurs du reseau compris entre 3 et 64).\n- Pour chaque routeur les interfaces sont numerotees de 0 a j : d'abord les interfaces maitre, puis suivent les interfaces esclaves et en dernier les interfaces entre les routeurs (nb d'interface par routeur est compris entre 1 et 16).\n Attention : il faut s'assurer que tous les routeurs appartiennent au meme reseau via les connexions entre les routeurs.")
+        showinfo("Fonctionnement de l'outil", "Cet outil permet de :\n- Selectionner le nombre de routeurs que vous souhaiter dans le reseau et lancer la generation de la grille d'initialisation des connexions entre les routeurs.\n- Choisir le nombre d'interface maitre et esclave que possede chaque routeur (attention pour chaque routeur : le nombre d'interface maitre, esclave et le nombre de connexions a d'autre routeurs ne doit pas depasser 16, car chaque routeur a 16 ports maximum).\n ATTENTION : modifier le nombre de routeurs et relancer une generation de la grille reinitialise toute la configuration.\n- Etablir des connexions en paquet entre les routeurs en cliquant sur la case correspondante (la case reciproque est automatiquement cochee).\n- Configurer les connexions locales des interfaces (si la case entre une interface maitre et une interface esclave est cochee , ces deux interfaces pourront communiquer entre elles au niveau local).\n- Configurer les connexions en paquets (les communications paquets permettent aux interfaces n'appartenant pas au meme routeur de communiquer entre elles).\n- Configurer le decodage d'adresse de chaque interface esclave pour chaque interface maitre (chaque maitre voit chaque esclave a une certaine adresse de 32 bits pouvant etre specifique).\n- Configurer la taille des tables de decodage d'adresse de chaque maitre : les maitres n'ont besoins de posseder seulement les adresses des esclaves avec lesquels ils souhaitent communiquer.\n- Une fois tous ces parametres enregistres -> lancer la generation du fichier de configuration du NoC : noc_config.vhd.\n\nInfo :\n- Les routeurs sont numerotes de 0 a i (nb de routeurs du reseau compris entre 3 et 64).\n- Pour chaque routeur les interfaces sont numerotees de 0 a j : d'abord les interfaces maitre, puis suivent les interfaces esclaves et en dernier les interfaces entre les routeurs (nb d'interface par routeur est compris entre 1 et 16).\n Attention : il faut s'assurer que tous les routeurs appartiennent au meme reseau via les connexions entre les routeurs.")
                         
                         
     def checkbouton_moniteur_securite_action(self):
