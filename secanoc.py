@@ -12,6 +12,7 @@ from tkinter.messagebox import *
 from functools import partial
 import os
 import shutil
+#regex
 import re
 from tkinter.messagebox import showerror
 
@@ -85,7 +86,7 @@ class ScrollableTable(Frame):
         
         # CANVAS LEFT : axe vertical de numérotation des routeurs
         #affecté par la barre de défilement verticale
-        self.Canvas_left = Canvas(self.Canvas_principal , width = 22, height = 550, highlightthickness=0, yscrollcommand = self.VerticalScrollBar.set)
+        self.Canvas_left = Canvas(self.Canvas_principal , width = 22, height = 520, highlightthickness=0, yscrollcommand = self.VerticalScrollBar.set)
         self.Canvas_left.grid(row=2, column=1, sticky=NW)
         self.Canvas_left.grid_propagate(False)
         
@@ -97,7 +98,7 @@ class ScrollableTable(Frame):
         
         # CANVAS CENTER : damier au centre contenant les cases pour l'initialisation des connexions entre les routeurs
         #affecté par les barres de défilement verticales et horizontales
-        self.Canvas_center = Canvas(self.Canvas_principal, width = 950, height = 550, highlightthickness=0, yscrollcommand = self.VerticalScrollBar.set, xscrollcommand = self.HorizontalScrollBar.set)
+        self.Canvas_center = Canvas(self.Canvas_principal, width = 950, height = 520, highlightthickness=0, yscrollcommand = self.VerticalScrollBar.set, xscrollcommand = self.HorizontalScrollBar.set)
         self.Canvas_center.grid(row=2, column=2, sticky=N+W)
         self.Canvas_center.grid_propagate(False)
         
@@ -133,7 +134,7 @@ class Interface(Frame):
     nbr_M_Global=0
     nbr_S_Global=0
     nbr_RP_Global=16
-
+    
     # Init
     def __init__(self, fenetre, **kwargs):
         Frame.__init__(self, fenetre, width=1000, height=670, **kwargs)
@@ -142,17 +143,16 @@ class Interface(Frame):
         self.liste_num_routeur_top = list()
         #axe vertial de n° du routeur
         self.liste_num_routeur_gauche = list()
-        self.liste_Cases_Connexions_Routeurs = list()
         self.liste_EntryNbrMaitre = list()
         self.liste_EntryNbrEsclave = list()
         self.i_num_routeur_top = 0
         self.i_num_routeur_gauche = 0
-        self.i_Cases_Connexions_Routeurs = 0
         self.i_EntryNbr_Maitre_Esclave = 0
         #variable de contrôles de saisie du nombre de routeurs
         self.NbrMinRouteurAutorise = 3
         self.NbrMaxRouteurAutorise = 64
-        
+        self.offset_grid_ligne = 3
+        self.offset_grid_colonne = 3
         self.flag_checkbouton_moniteur_securite = 0
         self.flag_checkbouton_connexions_locales = 0
         self.flag_checkbouton_decodeurs_adresse =0
@@ -220,36 +220,56 @@ class Interface(Frame):
         self.bouton_generation_vhdl = Button(self, text="Generation \n du VHDL", command= self.on_buttonGenerate_clicked)
         self.bouton_generation_vhdl.grid(row= 3, column=5, sticky=NSEW)
 
-    # def cliquer0(self):
-        
-        # if self.damierX[0].config(text = "X") == 0:
-            # self.damierX[0].config(text = "X")
-            # self.damierX[1].config(text = "X")
-            # self.flag_cliquer0 = 1
-        # elif self.flag_cliquer0 == 1:
-            # self.damierX[0].config(text = " ")
-            # self.damierX[1].config(text = " ")
-            # self.flag_cliquer0 = 0
             
         # Action du bouton "RUN/Génération de la matrice de connexions des routeurs"
     def run_action(self):
-	
+        self.i_Cases_Connexions_Routeurs = 0
+        self.liste_Cases_Connexions_Routeurs = list()
+        
+        ##fonction d'activation des cases : initialisation des connexions entre les routeurs
+        #lors du clic sur un bouton, le colorer en orange ainsi que le bouton de coordonnées inverses
+        #cela permet d'initialiser une connexion entre deux routeurs : par exemple clic sur le bouton 0 2 initialise aussi le bouton 2 0
+        def case_definir_connexion(event):
+
+            #extrait les coordonnées du bouton : recherche de tous les nombres dans le string
+            var_coord_bouton= re.findall('\d+', event.widget["text"])
+            #si le bouton cliqué est déjà de couleur orange
+            if event.widget["background"] == "orange":
+                #lui rendre sa couleur initiale selon qu'il est positionné sur une ligne paire ou impair
+                if int(var_coord_bouton[1])%2 == 0:
+                    event.widget.config(bg="SystemButtonFace")
+                else:
+                    event.widget.config(bg="gainsboro")
+                #rendre la couleur du bouton de coordonnées inverses
+                if int(var_coord_bouton[0])%2 == 0:
+                    self.liste_Cases_Connexions_Routeur_[int(var_coord_bouton[0])][int(var_coord_bouton[1])].config(bg="SystemButtonFace")
+                else:
+                    self.liste_Cases_Connexions_Routeur_[int(var_coord_bouton[0])][int(var_coord_bouton[1])].config(bg="gainsboro")
+            #sinon il n'est pas coloré en orange -> le colorer en orange ainsi que le bouton de coordonnées inverses      
+            else:
+                event.widget.config(bg="orange")
+                self.liste_Cases_Connexions_Routeur_[int(var_coord_bouton[0])][int(var_coord_bouton[1])].config(bg="orange")
+               
+                
         # Contrôle de saisie : champ "Nombre de routeurs" non vide et contient une valeur comprise entre 3 et 64
         if self.EntryNbrRouteur.get()=="" or not  ((int(self.EntryNbrRouteur.get()) >= self.NbrMinRouteurAutorise) and (int(self.EntryNbrRouteur.get()) <= self.NbrMaxRouteurAutorise)) :
             showerror("Erreur", 'Vous devez choisir un nombre de routeurs compris entre 3 et 64' )
         else:    
-        
+            
             #Conversion du contenu du champ "Nombre de routeurs" en int et initialisation de la variable "var_NbrRouteurs"
             self.var_NbrRouteurs = int(self.EntryNbrRouteur.get())
+            #Initialisation d'un tableau à deux dimensions (nb_routeurs * nb_routeurs)
+            self.liste_Cases_Connexions_Routeur_ = [[] for _ in range(self.var_NbrRouteurs)]
+            
             #placement d'une case inactive dans le coin en haut à gauche de la matrice/damier de connexions de routeurs 
             self.TopLeft_Corner_Case = Button(self.Scrollable_Table.Canvas_empty, text =" ", borderwidth=1, height = 32, width = 2)
             self.TopLeft_Corner_Case.grid(row=1, column=1, padx=2)
             self.TopLeft_Corner_Case.grid_propagate(False)
             
             #Cases de numéro des routeurs sur l'axe horizontal dans Canvas_top_interior_frame
-            for colonne in range (3,self.var_NbrRouteurs+3):
+            for colonne in range (self.offset_grid_colonne,self.var_NbrRouteurs+self.offset_grid_colonne):
                 ligne = 2
-                self.liste_num_routeur_top.append( Button(self.Scrollable_Table.Canvas_top_interior_Frame, text ="%s" % (colonne-2), borderwidth=1, height = 1, width = 2, background = "gainsboro"))
+                self.liste_num_routeur_top.append( Button(self.Scrollable_Table.Canvas_top_interior_Frame, text ="%s" % (colonne-3), borderwidth=1, height = 1, width = 2, background = "gainsboro"))
                 self.liste_num_routeur_top[self.i_num_routeur_top].grid(row= ligne, column=colonne, sticky=W+E+N+S)
                 self.i_num_routeur_top +=1
             #Placement des champs d'entête de saisie du nombre d'interface maître et esclave par routeurs dans Canvas_top_interior_frame
@@ -259,38 +279,51 @@ class Interface(Frame):
             self.Case_LabelNbrEsclave.grid(row= 2, column=colonne+2, sticky= NW)
           
             #Cases de numéro des routeurs de l'axe vertical dans Canvas_left_interior_Frame
-            for ligne in range (3,self.var_NbrRouteurs+3):
+            for ligne in range (self.offset_grid_ligne,self.var_NbrRouteurs+self.offset_grid_ligne):
                 colonne = 2
                 #si ligne pair : couleur grise claire
                 if (ligne %2 ==0):
-                    self.liste_num_routeur_gauche.append( Button(self.Scrollable_Table.Canvas_left_interior_Frame, text ="%s" % (ligne-2), height = 1, width = 2, background = "gainsboro", borderwidth=1))
+                    self.liste_num_routeur_gauche.append( Button(self.Scrollable_Table.Canvas_left_interior_Frame, text ="%s" % (ligne-3), height = 1, width = 2, background = "gainsboro", borderwidth=1))
                 #sinon case de couleur normale
                 else:
-                    self.liste_num_routeur_gauche.append( Button(self.Scrollable_Table.Canvas_left_interior_Frame, text ="%s" % (ligne-2), height = 1, width = 2, borderwidth=1))
+                    self.liste_num_routeur_gauche.append( Button(self.Scrollable_Table.Canvas_left_interior_Frame, text ="%s" % (ligne-3), height = 1, width = 2, borderwidth=1))
                 self.liste_num_routeur_gauche[self.i_num_routeur_gauche].grid(row= ligne, column=colonne, sticky=W+E+N+S)
                 self.i_num_routeur_gauche +=1
                 
-            #déclaration des cases du centre du damier/matrice de connexion des routeurs dans Canvas_center
-            for ligne in range (3,self.var_NbrRouteurs+3):
-                for colonne in range (3,self.var_NbrRouteurs+3):
-                    #cases grises inactive pour la diagonale
+            
+            self.i_Cases_Connexions_Routeurs_X = 0
+            self.i_Cases_Connexions_Routeurs_Y = 0
+            for ligne in range (self.offset_grid_ligne,self.var_NbrRouteurs+self.offset_grid_ligne):
+                for colonne in range (self.offset_grid_colonne,self.var_NbrRouteurs+self.offset_grid_colonne):
+                    # cases grises inactive pour la diagonale
                     if ligne == colonne:
-                        self.liste_Cases_Connexions_Routeurs.append( Button(self.Scrollable_Table.Canvas_center_interior_Frame, bg="grey", borderwidth=1, height = 1, width = 2))
-                        self.liste_Cases_Connexions_Routeurs[self.i_Cases_Connexions_Routeurs].grid(row= ligne, column=colonne, sticky=W+E+N+S)
-                        self.i_Cases_Connexions_Routeurs +=1
-                    #cases différentes de la diagonale
+                        self.liste_Cases_Connexions_Routeur_[self.i_Cases_Connexions_Routeurs_Y].append( Button(self.Scrollable_Table.Canvas_center_interior_Frame, bg="grey", borderwidth=1, height = 1, width = 2))
+                        self.liste_Cases_Connexions_Routeur_[self.i_Cases_Connexions_Routeurs_Y][self.i_Cases_Connexions_Routeurs_X].grid(row= ligne, column=colonne, sticky=W+E+N+S)
+                        self.i_Cases_Connexions_Routeurs_X +=1
+                    # cases différentes de la diagonale
                     if ligne != colonne:
-                        #si ligne paire : case grise claire
+                        # si ligne paire : case grise claire
                         if (ligne %2 ==0):
-                            self.liste_Cases_Connexions_Routeurs.append( Button(self.Scrollable_Table.Canvas_center_interior_Frame, text =" ", height = 1, width = 2, background = "gainsboro", borderwidth=1))
-                        #sinon case de couleur normale
+                            self.liste_Cases_Connexions_Routeur_[self.i_Cases_Connexions_Routeurs_Y].append( Button(self.Scrollable_Table.Canvas_center_interior_Frame
+                                ,text ="%s %s" %(self.i_Cases_Connexions_Routeurs_X, self.i_Cases_Connexions_Routeurs_Y), height = 1, width = 2
+                                ,background = "gainsboro", borderwidth=1, font=("Helvetica", 6)))
+                        # sinon case de couleur normale ("SystemButtonFace")
                         else:
-                            self.liste_Cases_Connexions_Routeurs.append( Button(self.Scrollable_Table.Canvas_center_interior_Frame, text =" ", height = 1, width = 2, borderwidth=1))
-                        self.liste_Cases_Connexions_Routeurs[self.i_Cases_Connexions_Routeurs].grid(row= ligne, column=colonne, sticky=W+E+N+S)
-                        self.i_Cases_Connexions_Routeurs +=1
+                            self.liste_Cases_Connexions_Routeur_[self.i_Cases_Connexions_Routeurs_Y].append( Button(self.Scrollable_Table.Canvas_center_interior_Frame
+                                ,text ="%s %s" %(self.i_Cases_Connexions_Routeurs_X, self.i_Cases_Connexions_Routeurs_Y)
+                                ,height = 1, width = 2, borderwidth=1, font=("Helvetica", 6)))
+                        self.liste_Cases_Connexions_Routeur_[self.i_Cases_Connexions_Routeurs_Y][self.i_Cases_Connexions_Routeurs_X].grid(row= ligne, column=colonne, sticky=W+E+N+S)
+                        self.liste_Cases_Connexions_Routeur_[self.i_Cases_Connexions_Routeurs_Y][self.i_Cases_Connexions_Routeurs_X].bind("<Button-1>",case_definir_connexion)
+                        self.i_Cases_Connexions_Routeurs_X +=1
+                #réinitialiser X pour la prochaine ligne
+                self.i_Cases_Connexions_Routeurs_X =0
+                #incrémenter le nombre de ligne
+                self.i_Cases_Connexions_Routeurs_Y +=1
+                
+               
             
             #Champs de saisies nombre d'interface maître / nombre d'interface esclave par routeur 
-            for ligne in range (3,self.var_NbrRouteurs+3):
+            for ligne in range (self.offset_grid_ligne,self.var_NbrRouteurs+self.offset_grid_ligne):
                 colonne = self.var_NbrRouteurs+3
                 self.liste_EntryNbrMaitre.append(Entry(self.Scrollable_Table.Canvas_center_interior_Frame, justify=CENTER, width=24))
                 self.liste_EntryNbrMaitre[self.i_EntryNbr_Maitre_Esclave].grid(row= ligne, column=self.var_NbrRouteurs+4, sticky= NSEW)
@@ -312,8 +345,7 @@ class Interface(Frame):
             
             self.Scrollable_Table.Canvas_center_interior_Frame.update_idletasks()
             self.Scrollable_Table.Canvas_center.configure(scrollregion=self.Scrollable_Table.Canvas_center.bbox("all"))
-  
-
+                        
     def checkbouton_moniteur_securite_action(self):
         if self.flag_checkbouton_moniteur_securite == 0:
             self.bouton_moniteur_securite.config(state = DISABLED)
