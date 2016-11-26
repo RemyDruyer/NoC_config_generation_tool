@@ -14,11 +14,10 @@ import os
 import shutil
 #regex
 import re
-from tkinter.messagebox import showerror
 
 
 # Classe Vertical Scroll
-# Crée une scroll bar verticale coté droit ajustable
+# Cree une scroll bar verticale cote droit ajustable
 class VerticalScrolledFrame(Frame):
     """
     * Use the 'interior' attribute to place widgets inside the scrollable frame
@@ -66,47 +65,47 @@ class ScrollableTable(Frame):
         Frame.__init__(self, parent, *args, **kw)
         self.grid()
         
-        # barre de défilement verticale
+        # barre de defilement verticale
         self.VerticalScrollBar = Scrollbar(self, orient="vertical")
         self.VerticalScrollBar.grid(row=0, column=20, sticky = N+S)
-        # barre de défilement horizontale 
+        # barre de defilement horizontale 
         self.HorizontalScrollBar = Scrollbar(self, orient="horizontal")
         self.HorizontalScrollBar.grid(row=20, column=0, sticky = E+W)
         
         # CANVAS PRINCIPAL : contient tous les autres Canvas de la "ScrollableTable"
-        # réglage de la taille du widget Scrollabable table
+        # reglage de la taille du widget Scrollabable table
         self.Canvas_principal = Canvas(self, width = 1000, height = 570, highlightthickness=0)
         self.Canvas_principal.grid_propagate(False)
         self.Canvas_principal.grid(row=0, column=0)
         
-        # CANVAS EMPTY : positionné tout en haut à gauche contient une case vide
+        # CANVAS EMPTY : positionne tout en haut a gauche contient une case vide
         self.Canvas_empty = Canvas(self.Canvas_principal, width = 13, height = 35, highlightthickness=0)
         self.Canvas_empty.grid(row=1, column=1, sticky=N+W)
         self.Canvas_empty.grid_propagate(False)
         
-        # CANVAS LEFT : axe vertical de numérotation des routeurs
-        #affecté par la barre de défilement verticale
+        # CANVAS LEFT : axe vertical de numerotation des routeurs
+        #affecte par la barre de defilement verticale
         self.Canvas_left = Canvas(self.Canvas_principal , width = 22, height = 520, highlightthickness=0, yscrollcommand = self.VerticalScrollBar.set)
         self.Canvas_left.grid(row=2, column=1, sticky=NW)
         self.Canvas_left.grid_propagate(False)
         
-        # CANVAS TOP : axe horizontal de numérotation des routeurs
-        #affecté par la barre de défilement horizontale
+        # CANVAS TOP : axe horizontal de numerotation des routeurs
+        #affecte par la barre de defilement horizontale
         self.Canvas_top = Canvas(self.Canvas_principal, width = 950, height = 35, highlightthickness=0, xscrollcommand = self.HorizontalScrollBar.set)
         self.Canvas_top.grid(row=1, column=2, sticky=N+W)
         self.Canvas_top.grid_propagate(False)
         
         # CANVAS CENTER : damier au centre contenant les cases pour l'initialisation des connexions entre les routeurs
-        #affecté par les barres de défilement verticales et horizontales
+        #affecte par les barres de defilement verticales et horizontales
         self.Canvas_center = Canvas(self.Canvas_principal, width = 950, height = 520, highlightthickness=0, yscrollcommand = self.VerticalScrollBar.set, xscrollcommand = self.HorizontalScrollBar.set)
         self.Canvas_center.grid(row=2, column=2, sticky=N+W)
         self.Canvas_center.grid_propagate(False)
         
-        #action des deux barres de défilement sur les CANVAS via les fonctions "_vb_yview" et "_vb_xview"
+        #action des deux barres de defilement sur les CANVAS via les fonctions "_vb_yview" et "_vb_xview"
         self.VerticalScrollBar.config(command=self._vb_yview)
         self.HorizontalScrollBar.config(command=self._vb_xview)
         
-        #déclaration des frames contenant les cases -> nécessaires pour le fonctinnement des barres de défilement
+        #declaration des frames contenant les cases -> necessaires pour le fonctinnement des barres de defilement
         self.Canvas_left_interior_Frame = Canvas_left_interior_Frame = Frame(self.Canvas_left)
         Canvas_left_interior_Frame_id = self.Canvas_left.create_window(0, 0, window=Canvas_left_interior_Frame, anchor =NW)
         
@@ -117,12 +116,12 @@ class ScrollableTable(Frame):
         Canvas_center_interior_Frame_id = self.Canvas_center.create_window(0, 0, window=Canvas_center_interior_Frame, anchor=NW)
 
         
-    ### Fonctions de défilement des Canvas
-    # pour la barre de défilement verticale : Canvas_left & Canvas_center
+    ### Fonctions de defilement des Canvas
+    # pour la barre de defilement verticale : Canvas_left & Canvas_center
     def _vb_yview(self, *args):
         self.Canvas_left.yview(*args)
         self.Canvas_center.yview(*args)
-    # pour la barre de défilement horizontale : Canvas_top & Canvas_center
+    # pour la barre de defilement horizontale : Canvas_top & Canvas_center
     def _vb_xview(self, *args):
         self.Canvas_top.xview(*args)
         self.Canvas_center.xview(*args)
@@ -176,7 +175,7 @@ class Interface(Frame):
         # nombre routeurs Label & Entry
         self.var_NbrRouteurs = Label(self, text="Nombre de routeurs dans le reseau (entre 3 et 64) :")
         self.var_NbrRouteurs.grid(row=0, column=1)
-        #création de la case d'entrée "nombre de routeurs" : largeur 5, texte centré
+        #creation de la case d'entree "nombre de routeurs" : largeur 5, texte centre
         self.EntryNbrRouteur = Entry(self, width = 5, justify = CENTER)
         self.EntryNbrRouteur.grid(row=0, column=2)
         self.EntryNbrRouteur.insert(0,"3")
@@ -190,62 +189,64 @@ class Interface(Frame):
         
         # Bouton RUN
         self.bouton_run = Button(self, text=" Generation de la matrice de connexions des routeurs ", command=self.run_action)
-        self.bouton_run.grid(row=0, column=3, sticky = NSEW)
-                
-        # Case à cocher "Activation des moniteurs de securite"
+        self.bouton_run.grid(row=0, column=3, sticky = W)
+        # Bouton d'information
+        self.bouton_run = Button(self, text=" ? ", command=self.infos_action, width=2)
+        self.bouton_run.grid(row=0, column=5, sticky = E)
+
+        # Case a cocher "Activation des moniteurs de securite"
         self.checkbouton_moniteur_securite = Checkbutton(self, text="Activation des moniteurs \n de securite", command= self.checkbouton_moniteur_securite_action)
         self.checkbouton_moniteur_securite.grid(row=2, column=0, sticky=NSEW)
-        # Bouton - appel fenêtre secondaire "Configuration des moniteurs de sécurité"
+        # Bouton - appel fenêtre secondaire "Configuration des moniteurs de securite"
         self.bouton_moniteur_securite = Button(self, text="Configuration des moniteurs \n de securite", command=self.quit, state=DISABLED)
         self.bouton_moniteur_securite.grid(row=3, column=0, sticky=NSEW)
         
-        # # Case à cocher "Interfaces toutes connectees en local"
+        # # Case a cocher "Interfaces toutes connectees en local"
         self.checkbouton_connexions_locales = Checkbutton(self, text="Interfaces toutes \n connectees en local", command= self.checkbouton_connexions_locales_action)
         self.checkbouton_connexions_locales.grid(row=2, column=1, sticky=NSEW)
         # # Bouton - appel fenêtre secondaire "Configuration des connexions locales"
         self.bouton_connexions_locales = Button(self, text="Configuration des \n connexions locales", command=self.bouton_connexions_locales_action)
         self.bouton_connexions_locales.grid(row=3, column=1, sticky=NSEW)
         
-        # # Case à cocher "Interfaces toutes connectees en paquets"
+        # # Case a cocher "Interfaces toutes connectees en paquets"
         self.checkbouton_connexions_paquets = Checkbutton(self, text="Interfaces toutes \n connectees en paquets", command= self.checkbouton_connexions_paquets_action)
         self.checkbouton_connexions_paquets.grid(row=2, column=2, sticky=NSEW)
         # # Bouton - appel fenêtre secondaire "Configuration des connexions en paquets"
         self.bouton_connexions_paquets = Button(self, text="Configuration des \n connexions en paquets", command=self.bouton_connexions_paquets_action)
         self.bouton_connexions_paquets.grid(row= 3, column=2, sticky=NSEW)
-        # # Bouton - appel fenêtre secondaire "Configuration des décodeurs d'adresse"
+        # # Bouton - appel fenêtre secondaire "Configuration des decodeurs d'adresse"
         self.bouton_decodeurs_adresses = Button(self, text="Configuration des decodeurs \n d'adresse", command=self.bouton_decodeurs_adresse_action)
         self.bouton_decodeurs_adresses.grid(row= 3, column=3, sticky=NSEW)
        
-        # # bouton "Génération du VHDL"
+        # # bouton "Generation du VHDL"
         self.bouton_generation_vhdl = Button(self, text="Generation \n du VHDL", command= self.on_buttonGenerate_clicked)
         self.bouton_generation_vhdl.grid(row= 3, column=5, sticky=NSEW)
-
             
-        # Action du bouton "RUN/Génération de la matrice de connexions des routeurs"
+        # Action du bouton "RUN/Generation de la matrice de connexions des routeurs"
     def run_action(self):
         self.i_Cases_Connexions_Routeurs = 0
         self.liste_Cases_Connexions_Routeurs = list()
         
         ##fonction d'activation des cases : initialisation des connexions entre les routeurs
-        #lors du clic sur un bouton, le colorer en orange ainsi que le bouton de coordonnées inverses
+        #lors du clic sur un bouton, le colorer en orange ainsi que le bouton de coordonnees inverses
         #cela permet d'initialiser une connexion entre deux routeurs : par exemple clic sur le bouton 0 2 initialise aussi le bouton 2 0
         def case_definir_connexion(event):
 
-            #extrait les coordonnées du bouton : recherche de tous les nombres dans le string
+            #extrait les coordonnees du bouton : recherche de tous les nombres dans le string
             var_coord_bouton= re.findall('\d+', event.widget["text"])
-            #si le bouton cliqué est déjà de couleur orange
+            #si le bouton clique est deja de couleur orange
             if event.widget["background"] == "orange":
-                #lui rendre sa couleur initiale selon qu'il est positionné sur une ligne paire ou impair
+                #lui rendre sa couleur initiale selon qu'il est positionne sur une ligne paire ou impair
                 if int(var_coord_bouton[1])%2 == 0:
                     event.widget.config(bg="SystemButtonFace")
                 else:
                     event.widget.config(bg="gainsboro")
-                #rendre la couleur du bouton de coordonnées inverses
+                #rendre la couleur du bouton de coordonnees inverses
                 if int(var_coord_bouton[0])%2 == 0:
                     self.liste_Cases_Connexions_Routeur_[int(var_coord_bouton[0])][int(var_coord_bouton[1])].config(bg="SystemButtonFace")
                 else:
                     self.liste_Cases_Connexions_Routeur_[int(var_coord_bouton[0])][int(var_coord_bouton[1])].config(bg="gainsboro")
-            #sinon il n'est pas coloré en orange -> le colorer en orange ainsi que le bouton de coordonnées inverses      
+            #sinon il n'est pas colore en orange -> le colorer en orange ainsi que le bouton de coordonnees inverses      
             else:
                 event.widget.config(bg="orange")
                 self.liste_Cases_Connexions_Routeur_[int(var_coord_bouton[0])][int(var_coord_bouton[1])].config(bg="orange")
@@ -258,15 +259,15 @@ class Interface(Frame):
             
             #Conversion du contenu du champ "Nombre de routeurs" en int et initialisation de la variable "var_NbrRouteurs"
             self.var_NbrRouteurs = int(self.EntryNbrRouteur.get())
-            #Initialisation d'un tableau à deux dimensions (nb_routeurs * nb_routeurs)
+            #Initialisation d'un tableau a deux dimensions (nb_routeurs * nb_routeurs)
             self.liste_Cases_Connexions_Routeur_ = [[] for _ in range(self.var_NbrRouteurs)]
             
-            #placement d'une case inactive dans le coin en haut à gauche de la matrice/damier de connexions de routeurs 
+            #placement d'une case inactive dans le coin en haut a gauche de la matrice/damier de connexions de routeurs 
             self.TopLeft_Corner_Case = Button(self.Scrollable_Table.Canvas_empty, text =" ", borderwidth=1, height = 32, width = 2)
             self.TopLeft_Corner_Case.grid(row=1, column=1, padx=2)
             self.TopLeft_Corner_Case.grid_propagate(False)
             
-            #Cases de numéro des routeurs sur l'axe horizontal dans Canvas_top_interior_frame
+            #Cases de numero des routeurs sur l'axe horizontal dans Canvas_top_interior_frame
             for colonne in range (self.offset_grid_colonne,self.var_NbrRouteurs+self.offset_grid_colonne):
                 ligne = 2
                 self.liste_num_routeur_top.append( Button(self.Scrollable_Table.Canvas_top_interior_Frame, text ="%s" % (colonne-3), borderwidth=1, height = 1, width = 2, background = "gainsboro"))
@@ -278,7 +279,7 @@ class Interface(Frame):
             self.Case_LabelNbrEsclave = Button(self.Scrollable_Table.Canvas_top_interior_Frame, width=20, bd=1, text="Nombre d'interfaces \n esclaves du routeur")
             self.Case_LabelNbrEsclave.grid(row= 2, column=colonne+2, sticky= NW)
           
-            #Cases de numéro des routeurs de l'axe vertical dans Canvas_left_interior_Frame
+            #Cases de numero des routeurs de l'axe vertical dans Canvas_left_interior_Frame
             for ligne in range (self.offset_grid_ligne,self.var_NbrRouteurs+self.offset_grid_ligne):
                 colonne = 2
                 #si ligne pair : couleur grise claire
@@ -300,7 +301,7 @@ class Interface(Frame):
                         self.liste_Cases_Connexions_Routeur_[self.i_Cases_Connexions_Routeurs_Y].append( Button(self.Scrollable_Table.Canvas_center_interior_Frame, bg="grey", borderwidth=1, height = 1, width = 2))
                         self.liste_Cases_Connexions_Routeur_[self.i_Cases_Connexions_Routeurs_Y][self.i_Cases_Connexions_Routeurs_X].grid(row= ligne, column=colonne, sticky=W+E+N+S)
                         self.i_Cases_Connexions_Routeurs_X +=1
-                    # cases différentes de la diagonale
+                    # cases differentes de la diagonale
                     if ligne != colonne:
                         # si ligne paire : case grise claire
                         if (ligne %2 ==0):
@@ -315,9 +316,9 @@ class Interface(Frame):
                         self.liste_Cases_Connexions_Routeur_[self.i_Cases_Connexions_Routeurs_Y][self.i_Cases_Connexions_Routeurs_X].grid(row= ligne, column=colonne, sticky=W+E+N+S)
                         self.liste_Cases_Connexions_Routeur_[self.i_Cases_Connexions_Routeurs_Y][self.i_Cases_Connexions_Routeurs_X].bind("<Button-1>",case_definir_connexion)
                         self.i_Cases_Connexions_Routeurs_X +=1
-                #réinitialiser X pour la prochaine ligne
+                #reinitialiser X pour la prochaine ligne
                 self.i_Cases_Connexions_Routeurs_X =0
-                #incrémenter le nombre de ligne
+                #incrementer le nombre de ligne
                 self.i_Cases_Connexions_Routeurs_Y +=1
                 
                
@@ -327,16 +328,16 @@ class Interface(Frame):
                 colonne = self.var_NbrRouteurs+3
                 self.liste_EntryNbrMaitre.append(Entry(self.Scrollable_Table.Canvas_center_interior_Frame, justify=CENTER, width=24))
                 self.liste_EntryNbrMaitre[self.i_EntryNbr_Maitre_Esclave].grid(row= ligne, column=self.var_NbrRouteurs+4, sticky= NSEW)
-                #valeur contenue dans la case initialisée à 0
+                #valeur contenue dans la case initialisee a 0
                 self.liste_EntryNbrMaitre[self.i_EntryNbr_Maitre_Esclave].insert(0,"0")
                 self.liste_EntryNbrEsclave.append(Entry(self.Scrollable_Table.Canvas_center_interior_Frame, justify=CENTER, width=24))
                 self.liste_EntryNbrEsclave[self.i_EntryNbr_Maitre_Esclave].grid(row= ligne, column=self.var_NbrRouteurs+5, sticky= NSEW)
-                #valeur contenue dans la case initialisée à 0
+                #valeur contenue dans la case initialisee a 0
                 self.liste_EntryNbrEsclave[self.i_EntryNbr_Maitre_Esclave].insert(0,"0")
                 self.i_EntryNbr_Maitre_Esclave +=1
             
             
-            #Mise à jour des zones défilables de Canvas_top, Canvas_left & Canvas_center pour le fonctionnement des barres de fonctionnement
+            #Mise a jour des zones defilables de Canvas_top, Canvas_left & Canvas_center pour le fonctionnement des barres de fonctionnement
             self.Scrollable_Table.Canvas_top_interior_Frame.update_idletasks()
             self.Scrollable_Table.Canvas_top.configure(scrollregion=self.Scrollable_Table.Canvas_top.bbox("all"))
             
@@ -345,6 +346,12 @@ class Interface(Frame):
             
             self.Scrollable_Table.Canvas_center_interior_Frame.update_idletasks()
             self.Scrollable_Table.Canvas_center.configure(scrollregion=self.Scrollable_Table.Canvas_center.bbox("all"))
+                        
+                        
+                        
+    def infos_action(self):
+        showinfo("Fonctionnement de l'outil", "Cet outil permet de :\n- Selectionner le nombre de routeurs que vous souhaiter dans le reseau et lancer la generation de la grille d'initialisation des connexions entre les routeurs.\n- Choisir le nombre d'interface maitre et esclave que possede chaque routeur (attention pour chaque routeur : le nombre d'interface maitre, esclave et le nombre de connexions a d'autre routeurs ne doit pas depasser 16, car chaque routeur a 16 ports maximum).\n- Etablir des connexions en paquet entre les routeurs en cliquant sur la case correspondante (la case reciproque est automatiquement cochee).\n- Configurer les connexions locales des interfaces (si la case entre une interface maitre et une interface esclave est cochee , ces deux interfaces pourront communiquer entre elles au niveau local).\n- Configurer les connexions en paquets (les communications paquets permettent aux interfaces n'appartenant pas au meme routeur de communiquer entre elles).\n- Configurer le decodage d'adresse de chaque interface esclave pour chaque interface maitre (chaque maitre voit chaque esclave a une certaine adresse de 32 bits pouvant etre specifique).\n- Configurer la taille des tables de decodage d'adresse de chaque maitre : les maitres n'ont besoins de posseder seulement les adresses des esclaves avec lesquels ils souhaitent communiquer.\n- Une fois tous ces parametres enregistres -> lancer la generation du fichier de configuration du NoC : noc_config.vhd.\n\nInfo :\n- Les routeurs sont numerotes de 0 a i (nb de routeurs du reseau compris entre 3 et 64).\n- Pour chaque routeur les interfaces sont numerotees de 0 a j : d'abord les interfaces maitre, puis suivent les interfaces esclaves et en dernier les interfaces entre les routeurs (nb d'interface par routeur est compris entre 1 et 16).\n Attention : il faut s'assurer que tous les routeurs appartiennent au meme reseau via les connexions entre les routeurs.")
+                        
                         
     def checkbouton_moniteur_securite_action(self):
         if self.flag_checkbouton_moniteur_securite == 0:
@@ -371,7 +378,7 @@ class Interface(Frame):
             if error_found:
                 showerror("Erreur", 'Vous devez specifier le nombre des Maitres et le nbr des Esclaves' )
             else:
-				#récupération du nombre de maître et d'esclave à partir des cases
+				#recuperation du nombre de maître et d'esclave a partir des cases
                 for r in range(int(self.EntryNbrRouteur.get())):
                     self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
                     self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
@@ -448,7 +455,7 @@ class Interface(Frame):
         print("Generate the NOC files")
         self.generate_vhdl_file()
 
-    # Génération du VHDL pour les variables : TOTAL_MASTER_NB, TOTAL_SLAVE_NB, TOTAL_ROUTING_PORT_NB, TOTAL_ROUTER_NB
+    # Generation du VHDL pour les variables : TOTAL_MASTER_NB, TOTAL_SLAVE_NB, TOTAL_ROUTING_PORT_NB, TOTAL_ROUTER_NB
     def generate_configurable_part1(self):
         outputdir = "./Noc0__"
         if not os.path.exists(outputdir):
@@ -457,7 +464,7 @@ class Interface(Frame):
         self.sum_nbr_M =0
         self.sum_nbr_S =0
 		
-		# Calcul de la somme totale d'interface maître et d'interface esclave dans le réseau
+		# Calcul de la somme totale d'interface maître et d'interface esclave dans le reseau
         for r in range(int(self.EntryNbrRouteur.get())):
             #calcul de la somme des interfaces maîtres
             self.sum_nbr_M = int(self.liste_EntryNbrMaitre[r].get()) + self.sum_nbr_M
@@ -486,7 +493,7 @@ package noc_config is
 ----------------------------------------------------------------
 
 '''
-        #génération du code VHDL dans un fichier spécifique
+        #generation du code VHDL dans un fichier specifique
         fw= open(outputdir + "/noc_config_configurable_part1.vhd", 'w')
         
         fw.write("%s" %ch)
@@ -1954,7 +1961,7 @@ end noc_address_pack;
 
     def generate_vhdl_file(self):
         error_found=0
-        #Vérifier que le dossier existe, il est créé si nécessaire
+        #Verifier que le dossier existe, il est cree si necessaire
         outputdir = "./Noc0__"
         if not os.path.exists(outputdir):
             os.makedirs(outputdir)
@@ -1981,7 +1988,7 @@ end noc_address_pack;
         if error_found:
             showerror("Erreur", 'Enregistrer avant vos modifications dans (configuration des connexions locales), (configurations des decodeurs d\'adresses) ou (configurations des connexions en paquets)' )
         else:
-            # génère le fichier de sortie
+            # genere le fichier de sortie
             with open(outputdir + "/noc_config.vhd",'w') as new_file:
                 with open(outputdir + "/noc_config_configurable_part1.vhd") as old_file:
                     for line in old_file:   
@@ -2056,7 +2063,7 @@ filelist = [
 #classe for copying VHDL files    
 class copyothersfiles():
     def __init__(self, NocName ):
-        #Vérifier que le dossier existe, il est créé si nécessaire
+        #Verifier que le dossier existe, il est cree si necessaire
         outputdir = "./"+NocName
         if not os.path.exists(outputdir):
             os.makedirs(outputdir)
@@ -2065,7 +2072,7 @@ class copyothersfiles():
         for f in filelist:
             shutil.copy2('./base/'+ f, outputdir + '/' + f)
 
-#classe pour gérer les connexions locales
+#classe pour gerer les connexions locales
 class LocalConnexion(Tk):
     def __init__(self, nbr_r_p,nbr_m_p,nbr_s_p ):
         root = Tk.__init__(self)
@@ -2131,7 +2138,7 @@ class LocalConnexion(Tk):
 
 
 
-#classe pour gérer les connexions en paquets
+#classe pour gerer les connexions en paquets
 class PaquetConnexion(Tk):
     def __init__(self,nbr_r_p,nbr_m_p,nbr_s_p):
         root = Tk.__init__(self)
@@ -2202,7 +2209,7 @@ class PaquetConnexion(Tk):
  
 
 
-#classe pour gérer le décodeur d'adresses
+#classe pour gerer le decodeur d'adresses
 class Decodeur_d_adresse(Tk):
     def __init__(self, nbr_r_p,nbr_m_p,nbr_s_p):
         root = Tk.__init__(self)
