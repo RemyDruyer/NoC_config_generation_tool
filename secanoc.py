@@ -1886,64 +1886,32 @@ constant ADD_DECODER_PARAMETER_MX :  matrix_add_decoder_parameter :=(
 --define for each router a routing table that gives the destination port to take
 --to reach all the other routers of the network.
 -- 1rst value) router destination address in regROUTERADD format.
--- 2nd value) local router port address
-constant ROUTER0_ROUTING_TABLE : routing_table_array:=(
-	(ROUTER1, from_ROUTER0_to_ROUTER1_destination_port),
-	(ROUTER2, from_ROUTER0_to_ROUTER2_destination_port),
-	(ROUTER3, from_ROUTER0_to_ROUTER3_destination_port),
-	(ROUTER4, from_ROUTER0_to_ROUTER4_destination_port),
-	(ROUTER5, from_ROUTER0_to_ROUTER5_destination_port));
-		
-constant ROUTER1_ROUTING_TABLE : routing_table_array:=( 
-	(ROUTER0, from_ROUTER1_to_ROUTER0_destination_port),
-	(ROUTER2, from_ROUTER1_to_ROUTER2_destination_port),
-	(ROUTER3, from_ROUTER1_to_ROUTER3_destination_port),
-	(ROUTER4, from_ROUTER1_to_ROUTER4_destination_port),
-	(ROUTER5, from_ROUTER1_to_ROUTER5_destination_port));
-		
-constant ROUTER2_ROUTING_TABLE : routing_table_array:=(
-	(ROUTER0, from_ROUTER2_to_ROUTER0_destination_port),
-	(ROUTER1, from_ROUTER2_to_ROUTER1_destination_port),
-	(ROUTER3, from_ROUTER2_to_ROUTER3_destination_port),
-	(ROUTER4, from_ROUTER2_to_ROUTER4_destination_port),
-	(ROUTER5, from_ROUTER2_to_ROUTER5_destination_port));
-	
-constant ROUTER3_ROUTING_TABLE : routing_table_array:=(
-	(ROUTER0, from_ROUTER3_to_ROUTER0_destination_port),
-	(ROUTER1, from_ROUTER3_to_ROUTER1_destination_port),
-	(ROUTER2, from_ROUTER3_to_ROUTER2_destination_port),
-	(ROUTER4, from_ROUTER3_to_ROUTER4_destination_port),
-	(ROUTER5, from_ROUTER3_to_ROUTER5_destination_port));
-		
-constant ROUTER4_ROUTING_TABLE : routing_table_array:=( 
-	(ROUTER0, from_ROUTER4_to_ROUTER0_destination_port),
-	(ROUTER1, from_ROUTER4_to_ROUTER1_destination_port),
-	(ROUTER2, from_ROUTER4_to_ROUTER2_destination_port),
-	(ROUTER3, from_ROUTER4_to_ROUTER3_destination_port),
-	(ROUTER5, from_ROUTER4_to_ROUTER5_destination_port));
-		
-constant ROUTER5_ROUTING_TABLE : routing_table_array:=( 
-	(ROUTER0, from_ROUTER5_to_ROUTER0_destination_port),
-	(ROUTER1, from_ROUTER5_to_ROUTER1_destination_port),
-	(ROUTER2, from_ROUTER5_to_ROUTER2_destination_port),
-	(ROUTER3, from_ROUTER5_to_ROUTER3_destination_port),
-	(ROUTER4, from_ROUTER5_to_ROUTER4_destination_port));
-	
--- => AGGREGATING ARRAY <= --
-constant ALL_ROUTING_TABLES : array_all_routing_tables:=(
-	ROUTER0_ROUTING_TABLE,
-	ROUTER1_ROUTING_TABLE,
-	ROUTER2_ROUTING_TABLE,
-	ROUTER3_ROUTING_TABLE,
-	ROUTER4_ROUTING_TABLE,
-	ROUTER5_ROUTING_TABLE
-);
-        '''
+-- 2nd value) local router port address'''
+
         fw= open(outputdir + "/noc_config_configurable_part_11.vhd", 'w')
         fw.write("%s" %ch)
+        for r in range (0, self.nbr_R):
+            fw.write("\n constant ROUTER%d_ROUTING_TABLE : routing_table_array:=( \n" %r)
+            for r_dest in range (0, self.nbr_R):
+                if r==self.nbr_R-1 and r_dest==(self.nbr_R-2):
+                    fw.write("      (ROUTER%d, from_ROUTER%d_to_ROUTER%d_destination_port));\n" %(r_dest,r,r_dest))
+
+                elif r!=r_dest and r_dest == self.nbr_R-1:
+                    fw.write("      (ROUTER%d, from_ROUTER%d_to_ROUTER%d_destination_port));\n" %(r_dest,r,r_dest))
+                    
+                elif r!=r_dest and r_dest != self.nbr_R:
+                    fw.write("      (ROUTER%d, from_ROUTER%d_to_ROUTER%d_destination_port),\n" %(r_dest,r,r_dest))
+                     
+        fw.write("\n -- => AGGREGATING ARRAY <= --\n")
+        fw.write("constant ALL_ROUTING_TABLES : array_all_routing_tables:=(\n")
+        for r in range (0,self.nbr_R-1):
+            fw.write("      ROUTER%d_ROUTING_TABLE,\n" %r)
+        fw.write("      ROUTER%d_ROUTING_TABLE\n" %(self.nbr_R-1))
+        fw.write(" );\n")
         fw.close()
-	
-	
+
+    
+    
  # Génération VHDL : ------ 12) LOCAL CONNEXIONS MATRIX ------ 
     def generate_configurable_part_12_1(self):
         outputdir = "./Noc0__"
