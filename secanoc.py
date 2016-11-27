@@ -439,20 +439,20 @@ class Interface(Frame):
             showerror("Erreur", 'Vous devez specifier le nombre de Routeurs' )
         else: 
             self.nbr_R = int(self.EntryNbrRouteur.get())
-            self.nbr_M = [0 for i in range(self.nbr_R)]
-            self.nbr_S = [0 for i in range(self.nbr_R)]
+            self.nbr_M = [0 for i in range(0,self.nbr_R)]
+            self.nbr_S = [0 for i in range(0,self.nbr_R)]
             error_found=0
             if self.EntryNbrRouteur.get()=="":
                 error_found=1
             else:
-                for r in range(0,int(self.EntryNbrRouteur.get())-1):
+                for r in range(0,self.nbr_R):
                     if self.liste_EntryNbrMaitre[r].get()=="" or self.liste_EntryNbrEsclave[r].get()=="":
                         error_found=1
             if error_found:
                 showerror("Erreur", 'Vous devez specifier le nombre des Maitres et le nbr des Esclaves' )
             else:
 				#recuperation du nombre de maître et d'esclave a partir des cases
-                for r in range(0,int(self.EntryNbrRouteur.get())-1):
+                for r in range(0,self.nbr_R):
                     self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
                     self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
                 app_localConnexion = LocalConnexion(self.nbr_R,self.nbr_M,self.nbr_S)
@@ -478,13 +478,13 @@ class Interface(Frame):
             if self.EntryNbrRouteur.get()=="":
                 error_found=1
             else:
-                for r in range(0,int(self.EntryNbrRouteur.get())-1):
+                for r in range(0,int(self.EntryNbrRouteur.get())):
                     if self.liste_EntryNbrMaitre[r].get()=="" or self.liste_EntryNbrEsclave[r].get()=="":
                         error_found=1
             if error_found:
                 showerror("Erreur", 'Vous devez specifier le nombre des Maitres et le nbr des Esclaves' )
             else:
-                for r in range(0,int(self.EntryNbrRouteur.get())-1):
+                for r in range(0,int(self.EntryNbrRouteur.get())):
                     self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
                     self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
                 app_Decodeur_d_adresse = Decodeur_d_adresse(self.nbr_R,self.nbr_M,self.nbr_S)
@@ -502,13 +502,13 @@ class Interface(Frame):
             if self.EntryNbrRouteur.get()=="":
                 error_found=1
             else:
-                for r in range(0,int(self.EntryNbrRouteur.get())-1):
+                for r in range(0,int(self.EntryNbrRouteur.get())):
                     if self.liste_EntryNbrMaitre[r].get()=="" or self.liste_EntryNbrEsclave[r].get()=="":
                         error_found=1
             if error_found:
                 showerror("Erreur", 'Vous devez specifier le nombre des Maitres et le nbr des Esclaves' )
             else:
-                for r in range(0,int(self.EntryNbrRouteur.get())-1):
+                for r in range(0,int(self.EntryNbrRouteur.get())):
                     self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
                     self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
                 app_PaquetConnexion = PaquetConnexion(self.nbr_R,self.nbr_M,self.nbr_S)
@@ -528,7 +528,7 @@ class Interface(Frame):
         print("Generate the NOC files")
         self.generate_vhdl_file()
 
-    # Generation du VHDL pour les variables : TOTAL_MASTER_NB, TOTAL_SLAVE_NB, TOTAL_ROUTING_PORT_NB, TOTAL_ROUTER_NB
+    # Generation VHDL : ----- GLOBAL CONSTANTS -----
     def generate_configurable_part1(self):
         outputdir = "./Noc0__"
         if not os.path.exists(outputdir):
@@ -538,7 +538,7 @@ class Interface(Frame):
         self.sum_nbr_S =0
 		
 		# Calcul de la somme totale d'interface maître et d'interface esclave dans le reseau
-        for r in range(0,int(self.EntryNbrRouteur.get())-1):
+        for r in range(0,int(self.EntryNbrRouteur.get())):
             #calcul de la somme des interfaces maîtres
             self.sum_nbr_M = int(self.liste_EntryNbrMaitre[r].get()) + self.sum_nbr_M
             #calcul de la somme des interfaces esclaves
@@ -586,7 +586,7 @@ package noc_config is
         self.nbr_M = [0 for i in range(self.nbr_R)]
         self.nbr_S = [0 for i in range(self.nbr_R)]
 
-        for r in range(0,int(self.EntryNbrRouteur.get())-1):
+        for r in range(0,int(self.EntryNbrRouteur.get())):
             self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
             self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
 
@@ -859,7 +859,7 @@ constant ROUTINGPORT15 	: regPORTADD:= "1111";
             fw.write('constant ROUTER%d : regROUTERADD:= "%r"; \n' %(r,get_bin(r, 6)))
         fw.close()
 
-        
+    #Génération VHDL : ------ 1) MASTER, SLAVE and ROUTING PORT NUMBERS by ROUTER ------
     def generate_configurable_part2_1(self):
         outputdir = "./Noc0__"
         if not os.path.exists(outputdir):
@@ -868,7 +868,7 @@ constant ROUTINGPORT15 	: regPORTADD:= "1111";
         self.nbr_M = [0 for i in range(self.nbr_R)]
         self.nbr_S = [0 for i in range(self.nbr_R)]
 
-        for r in range(0,int(self.EntryNbrRouteur.get())-1):
+        for r in range(0,int(self.EntryNbrRouteur.get())):
             self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
             self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
         ch='''
@@ -902,14 +902,14 @@ constant ALL_ROUTER_MASTER_SLAVE_ROUTPORT_NB : array_all_record_master_routport_
         fw.close()
 
 
-        
+    #Génération VHDL : ------ 2) MASTER and SLAVE RANKS ------
     def generate_configurable_part2_2(self):
         outputdir = "./Noc0__"
         self.nbr_R = int(self.EntryNbrRouteur.get())
         self.nbr_M = [0 for i in range(self.nbr_R)]
         self.nbr_S = [0 for i in range(self.nbr_R)]
 
-        for r in range(0,int(self.EntryNbrRouteur.get())-1):
+        for r in range(0,int(self.EntryNbrRouteur.get())):
             self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
             self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
         ch='''
@@ -931,9 +931,9 @@ constant SLAVE_RANK  : slave_rank_in_vector  := (0,5,7,0,8,12);
         fw.close()
 
         
-    
+   
 
-        
+    # Génération VHDL : ------ 3) ROUTER CONNEXIONS (topology)------
     def generate_configurable_part2_3(self):
         outputdir = "./Noc0__"
         if not os.path.exists(outputdir):
@@ -942,12 +942,13 @@ constant SLAVE_RANK  : slave_rank_in_vector  := (0,5,7,0,8,12);
         self.nbr_interface_routeur = [0 for i in range(self.nbr_R)]
         self.nbr_M = [0 for i in range(self.nbr_R)]
         self.nbr_S = [0 for i in range(self.nbr_R)]
-        
-        for r in range(0,int(self.EntryNbrRouteur.get())-1):
+        #récupération du nombre d'interface maitre et esclave par routeur à partir des Entry
+        for r in range(0,int(self.EntryNbrRouteur.get())):
             self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
             self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
-        
-        for r in range(0,int(self.EntryNbrRouteur.get())-1):
+        #calcul du nombre cumulé d'interface M & E par routeur pour connaître l'index du premier port de routage
+        #utilisé pour la connexion vers un autre routeur
+        for r in range(0,int(self.EntryNbrRouteur.get())):
             self.nbr_interface_routeur[r] = self.nbr_M[r] + self.nbr_S[r]
             
         ch='''
@@ -963,18 +964,25 @@ constant SLAVE_RANK  : slave_rank_in_vector  := (0,5,7,0,8,12);
         fw= open(outputdir + "/noc_config_configurable_part2_3.vhd", 'w')
         fw.write("%s" %ch)
         fw.write("\n")
+        #index du nombre de connexion totale entre les routeurs
         var_num_connexion = 0
+        #pour chaque routeur
         for ligne in range (0,self.var_NbrRouteurs):
             for colonne in range (0,self.var_NbrRouteurs):
+                #on ne prend que la partie au dessus/à droite de la diagonale pour générer compter les connexions et éviter de créer des doubles
                 if colonne > ligne:
+                    #si la case est orange et donc qu'une connexion existe
                     if self.liste_Cases_Connexions_Routeur[ligne][colonne]["background"]=="orange":
+                        #ecrire la connexion correspondante avec comme paramètre dans l'ordre : 1) N° de la connexion courante (en partant de 0) ; 2) Adresse du routeur en Y ; 3) Adresse du port de routage du routeur en Y ; 4) Adresse du routeur en X ; 5) N° du port de routage du routeur en X
                         fw.write("constant ROUTER_CONNEXION_%d : record_router_connexion :=(%d,%d,%d,%d);" %(var_num_connexion, ligne, self.nbr_interface_routeur[ligne] , colonne, self.nbr_interface_routeur[colonne]))
                         fw.write("\n")
+                        #incrémentation de l'index du nombre de connexion
                         var_num_connexion += 1
+                        #incrémentation de l'index du prochain port de routage potentiel utilisé dans une connexion pour le routeur source et le routeur destination de la connexion venant d'être écrite
                         self.nbr_interface_routeur[ligne] += 1
                         self.nbr_interface_routeur[colonne] += 1
         
-        
+        #écriture du tableau d'aggregation des connexions routeurs
         fw.write("\n-- => AGGREGATING ARRAY <= --\n")
         fw.write("constant ALL_ROUTER_CONNEXIONS : array_all_router_connexion:=(\n")
         #ecriture de toutes les ROUTER_CONNEXION jusqu'à l'avant dernière avec une virgule à la fin
@@ -985,13 +993,14 @@ constant SLAVE_RANK  : slave_rank_in_vector  := (0,5,7,0,8,12);
         fw.write(");\n")
         fw.close()
         
+    # Génération VHDL : ------ 4) PACKET INTERFACE DECLARATION ------
     def generate_configurable_part2_4(self):
         outputdir = "./Noc0__"
         self.nbr_R = int(self.EntryNbrRouteur.get())
         self.nbr_M = [0 for i in range(self.nbr_R)]
         self.nbr_S = [0 for i in range(self.nbr_R)]
 
-        for r in range(0,int(self.EntryNbrRouteur.get())-1):
+        for r in range(0,int(self.EntryNbrRouteur.get())):
             self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
             self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
         ch='''
@@ -1028,14 +1037,14 @@ constant ALL_ROUTER_PACKET_INTERFACE_PORT_ADD : array_all_router_packet_interfac
         fw.close()
         
 		
-		
+    # Génération VHDL : ------ 5) ADDRESS DECODER TABLE SIZES  ------
     def generate_configurable_part2_5(self):
         outputdir = "./Noc0__"
         self.nbr_R = int(self.EntryNbrRouteur.get())
         self.nbr_M = [0 for i in range(self.nbr_R)]
         self.nbr_S = [0 for i in range(self.nbr_R)]
 
-        for r in range(0,int(self.EntryNbrRouteur.get())-1):
+        for r in range(0,int(self.EntryNbrRouteur.get())):
             self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
             self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
         ch='''
@@ -1072,14 +1081,14 @@ constant TOTAL_ADDRESS_DECOD_SIZE 				: integer := 130;
         fw.close()
 		
 
-		
+    # Génération VHDL : ------ 6) SLAVE ADDRESS MAPPING (32-bits) ------
     def generate_configurable_part2_6(self):
         outputdir = "./Noc0__"
         self.nbr_R = int(self.EntryNbrRouteur.get())
         self.nbr_M = [0 for i in range(self.nbr_R)]
         self.nbr_S = [0 for i in range(self.nbr_R)]
 
-        for r in range(0,int(self.EntryNbrRouteur.get())-1):
+        for r in range(0,int(self.EntryNbrRouteur.get())):
             self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
             self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
         ch='''
@@ -1373,6 +1382,8 @@ constant	ROUTER5_MASTER0_address_mapping_for_ROUTER0_SLAVE4_HIGH_ADD 	: std_logi
         fw.write("%s" %ch)
         fw.close()
         
+        
+ # Génération VHDL : ---- 7) ROUTING TABLE CONTENTS ------
     def generate_configurable_part2_7(self):
         outputdir = "./Noc0__"
         if not os.path.exists(outputdir):
@@ -1381,7 +1392,7 @@ constant	ROUTER5_MASTER0_address_mapping_for_ROUTER0_SLAVE4_HIGH_ADD 	: std_logi
         self.nbr_M = [0 for i in range(self.nbr_R)]
         self.nbr_S = [0 for i in range(self.nbr_R)]
 
-        for r in range(0,int(self.EntryNbrRouteur.get())-1):
+        for r in range(0,int(self.EntryNbrRouteur.get())):
             self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
             self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
         ch='''
@@ -1429,6 +1440,7 @@ constant from_ROUTER5_to_ROUTER4_destination_port : regPORTADD:= ROUTINGPORT2;
         fw.write("%s" %ch)
         fw.close()
         
+ # Génération VHDL : ------ 8) ADDRESS DECODER TYPES ------
     def generate_configurable_part2_8(self):
         outputdir = "./Noc0__"
         if not os.path.exists(outputdir):
@@ -1437,7 +1449,7 @@ constant from_ROUTER5_to_ROUTER4_destination_port : regPORTADD:= ROUTINGPORT2;
         self.nbr_M = [0 for i in range(self.nbr_R)]
         self.nbr_S = [0 for i in range(self.nbr_R)]
 
-        for r in range(0,int(self.EntryNbrRouteur.get())-1):
+        for r in range(0,int(self.EntryNbrRouteur.get())):
             self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
             self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
         ch='''
@@ -1473,7 +1485,7 @@ type unconstrained_array_record_address_decod_table is array (natural range <>) 
         fw.close()
         
 		
-		
+ # Génération VHDL : ------ 9) ADDRESS DECODER TABLES ------
     def generate_configurable_part2_9(self):
         outputdir = "./Noc0__"
         if not os.path.exists(outputdir):
@@ -1482,7 +1494,7 @@ type unconstrained_array_record_address_decod_table is array (natural range <>) 
         self.nbr_M = [0 for i in range(self.nbr_R)]
         self.nbr_S = [0 for i in range(self.nbr_R)]
 
-        for r in range(0,int(self.EntryNbrRouteur.get())-1):
+        for r in range(0,int(self.EntryNbrRouteur.get())):
             self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
             self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
         ch='''
@@ -1812,7 +1824,7 @@ constant ALL_MASTER_ADDRESS_DECODER_TABLES : unconstrained_array_record_address_
         fw.close()
 		
 		
-        
+ # Génération VHDL : ------ 10) ADDRESS DECODER PARAMETER MATRIX ------
     def generate_configurable_part2_10(self):
         outputdir = "./Noc0__"
         if not os.path.exists(outputdir):
@@ -1821,7 +1833,7 @@ constant ALL_MASTER_ADDRESS_DECODER_TABLES : unconstrained_array_record_address_
         self.nbr_M = [0 for i in range(self.nbr_R)]
         self.nbr_S = [0 for i in range(self.nbr_R)]
 
-        for r in range(0,int(self.EntryNbrRouteur.get())-1):
+        for r in range(0,int(self.EntryNbrRouteur.get())):
             self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
             self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
         ch='''
@@ -1847,7 +1859,7 @@ constant ADD_DECODER_PARAMETER_MX :  matrix_add_decoder_parameter :=(
         fw.write("%s" %ch)
         fw.close()
 		
-		
+ # Génération VHDL : ------ 11) ROUTING TABLE  -------
     def generate_configurable_part2_11(self):
         outputdir = "./Noc0__"
         if not os.path.exists(outputdir):
@@ -1856,7 +1868,7 @@ constant ADD_DECODER_PARAMETER_MX :  matrix_add_decoder_parameter :=(
         self.nbr_M = [0 for i in range(self.nbr_R)]
         self.nbr_S = [0 for i in range(self.nbr_R)]
 
-        for r in range(0,int(self.EntryNbrRouteur.get())-1):
+        for r in range(0,int(self.EntryNbrRouteur.get())):
             self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
             self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
         ch='''
@@ -1922,21 +1934,21 @@ constant ALL_ROUTING_TABLES : array_all_routing_tables:=(
         fw.close()
 	
 	
-	
+ # Génération VHDL : ------ 12) LOCAL CONNEXIONS MATRIX ------ 
     def generate_configurable_part2_12_1(self):
         outputdir = "./Noc0__"
         self.nbr_R = int(self.EntryNbrRouteur.get())
         self.nbr_M = [0 for i in range(self.nbr_R)]
         self.nbr_S = [0 for i in range(self.nbr_R)]
 
-        for r in range(0,int(self.EntryNbrRouteur.get())-1):
+        for r in range(0,int(self.EntryNbrRouteur.get())):
             self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
             self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
         ch='''
         
         '''
         fw= open(outputdir + "/noc_config_configurable_part2_12_1.vhd", 'w')
-        fw.write("------ 9) LOCAL CONNEXIONS MATRIX ------ \n")
+        fw.write("------ 12) LOCAL CONNEXIONS MATRIX ------ \n")
         for r in range(self.nbr_R):
             fw.write('constant ROUTER%d_LOCAL_MX    : local_connexion_matrix :=(           \n ' %r)
             fw.write('\n')
@@ -1979,7 +1991,7 @@ constant ALL_ROUTING_TABLES : array_all_routing_tables:=(
         self.nbr_M = [0 for i in range(self.nbr_R)]
         self.nbr_S = [0 for i in range(self.nbr_R)]
 
-        for r in range(0,int(self.EntryNbrRouteur.get())-1):
+        for r in range(0,int(self.EntryNbrRouteur.get())):
             self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
             self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
         ch='''
@@ -2007,7 +2019,7 @@ constant ALL_ROUTER_LOCAL_MATRIX : array_all_local_connexion_matrix:=(
         self.nbr_M = [0 for i in range(self.nbr_R)]
         self.nbr_S = [0 for i in range(self.nbr_R)]
 
-        for r in range(0,int(self.EntryNbrRouteur.get())-1):
+        for r in range(0,int(self.EntryNbrRouteur.get())):
             self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
             self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
         ch='''
@@ -2168,7 +2180,7 @@ class LocalConnexion(Tk):
         self.nbr_M = nbr_m_p
         self.nbr_S = nbr_s_p
         self.is_selected_flag=0
-        Connexion_local =[[[ 0 for i in range(self.nbr_R) ] for j in range(len(self.nbr_M))] for j in range(len(self.nbr_S)) ]
+        Connexion_local =[[[ 0 for i in range(0,self.nbr_R+1) ] for j in range(0,len(self.nbr_M)+1)] for j in range(0,len(self.nbr_S)+1) ]
         label_0    = []
         Routeurs   = []
         Maitres    = []
@@ -2179,18 +2191,16 @@ class LocalConnexion(Tk):
         Maitres   .append(Label(self.frame.interior, text="Maitre   "))
         Esclaves  .append(Label(self.frame.interior, text="Esclave  "))
         self.Connexions.append(Label(self.frame.interior, text="Connexion"))
-#       print ('Avant de commencer les loop')
-#       print ('self.nbr_R = %d ' % self.nbr_R)
-#       print ('self.nbr_M[0] = %d ' % self.nbr_M[0])
-        for r in range(self.nbr_R):
-            for m in range(self.nbr_M[r]):
+
+        for r in range(0,self.nbr_R):
+            for m in range(0,self.nbr_M[r]):
                 for s in range(self.nbr_M[r],self.nbr_M[r]+self.nbr_S[r]):
                     Routeurs  .append(Button(self.frame.interior, text=str(r), state=DISABLED, width=7))
-                    Maitres   .append(Button(self.frame.interior, text=str(m+1), state=DISABLED, width=7))
-                    Esclaves  .append(Button(self.frame.interior, text=str(s+1), state=DISABLED, width=7))
+                    Maitres   .append(Button(self.frame.interior, text=str(m), state=DISABLED, width=7))
+                    Esclaves  .append(Button(self.frame.interior, text=str(s), state=DISABLED, width=7))
                     self.Connexions.append(Checkbutton(self.frame.interior, variable=var))
                     row_cont=row_cont +1
-                    Connexion_local[r][m][s-self.nbr_M[r]]= var
+                    # Connexion_local[r][m][s]= var
         
         label_0[0]      .grid(row=0, column=1)
         for i in range(len(Esclaves)):
