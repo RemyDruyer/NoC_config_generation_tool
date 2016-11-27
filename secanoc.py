@@ -873,40 +873,52 @@ constant ROUTINGPORT15 	: regPORTADD:= "1111";
         self.nbr_R = int(self.EntryNbrRouteur.get())
         self.nbr_M = [0 for i in range(self.nbr_R)]
         self.nbr_S = [0 for i in range(self.nbr_R)]
-
+        self.nbr_RP = [0 for i in range(self.nbr_R)]
+        
         for r in range(0,int(self.EntryNbrRouteur.get())):
             self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
             self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
+           
+        #pour chaque routeur
+        for ligne in range (0,self.var_NbrRouteurs):
+            for colonne in range (0,self.var_NbrRouteurs):
+                #on ne prend que la partie au dessus/à droite de la diagonale pour générer compter les connexions et éviter de créer des doubles
+                if colonne > ligne:
+                    #si la case est orange et donc qu'une connexion existe
+                    if self.liste_Cases_Connexions_Routeur[ligne][colonne]["background"]=="orange":
+                        #incrémentation de l'index du nombre de port de routage
+                        self.nbr_RP[ligne] += 1
+                        self.nbr_RP[colonne] += 1
+
+            
         ch='''
 ----------------------------------------------------------------
 				 ----- CONFIGURABLE PART  -----
 ----------------------------------------------------------------
 
 ------ 1) MASTER, SLAVE and ROUTING PORT NUMBERS by ROUTER ------
---for each router, declare the number of master interface port(s), slave interface port(s) and routing port(s)
-constant R0_MASTER_SLAVE_ROUTPORT_NB : record_master_routport_slave_nb_by_router :=(4,5,2);
-constant R1_MASTER_SLAVE_ROUTPORT_NB : record_master_routport_slave_nb_by_router :=(0,2,4);
-constant R2_MASTER_SLAVE_ROUTPORT_NB : record_master_routport_slave_nb_by_router :=(4,1,1);
-constant R3_MASTER_SLAVE_ROUTPORT_NB : record_master_routport_slave_nb_by_router :=(3,0,3);
-constant R4_MASTER_SLAVE_ROUTPORT_NB : record_master_routport_slave_nb_by_router :=(4,4,3);
-constant R5_MASTER_SLAVE_ROUTPORT_NB : record_master_routport_slave_nb_by_router :=(1,1,1);
-
--- => AGGREGATING ARRAY <= --
---aggregate all the "Ri_MASTER_SLAVE_ROUTPORT_NB" in this array
-constant ALL_ROUTER_MASTER_SLAVE_ROUTPORT_NB : array_all_record_master_routport_slave_nb_by_router:=(
-	R0_MASTER_SLAVE_ROUTPORT_NB,
-	R1_MASTER_SLAVE_ROUTPORT_NB,
-	R2_MASTER_SLAVE_ROUTPORT_NB,
-	R3_MASTER_SLAVE_ROUTPORT_NB,
-	R4_MASTER_SLAVE_ROUTPORT_NB,
-	R5_MASTER_SLAVE_ROUTPORT_NB
-);
+--for each router, declare the number of master interface port(s), slave interface port(s) and routing port(s)'''
      
-'''    
+   
         fw= open(outputdir + "/noc_config_configurable_part2_1.vhd", 'w')
         fw.write("%s" %ch)
+        fw.write("\n")
+        for r in range (0,self.nbr_R):
+            fw.write("constant R%d_MASTER_SLAVE_ROUTPORT_NB : record_master_routport_slave_nb_by_router :=(%d,%d,%d);\n" %(r, self.nbr_M[r], self.nbr_S[r], self.nbr_RP[r]))
+        fw.write("\n -- => AGGREGATING ARRAY <= --\n")
+        fw.write("--aggregate all the 'Ri_MASTER_SLAVE_ROUTPORT_NB' in this array\n")
+        fw.write(" constant ALL_ROUTER_MASTER_SLAVE_ROUTPORT_NB : array_all_record_master_routport_slave_nb_by_router:=(\n")
+        for r in range (0,self.nbr_R-1):
+            fw.write("      R%d_MASTER_SLAVE_ROUTPORT_NB,\n" %r)
+            
+        fw.write("      R%d_MASTER_SLAVE_ROUTPORT_NB\n" %(self.nbr_R-1))
+        fw.write(" );\n")
+        
         fw.close()
 
+        
+        
+        
 
     #Génération VHDL : ------ 2) MASTER and SLAVE RANKS ------
     def generate_configurable_part2_2(self):
@@ -970,7 +982,7 @@ constant SLAVE_RANK  : slave_rank_in_vector  := (0,5,7,0,8,12);
         fw= open(outputdir + "/noc_config_configurable_part2_3.vhd", 'w')
         fw.write("%s" %ch)
         fw.write("\n")
-        #index du nombre de connexion totale entre les routeurs
+        #index du nombre total de connexion entre les routeurs
         var_num_connexion = 0
         #pour chaque routeur
         for ligne in range (0,self.var_NbrRouteurs):
@@ -2241,7 +2253,6 @@ class PaquetConnexion(Tk):
     def __init__(self,nbr_r_p,nbr_m_p,nbr_s_p):
         root = Tk.__init__(self)
         self.var = []
-        row_cont=0
         self.title("Configuration des connexions en paquets")
         self.geometry("520x370")
         self.frame = VerticalScrolledFrame(self)
@@ -2266,13 +2277,11 @@ class PaquetConnexion(Tk):
                 Routeurs  .append(Button(self.frame.interior, text=str(r), state=DISABLED, width=7))
                 Maitres   .append(Button(self.frame.interior, text=str(m)+" (Maitre)", state=DISABLED, width=7))
                 self.Connexions.append(Checkbutton(self.frame.interior, variable=self.var))
-                row_cont=row_cont +1
 
             for s in range(self.nbr_M[r],self.nbr_M[r]+self.nbr_S[r]):
                 Routeurs  .append(Button(self.frame.interior, text=str(r), state=DISABLED, width=7))
                 Maitres   .append(Button(self.frame.interior, text=str(s)+" (Esclave)", state=DISABLED, width=7))
                 self.Connexions.append(Checkbutton(self.frame.interior, variable=self.var))
-                row_cont=row_cont +1
         
         label_0[0]      .grid(row=0, column=1)
         for i in range(len(Maitres)):
@@ -2307,50 +2316,52 @@ class PaquetConnexion(Tk):
 class Decodeur_d_adresse(Tk):
     def __init__(self, nbr_r_p,nbr_m_p,nbr_s_p):
         root = Tk.__init__(self)
-        var = []
-        row_cont=0
         self.title("Configuration des decodeurs d'adresses")
         self.geometry("760x310")
         self.frame = VerticalScrolledFrame(self)
         self.frame.grid(row=0, column=0,sticky=N)
-        #print('nbr_R_Global in Decodeur dadresse = %d' % args)
         self.nbr_R = nbr_r_p
         self.nbr_M = nbr_m_p
         self.nbr_S = nbr_s_p
-        label_0    = []
-        Routeurs   = []
-        Esclaves    = []
-        self.Adresse_basse   = []
-        self.Adresse_haute = []
-        label_0.append(Label(self.frame.interior, text="", width=6))
-        Routeurs.append(Label(self.frame.interior, text="Routeur"))
-        Esclaves.append(Label(self.frame.interior, text="Esclave"))
-        self.Adresse_basse.append(Label(self.frame.interior, text="Adresse basse (Hex)  "))
-        self.Adresse_haute.append(Label(self.frame.interior, text="Adresse haute (Hex)"))
+        self.Cases_Routeurs     = []
+        self.Cases_Esclaves     = []
+        self.Adresse_basse      = []
+        self.Adresse_haute      = []
+        self.Label_Espace = Label(self.frame.interior, text="", width=6)
+        self.Label_Routeur = Label(self.frame.interior, text="Routeur")
+        self.Label_Esclave = Label(self.frame.interior, text="Esclave")
+        self.Label_Adresse_basse = Label(self.frame.interior, text="Adresse basse (Hex)  ")
+        self.Label_Adresse_haute = Label(self.frame.interior, text="Adresse haute (Hex)")
+            
         for r in range(0,self.nbr_R):
             for s in range(self.nbr_M[r],self.nbr_M[r]+self.nbr_S[r]):
-                Routeurs  .append(Button(self.frame.interior, text=str(r), state=DISABLED, width=10))
-                Esclaves   .append(Button(self.frame.interior, text=str(s), state=DISABLED, width=10))
-                self.Adresse_basse  .append(Entry(self.frame.interior))
-                self.Adresse_haute.append(Entry(self.frame.interior))
-                row_cont=row_cont +1
+                self.Cases_Routeurs.append(Button(self.frame.interior, text=str(r), state=DISABLED, width=10))
+                self.Cases_Esclaves.append(Button(self.frame.interior, text=str(s), state=DISABLED, width=10))
+                self.Adresse_basse.append(Entry(self.frame.interior, justify = CENTER))
+                self.Adresse_haute.append(Entry(self.frame.interior, justify = CENTER))
         
-        label_0[0]      .grid(row=0, column=1)
-        for i in range(len(Esclaves)):
-            Routeurs[i]  .grid(row=i, column=2)
-            Esclaves[i]   .grid(row=i, column=3)
-            self.Adresse_basse[i]  .grid(row=i, column=4)
-            self.Adresse_haute[i].grid(row=i, column=5)
+        self.Label_Espace.grid(row=0, column=1)
+        self.Label_Routeur.grid(row=0, column=2)
+        self.Label_Esclave.grid(row=0, column=3)
+        self.Label_Adresse_basse.grid(row=0, column=4)
+        self.Label_Adresse_haute.grid(row=0, column=5)
+        
+        for i in range(0,len(self.Cases_Esclaves)):
+            self.Cases_Routeurs[i].grid(row=i+1, column=2)
+            self.Cases_Esclaves[i].grid(row=i+1, column=3)
+            self.Adresse_basse[i].grid(row=i+1, column=4)
+            self.Adresse_basse[i].insert(0,"00000000")
+            self.Adresse_haute[i].grid(row=i+1, column=5)
+            self.Adresse_haute[i].insert(0,"00000000")
         Button(self, text="Save", width=12, command=self.on_buttonsave_clicked).grid(row=10, column=3)
-
+        
+            
     def on_buttonsave_clicked(self):
         error_flag=0
         print("Configuration du  decodeur d'adresses enregistree")    
-        for i in range(1,len(self.Adresse_basse)):
+        for i in range(0,len(self.Adresse_basse)):
             if not(re.match("^[A-Fa-f0-9_-]*$", self.Adresse_haute[i].get())) or len(self.Adresse_haute[i].get())!=8 or not(re.match("^[A-Fa-f0-9_-]*$", self.Adresse_basse[i].get())) or len(self.Adresse_basse[i].get())!=8:
                 showerror("Erreur", '[%s] n\'est pas une adresse Hexadecimale valide \n Info: Une adresse valide contient 8 caracteres [A-F ; a-f ; 0-9]' %self.Adresse_haute[i].get())
-                # error_flag=1
-                # break
         if error_flag==0:
             outputdir = "./Noc0__"
             if not os.path.exists(outputdir):
@@ -2358,13 +2369,14 @@ class Decodeur_d_adresse(Tk):
             fw= open(outputdir + "/noc_config_configurable_part2_5.vhd", 'w')
             fw.write("------ 5) CROSSBAR 32-bits SLAVE ADDRESSES ------ \n")
             fw.write('\n')
-            for r in range(self.nbr_R):
+            for r in range(0,self.nbr_R):
                 fw.write('-- ROUTER %d --\n' %r)
-                for s in range(self.nbr_M[r],self.nbr_M[r]+self.nbr_S[r]):
-                    fw.write('-- Slave %d --\n' %s)
-                    fw.write('constant  ROUTER%d_SLAVE%d_BASE_ADD     : std_logic_vector(ADD_SIZE-1 downto 0):= X"%s";\n' %(r,s,self.Adresse_basse[r+1].get()))
-                    fw.write('constant  ROUTER%d_SLAVE%d_HIGH_ADD     : std_logic_vector(ADD_SIZE-1 downto 0):= X"%s";\n' %(r,s,self.Adresse_haute[r+1].get()))
-                    fw.write('\n')
+            #pas besoin d'être fixé car la génération des décodeurs d'adresse doit être modifié complètement
+                # for s in range(self.nbr_M[r],self.nbr_M[r]+self.nbr_S[r]):
+                    # fw.write('-- Slave %d --\n' %s)
+                    # fw.write('constant  ROUTER%d_SLAVE%d_BASE_ADD     : std_logic_vector(ADD_SIZE-1 downto 0):= X"%s";\n' %(r,s,self.Adresse_basse[r].get()))
+                    # fw.write('constant  ROUTER%d_SLAVE%d_HIGH_ADD     : std_logic_vector(ADD_SIZE-1 downto 0):= X"%s";\n' %(r,s,self.Adresse_haute[r].get()))
+                    # fw.write('\n')
             fw.close()
             self.quit()
        
