@@ -142,9 +142,6 @@ class Interface(Frame):
         self.liste_num_routeur_gauche = list()
         self.liste_EntryNbrMaitre = list()
         self.liste_EntryNbrEsclave = list()
-        self.i_num_routeur_top = 0
-        self.i_num_routeur_gauche = 0
-        self.i_EntryNbr_Maitre_Esclave = 0
         #variable de contrôles de saisie du nombre de routeurs
         self.NbrMinRouteurAutorise = 3
         self.NbrMaxRouteurAutorise = 64
@@ -280,6 +277,7 @@ class Interface(Frame):
             self.Case_LabelNbrEsclave.grid(row= 2, column=self.var_NbrRouteurs+self.offset_grid_colonne+2, columnspan = 1,sticky= NE)
           
             #Cases de numero des routeurs de l'axe vertical dans Canvas_left_interior_Frame
+            self.i_num_routeur_gauche = 0
             for ligne in range (self.offset_grid_ligne,self.var_NbrRouteurs+self.offset_grid_ligne):
                 colonne = 2
                 #si ligne pair : couleur grise claire
@@ -320,7 +318,8 @@ class Interface(Frame):
                 #incrementer le nombre de ligne
                 self.i_Cases_Connexions_Routeurs_Y +=1
                 
-            #Champs de saisies nombre d'interface maître / nombre d'interface esclave par routeur 
+            #Champs de saisies nombre d'interface maître / nombre d'interface esclave par routeur
+            self.i_EntryNbr_Maitre_Esclave = 0         
             for ligne in range (self.offset_grid_ligne,self.var_NbrRouteurs+self.offset_grid_ligne):
                 colonne = self.var_NbrRouteurs+3
                 self.liste_EntryNbrMaitre.append(Entry(self.Scrollable_Table.Canvas_center_interior_Frame, justify=CENTER, width=24))
@@ -364,10 +363,12 @@ class Interface(Frame):
                 colonne = 2
                 self.liste_num_routeur_gauche[self.i_num_routeur_gauche].destroy()
                 self.i_num_routeur_gauche +=1
+            #réinit de la liste
+            self.liste_num_routeur_gauche = list()
                 
+            #Cases principales du damier
             self.i_Cases_Connexions_Routeurs_X = 0
             self.i_Cases_Connexions_Routeurs_Y = 0
-             #Cases principales du damier
             for ligne in range (self.offset_grid_ligne,self.var_NbrRouteurs+self.offset_grid_ligne):
                 for colonne in range (self.offset_grid_colonne,self.var_NbrRouteurs+self.offset_grid_colonne):
                     # cases grises inactive pour la diagonale
@@ -382,8 +383,10 @@ class Interface(Frame):
                 self.i_Cases_Connexions_Routeurs_X =0
                 #incrementer le nombre de ligne
                 self.i_Cases_Connexions_Routeurs_Y +=1
+            #réinit de la liste
+            self.liste_Cases_Connexions_Routeur = list()
             
-            
+
             #Champs de saisies nombre d'interface maître / nombre d'interface esclave par routeur
             self.i_EntryNbr_Maitre_Esclave = 0
             for ligne in range (self.offset_grid_ligne,self.var_NbrRouteurs+self.offset_grid_ligne):
@@ -391,6 +394,9 @@ class Interface(Frame):
                 self.liste_EntryNbrMaitre[self.i_EntryNbr_Maitre_Esclave].destroy()
                 self.liste_EntryNbrEsclave[self.i_EntryNbr_Maitre_Esclave].destroy()
                 self.i_EntryNbr_Maitre_Esclave +=1
+            #réinit des listes
+            self.liste_EntryNbrMaitre = list()
+            self.liste_EntryNbrEsclave = list()
             
             
             #Mise a jour des zones defilables de Canvas_top, Canvas_left & Canvas_center pour le fonctionnement des barres de fonctionnement
