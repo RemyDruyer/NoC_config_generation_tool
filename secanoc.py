@@ -478,13 +478,13 @@ class Interface(Frame):
             if self.EntryNbrRouteur.get()=="":
                 error_found=1
             else:
-                for r in range(0,int(self.EntryNbrRouteur.get())):
+                for r in range(0,self.nbr_R):
                     if self.liste_EntryNbrMaitre[r].get()=="" or self.liste_EntryNbrEsclave[r].get()=="":
                         error_found=1
             if error_found:
                 showerror("Erreur", 'Vous devez specifier le nombre des Maitres et le nbr des Esclaves' )
             else:
-                for r in range(0,int(self.EntryNbrRouteur.get())):
+                for r in range(0,self.nbr_R):
                     self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
                     self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
                 app_Decodeur_d_adresse = Decodeur_d_adresse(self.nbr_R,self.nbr_M,self.nbr_S)
@@ -502,13 +502,13 @@ class Interface(Frame):
             if self.EntryNbrRouteur.get()=="":
                 error_found=1
             else:
-                for r in range(0,int(self.EntryNbrRouteur.get())):
+                for r in range(0,self.nbr_R):
                     if self.liste_EntryNbrMaitre[r].get()=="" or self.liste_EntryNbrEsclave[r].get()=="":
                         error_found=1
             if error_found:
                 showerror("Erreur", 'Vous devez specifier le nombre des Maitres et le nbr des Esclaves' )
             else:
-                for r in range(0,int(self.EntryNbrRouteur.get())):
+                for r in range(0,self.nbr_R):
                     self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
                     self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
                 app_PaquetConnexion = PaquetConnexion(self.nbr_R,self.nbr_M,self.nbr_S)
@@ -2244,7 +2244,7 @@ class PaquetConnexion(Tk):
         self.nbr_M = nbr_m_p
         self.nbr_S = nbr_s_p
         self.is_selected_flag=0
-        Connexion_local =[[[ 0 for i in range(self.nbr_R) ] for j in range(len(self.nbr_M))] for j in range(len(self.nbr_S)) ]
+        Connexion_local =[[[ 0 for i in range(0,self.nbr_R) ] for j in range(0,len(self.nbr_M))] for j in range(0,len(self.nbr_S)) ]
         label_0    = []
         Routeurs   = []
         Maitres    = []
@@ -2253,30 +2253,26 @@ class PaquetConnexion(Tk):
         label_0   .append(Label(self.frame.interior, text="", width=6))
         Routeurs  .append(Label(self.frame.interior, text="Routeur  "))
         Maitres   .append(Label(self.frame.interior, text="  IP "))
-        #Esclaves  .append(Label(self.frame.interior, text="Esclave  "))
         self.Connexions.append(Label(self.frame.interior, text="Connexion"))
 
         for r in range(self.nbr_R):
             for m in range(self.nbr_M[r]):
                 Routeurs  .append(Button(self.frame.interior, text=str(r), state=DISABLED, width=7))
-                Maitres   .append(Button(self.frame.interior, text=str(m+1)+"(Maitre)", state=DISABLED, width=7))
+                Maitres   .append(Button(self.frame.interior, text=str(m)+" (Maitre)", state=DISABLED, width=7))
                 self.Connexions.append(Checkbutton(self.frame.interior, variable=self.var))
                 row_cont=row_cont +1
-                #Connexion_local[r][m][s-self.nbr_M[r]]= var
 
             for s in range(self.nbr_M[r],self.nbr_M[r]+self.nbr_S[r]):
                 Routeurs  .append(Button(self.frame.interior, text=str(r), state=DISABLED, width=7))
-                Maitres   .append(Button(self.frame.interior, text=str(s+1)+"(Esclave)", state=DISABLED, width=7))
-                #Esclaves  .append(Button(self.frame.interior, text=str(s+1), state=DISABLED, width=7))
+                Maitres   .append(Button(self.frame.interior, text=str(s)+" (Esclave)", state=DISABLED, width=7))
                 self.Connexions.append(Checkbutton(self.frame.interior, variable=self.var))
                 row_cont=row_cont +1
-                #Connexion_local[r][m][s-self.nbr_M[r]]= self.var[r+s]
         
         label_0[0]      .grid(row=0, column=1)
         for i in range(len(Maitres)):
             Routeurs[i]  .grid(row=i, column=2)
             Maitres[i]   .grid(row=i, column=3)
-            #Esclaves[i]  .grid(row=i, column=4)
+            
             self.Connexions[i].grid(row=i, column=4)
         Button(self, text="Tout Connecter/Deconnecter", width=22, command=self.on_buttonToutConnecter_clicked).grid(row=18, column=3)
         Button(self, text="Save", width=22, command=self.on_buttonsave_clicked).grid(row=19, column=3)
@@ -2325,10 +2321,10 @@ class Decodeur_d_adresse(Tk):
         Esclaves.append(Label(self.frame.interior, text="Esclave"))
         self.Adresse_basse.append(Label(self.frame.interior, text="Adresse basse (Hex)  "))
         self.Adresse_haute.append(Label(self.frame.interior, text="Adresse haute (Hex)"))
-        for r in range(self.nbr_R):
+        for r in range(0,self.nbr_R):
             for s in range(self.nbr_M[r],self.nbr_M[r]+self.nbr_S[r]):
                 Routeurs  .append(Button(self.frame.interior, text=str(r), state=DISABLED, width=10))
-                Esclaves   .append(Button(self.frame.interior, text=str(s+1), state=DISABLED, width=10))
+                Esclaves   .append(Button(self.frame.interior, text=str(s), state=DISABLED, width=10))
                 self.Adresse_basse  .append(Entry(self.frame.interior))
                 self.Adresse_haute.append(Entry(self.frame.interior))
                 row_cont=row_cont +1
