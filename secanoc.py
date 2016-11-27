@@ -918,10 +918,21 @@ constant ROUTINGPORT15 	: regPORTADD:= "1111";
         self.nbr_R = int(self.EntryNbrRouteur.get())
         self.nbr_M = [0 for i in range(self.nbr_R)]
         self.nbr_S = [0 for i in range(self.nbr_R)]
-
-        for r in range(0,int(self.EntryNbrRouteur.get())):
+        self.nbr_M_sum = 0
+        self.nbr_S_sum = 0
+        self.nbr_M_rank = [0 for i in range(self.nbr_R)]
+        self.nbr_S_rank = [0 for i in range(self.nbr_R)]
+        
+        for r in range(0, self.nbr_R):
             self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
             self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
+            
+        for r in range(1, self.nbr_R):
+            self.nbr_M_rank[r] = self.nbr_M[r-1] + self.nbr_M_sum
+            self.nbr_M_sum += self.nbr_M[r-1]
+            self.nbr_S_rank[r] = self.nbr_S[r-1] + self.nbr_S_sum
+            self.nbr_S_sum += self.nbr_S[r-1]
+            
         ch='''
 ------ 2) MASTER and SLAVE RANKS ------
 --a vector composed of all the masters and a vector composed of all the slaves are used to assignate
@@ -931,13 +942,21 @@ constant ROUTINGPORT15 	: regPORTADD:= "1111";
 --These 2 variables must have a value for each router:
 -- a) The first value is always '0'
 -- b) If the current router does not have any MASTER/SLAVE the value must be '0' (MASTER for MASTER_RANK and SLAVE for SLAVE_RANK)
--- c) The value for the next router is equal to the current value plus the number of MASTER/SLAVE in the current router (cumulated sum of all the precedent MASTER/SLAVE)
-constant MASTER_RANK : master_rank_in_vector := (0,0,4,8,11,15);
-constant SLAVE_RANK  : slave_rank_in_vector  := (0,5,7,0,8,12);
+-- c) The value for the next router is equal to the current value plus the number of MASTER/SLAVE in the current router (cumulated sum of all the precedent MASTER/SLAVE)'''
 
-        '''
+
+
         fw= open(outputdir + "/noc_config_configurable_part_2.vhd", 'w')
         fw.write("%s" %ch)
+        fw.write("\nconstant MASTER_RANK : master_rank_in_vector := (")
+        for r in range(0, self.nbr_R-1):
+            fw.write("%d," %self.nbr_M_rank[r])
+        fw.write("%d);" %self.nbr_M_rank[self.nbr_R-1])
+        
+        fw.write("\nconstant SLAVE_RANK : slave_rank_in_vector := (")
+        for r in range(0, self.nbr_R-1):
+            fw.write("%d," %self.nbr_S_rank[r])
+        fw.write("%d);" %self.nbr_S_rank[self.nbr_R-1])
         fw.close()
 
         
@@ -1893,12 +1912,13 @@ constant ADD_DECODER_PARAMETER_MX :  matrix_add_decoder_parameter :=(
         for r in range (0, self.nbr_R):
             fw.write("\n constant ROUTER%d_ROUTING_TABLE : routing_table_array:=( \n" %r)
             for r_dest in range (0, self.nbr_R):
+                #Pour la dernière de la table de routage du dernier routeur
                 if r==self.nbr_R-1 and r_dest==(self.nbr_R-2):
                     fw.write("      (ROUTER%d, from_ROUTER%d_to_ROUTER%d_destination_port));\n" %(r_dest,r,r_dest))
-
+                #Pour la dernière ligne de la table de routage tous les autres routeurs
                 elif r!=r_dest and r_dest == self.nbr_R-1:
                     fw.write("      (ROUTER%d, from_ROUTER%d_to_ROUTER%d_destination_port));\n" %(r_dest,r,r_dest))
-                    
+                #Pour toute les autres lignes de la table de routage de tous les routeurs
                 elif r!=r_dest and r_dest != self.nbr_R:
                     fw.write("      (ROUTER%d, from_ROUTER%d_to_ROUTER%d_destination_port),\n" %(r_dest,r,r_dest))
                      
