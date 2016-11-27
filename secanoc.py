@@ -79,13 +79,13 @@ class ScrollableTable(Frame):
         self.Canvas_principal.grid(row=0, column=0)
         
         # CANVAS EMPTY : positionne tout en haut a gauche contient une case vide
-        self.Canvas_empty = Canvas(self.Canvas_principal, width = 13, height = 35, highlightthickness=0)
+        self.Canvas_empty = Canvas(self.Canvas_principal, width = 80, height = 35, highlightthickness=0)
         self.Canvas_empty.grid(row=1, column=1, sticky=N+W)
         self.Canvas_empty.grid_propagate(False)
         
         # CANVAS LEFT : axe vertical de numerotation des routeurs
         #affecte par la barre de defilement verticale
-        self.Canvas_left = Canvas(self.Canvas_principal , width = 22, height = 520, highlightthickness=0, yscrollcommand = self.VerticalScrollBar.set)
+        self.Canvas_left = Canvas(self.Canvas_principal , width = 80, height = 520, highlightthickness=0, yscrollcommand = self.VerticalScrollBar.set)
         self.Canvas_left.grid(row=2, column=1, sticky=NW)
         self.Canvas_left.grid_propagate(False)
         
@@ -138,8 +138,6 @@ class Interface(Frame):
     def __init__(self, fenetre, **kwargs):
         Frame.__init__(self, fenetre, width=1000, height=670, **kwargs)
         self.grid()
-        #axe horizontal de n° du routeur
-        self.liste_num_routeur_top = list()
         #axe vertial de n° du routeur
         self.liste_num_routeur_gauche = list()
         self.liste_EntryNbrMaitre = list()
@@ -234,25 +232,28 @@ class Interface(Frame):
         #lors du clic sur un bouton, le colorer en orange ainsi que le bouton de coordonnees inverses
         #cela permet d'initialiser une connexion entre deux routeurs : par exemple clic sur le bouton 0 2 initialise aussi le bouton 2 0
         def _case_definir_connexion(event):
-
-            #extrait les coordonnees du bouton : recherche de tous les nombres dans le string
-            var_coord_bouton= re.findall('\d+', event.widget["text"])
-            #si le bouton clique est deja de couleur orange
+            #Récupération de toute les infos de poistionnement grid() du bouton
+            info_grid_bouton=event.widget.grid_info()
+            #extraction des coordonnées X Y du boutons par rapport au info grid()
+            var_Coord_X_bouton = info_grid_bouton["column"]-self.offset_grid_ligne
+            var_Coord_Y_bouton = info_grid_bouton["row"]-self.offset_grid_ligne
+            
+            #Coloration du bouton
             if event.widget["background"] == "orange":
                 #lui rendre sa couleur initiale selon qu'il est positionne sur une ligne paire ou impair
-                if int(var_coord_bouton[1])%2 == 0:
+                if var_Coord_Y_bouton % 2 == 0:
                     event.widget.config(bg="SystemButtonFace")
                 else:
                     event.widget.config(bg="gainsboro")
                 #rendre la couleur du bouton de coordonnees inverses
-                if int(var_coord_bouton[0])%2 == 0:
-                    self.liste_Cases_Connexions_Routeur_[int(var_coord_bouton[0])][int(var_coord_bouton[1])].config(bg="SystemButtonFace")
+                if var_Coord_X_bouton %2 == 0:
+                    self.liste_Cases_Connexions_Routeur[var_Coord_X_bouton][var_Coord_Y_bouton].config(bg="SystemButtonFace")
                 else:
-                    self.liste_Cases_Connexions_Routeur_[int(var_coord_bouton[0])][int(var_coord_bouton[1])].config(bg="gainsboro")
+                    self.liste_Cases_Connexions_Routeur[var_Coord_X_bouton][var_Coord_Y_bouton].config(bg="gainsboro")
             #sinon il n'est pas colore en orange -> le colorer en orange ainsi que le bouton de coordonnees inverses      
             else:
                 event.widget.config(bg="orange")
-                self.liste_Cases_Connexions_Routeur_[int(var_coord_bouton[0])][int(var_coord_bouton[1])].config(bg="orange")
+                self.liste_Cases_Connexions_Routeur[var_Coord_X_bouton][var_Coord_Y_bouton].config(bg="orange")
                
         def _generation_grille_routeur(self):
             #initialiser le flag "bouton run cliqué"
@@ -260,34 +261,33 @@ class Interface(Frame):
             #Conversion du contenu du champ "Nombre de routeurs" en int et initialisation de la variable "var_NbrRouteurs"
             self.var_NbrRouteurs = int(self.EntryNbrRouteur.get())
             #Initialisation d'un tableau a deux dimensions (nb_routeurs * nb_routeurs)
-            self.liste_Cases_Connexions_Routeur_ = [[] for _ in range(self.var_NbrRouteurs)]
+            self.liste_Cases_Connexions_Routeur = [[] for _ in range(self.var_NbrRouteurs)]
             
             #placement d'une case inactive dans le coin en haut a gauche de la matrice/damier de connexions de routeurs 
-            self.TopLeft_Corner_Case = Button(self.Scrollable_Table.Canvas_empty, text =" ", borderwidth=1, height = 32, width = 2)
-            self.TopLeft_Corner_Case.grid(row=1, column=1, padx=2)
+            self.TopLeft_Corner_Case = Button(self.Scrollable_Table.Canvas_empty, text ="Routeur", borderwidth=1, height = 2, width = 10)
+            self.TopLeft_Corner_Case.grid(row=1, column=1, padx=0)
             self.TopLeft_Corner_Case.grid_propagate(False)
             
-            #Cases de numero des routeurs sur l'axe horizontal dans Canvas_top_interior_frame
-            for colonne in range (self.offset_grid_colonne,self.var_NbrRouteurs+self.offset_grid_colonne):
-                ligne = 2
-                self.liste_num_routeur_top.append( Button(self.Scrollable_Table.Canvas_top_interior_Frame, text ="%s" % (colonne-3), borderwidth=1, height = 1, width = 2, background = "gainsboro"))
-                self.liste_num_routeur_top[self.i_num_routeur_top].grid(row= ligne, column=colonne, sticky=W+E+N+S)
-                self.i_num_routeur_top +=1
+            #Case horizontale "Connecté à routeur" dans Canvas_top_interior_frame    
+            ligne = 2
+            self.Case_Label_top_matrice =  Button(self.Scrollable_Table.Canvas_top_interior_Frame, borderwidth=2, text = "Connecte a routeur", height = 1, background = "gainsboro", width = self.var_NbrRouteurs ,padx = (self.var_NbrRouteurs-1)*8)
+            self.Case_Label_top_matrice.grid(row= ligne, column=self.var_NbrRouteurs+self.offset_grid_colonne, sticky=N+W+S)
+             
             #Placement des champs d'entête de saisie du nombre d'interface maître et esclave par routeurs dans Canvas_top_interior_frame
             self.Case_LabelNbrMaitre = Button(self.Scrollable_Table.Canvas_top_interior_Frame, width=20, bd=1, text="Nombre d'interfaces \n maitres du routeur")
-            self.Case_LabelNbrMaitre.grid(row= 2, column=colonne+1, sticky= NW)
+            self.Case_LabelNbrMaitre.grid(row= 2, column=self.var_NbrRouteurs+self.offset_grid_colonne+1, columnspan = 1, sticky= NE)
             self.Case_LabelNbrEsclave = Button(self.Scrollable_Table.Canvas_top_interior_Frame, width=20, bd=1, text="Nombre d'interfaces \n esclaves du routeur")
-            self.Case_LabelNbrEsclave.grid(row= 2, column=colonne+2, sticky= NW)
+            self.Case_LabelNbrEsclave.grid(row= 2, column=self.var_NbrRouteurs+self.offset_grid_colonne+2, columnspan = 1,sticky= NE)
           
             #Cases de numero des routeurs de l'axe vertical dans Canvas_left_interior_Frame
             for ligne in range (self.offset_grid_ligne,self.var_NbrRouteurs+self.offset_grid_ligne):
                 colonne = 2
                 #si ligne pair : couleur grise claire
                 if (ligne %2 ==0):
-                    self.liste_num_routeur_gauche.append( Button(self.Scrollable_Table.Canvas_left_interior_Frame, text ="%s" % (ligne-3), height = 1, width = 2, background = "gainsboro", borderwidth=1))
+                    self.liste_num_routeur_gauche.append( Button(self.Scrollable_Table.Canvas_left_interior_Frame, text ="%s" % (ligne-3), height = 1, width = 10, background = "gainsboro", borderwidth=1))
                 #sinon case de couleur normale
                 else:
-                    self.liste_num_routeur_gauche.append( Button(self.Scrollable_Table.Canvas_left_interior_Frame, text ="%s" % (ligne-3), height = 1, width = 2, borderwidth=1))
+                    self.liste_num_routeur_gauche.append( Button(self.Scrollable_Table.Canvas_left_interior_Frame, text ="%s" % (ligne-3), height = 1, width = 10, borderwidth=1))
                 self.liste_num_routeur_gauche[self.i_num_routeur_gauche].grid(row= ligne, column=colonne, sticky=W+E+N+S)
                 self.i_num_routeur_gauche +=1
                 
@@ -298,23 +298,22 @@ class Interface(Frame):
                 for colonne in range (self.offset_grid_colonne,self.var_NbrRouteurs+self.offset_grid_colonne):
                     # cases grises inactive pour la diagonale
                     if ligne == colonne:
-                        self.liste_Cases_Connexions_Routeur_[self.i_Cases_Connexions_Routeurs_Y].append( Button(self.Scrollable_Table.Canvas_center_interior_Frame, bg="grey", borderwidth=1, height = 1, width = 2))
-                        self.liste_Cases_Connexions_Routeur_[self.i_Cases_Connexions_Routeurs_Y][self.i_Cases_Connexions_Routeurs_X].grid(row= ligne, column=colonne, sticky=W+E+N+S)
+                        self.liste_Cases_Connexions_Routeur[self.i_Cases_Connexions_Routeurs_Y].append( Button(self.Scrollable_Table.Canvas_center_interior_Frame, bg="grey", borderwidth=1, height = 1, width = 2))
+                        self.liste_Cases_Connexions_Routeur[self.i_Cases_Connexions_Routeurs_Y][self.i_Cases_Connexions_Routeurs_X].grid(row= ligne, column=colonne, sticky=W+E+N+S)
                         self.i_Cases_Connexions_Routeurs_X +=1
                     # cases differentes de la diagonale
-                    if ligne != colonne:
+                    else:
                         # si ligne paire : case grise claire
                         if (ligne %2 ==0):
-                            self.liste_Cases_Connexions_Routeur_[self.i_Cases_Connexions_Routeurs_Y].append( Button(self.Scrollable_Table.Canvas_center_interior_Frame
-                                ,text ="%s %s" %(self.i_Cases_Connexions_Routeurs_X, self.i_Cases_Connexions_Routeurs_Y), height = 1, width = 2
-                                ,background = "gainsboro", borderwidth=1, font=("Helvetica", 6)))
+                            self.liste_Cases_Connexions_Routeur[self.i_Cases_Connexions_Routeurs_Y].append( Button(self.Scrollable_Table.Canvas_center_interior_Frame
+                                ,text ="%s" %(self.i_Cases_Connexions_Routeurs_X), height = 1, padx = 1
+                                ,background = "gainsboro", borderwidth=1, font=("Helvetica", 9)))
                         # sinon case de couleur normale ("SystemButtonFace")
                         else:
-                            self.liste_Cases_Connexions_Routeur_[self.i_Cases_Connexions_Routeurs_Y].append( Button(self.Scrollable_Table.Canvas_center_interior_Frame
-                                ,text ="%s %s" %(self.i_Cases_Connexions_Routeurs_X, self.i_Cases_Connexions_Routeurs_Y)
-                                ,height = 1, width = 2, borderwidth=1, font=("Helvetica", 6)))
-                        self.liste_Cases_Connexions_Routeur_[self.i_Cases_Connexions_Routeurs_Y][self.i_Cases_Connexions_Routeurs_X].grid(row= ligne, column=colonne, sticky=W+E+N+S)
-                        self.liste_Cases_Connexions_Routeur_[self.i_Cases_Connexions_Routeurs_Y][self.i_Cases_Connexions_Routeurs_X].bind("<Button-1>",_case_definir_connexion)
+                            self.liste_Cases_Connexions_Routeur[self.i_Cases_Connexions_Routeurs_Y].append( Button(self.Scrollable_Table.Canvas_center_interior_Frame
+                                ,text ="%s" %(self.i_Cases_Connexions_Routeurs_X) ,height = 1, width = 2, borderwidth=1, font=("Helvetica", 9)))
+                        self.liste_Cases_Connexions_Routeur[self.i_Cases_Connexions_Routeurs_Y][self.i_Cases_Connexions_Routeurs_X].grid(row= ligne, column=colonne, sticky=W+E+N+S)
+                        self.liste_Cases_Connexions_Routeur[self.i_Cases_Connexions_Routeurs_Y][self.i_Cases_Connexions_Routeurs_X].bind("<Button-1>",_case_definir_connexion)
                         self.i_Cases_Connexions_Routeurs_X +=1
                 #reinitialiser X pour la prochaine ligne
                 self.i_Cases_Connexions_Routeurs_X =0
@@ -352,11 +351,8 @@ class Interface(Frame):
             #case inactive dans le coin en haut a gauche de la matrice/damier de connexions de routeurs 
             self.TopLeft_Corner_Case.destroy()
             
-            #Cases de numero des routeurs sur l'axe horizontal dans Canvas_top_interior_frame
-            self.i_num_routeur_top = 0
-            for colonne in range (self.offset_grid_colonne,self.var_NbrRouteurs+self.offset_grid_colonne):
-                self.liste_num_routeur_top[self.i_num_routeur_top].destroy()
-                self.i_num_routeur_top +=1
+            #Case label "Connecte a" en haut du damier des connexions routeurs placée dans Canvas_top_interior_frame
+            self.Case_Label_top_matrice.destroy()
                 
             #Champs d'entête de saisie du nombre d'interface maître et esclave par routeurs dans Canvas_top_interior_frame
             self.Case_LabelNbrMaitre.destroy()
@@ -376,11 +372,11 @@ class Interface(Frame):
                 for colonne in range (self.offset_grid_colonne,self.var_NbrRouteurs+self.offset_grid_colonne):
                     # cases grises inactive pour la diagonale
                     if ligne == colonne:
-                        self.liste_Cases_Connexions_Routeur_[self.i_Cases_Connexions_Routeurs_Y][self.i_Cases_Connexions_Routeurs_X].destroy()
+                        self.liste_Cases_Connexions_Routeur[self.i_Cases_Connexions_Routeurs_Y][self.i_Cases_Connexions_Routeurs_X].destroy()
                         self.i_Cases_Connexions_Routeurs_X +=1
                     # cases differentes de la diagonale
-                    if ligne != colonne:
-                        self.liste_Cases_Connexions_Routeur_[self.i_Cases_Connexions_Routeurs_Y][self.i_Cases_Connexions_Routeurs_X].destroy()
+                    else:
+                        self.liste_Cases_Connexions_Routeur[self.i_Cases_Connexions_Routeurs_Y][self.i_Cases_Connexions_Routeurs_X].destroy()
                         self.i_Cases_Connexions_Routeurs_X +=1
                 #reinitialiser X pour la prochaine ligne
                 self.i_Cases_Connexions_Routeurs_X =0
@@ -449,14 +445,14 @@ class Interface(Frame):
             if self.EntryNbrRouteur.get()=="":
                 error_found=1
             else:
-                for r in range(int(self.EntryNbrRouteur.get())):
+                for r in range(0,int(self.EntryNbrRouteur.get())-1):
                     if self.liste_EntryNbrMaitre[r].get()=="" or self.liste_EntryNbrEsclave[r].get()=="":
                         error_found=1
             if error_found:
                 showerror("Erreur", 'Vous devez specifier le nombre des Maitres et le nbr des Esclaves' )
             else:
 				#recuperation du nombre de maître et d'esclave a partir des cases
-                for r in range(int(self.EntryNbrRouteur.get())):
+                for r in range(0,int(self.EntryNbrRouteur.get())-1):
                     self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
                     self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
                 app_localConnexion = LocalConnexion(self.nbr_R,self.nbr_M,self.nbr_S)
@@ -482,13 +478,13 @@ class Interface(Frame):
             if self.EntryNbrRouteur.get()=="":
                 error_found=1
             else:
-                for r in range(int(self.EntryNbrRouteur.get())):
+                for r in range(0,int(self.EntryNbrRouteur.get())-1):
                     if self.liste_EntryNbrMaitre[r].get()=="" or self.liste_EntryNbrEsclave[r].get()=="":
                         error_found=1
             if error_found:
                 showerror("Erreur", 'Vous devez specifier le nombre des Maitres et le nbr des Esclaves' )
             else:
-                for r in range(int(self.EntryNbrRouteur.get())):
+                for r in range(0,int(self.EntryNbrRouteur.get())-1):
                     self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
                     self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
                 app_Decodeur_d_adresse = Decodeur_d_adresse(self.nbr_R,self.nbr_M,self.nbr_S)
@@ -506,13 +502,13 @@ class Interface(Frame):
             if self.EntryNbrRouteur.get()=="":
                 error_found=1
             else:
-                for r in range(int(self.EntryNbrRouteur.get())):
+                for r in range(0,int(self.EntryNbrRouteur.get())-1):
                     if self.liste_EntryNbrMaitre[r].get()=="" or self.liste_EntryNbrEsclave[r].get()=="":
                         error_found=1
             if error_found:
                 showerror("Erreur", 'Vous devez specifier le nombre des Maitres et le nbr des Esclaves' )
             else:
-                for r in range(int(self.EntryNbrRouteur.get())):
+                for r in range(0,int(self.EntryNbrRouteur.get())-1):
                     self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
                     self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
                 app_PaquetConnexion = PaquetConnexion(self.nbr_R,self.nbr_M,self.nbr_S)
@@ -542,7 +538,7 @@ class Interface(Frame):
         self.sum_nbr_S =0
 		
 		# Calcul de la somme totale d'interface maître et d'interface esclave dans le reseau
-        for r in range(int(self.EntryNbrRouteur.get())):
+        for r in range(0,int(self.EntryNbrRouteur.get())-1):
             #calcul de la somme des interfaces maîtres
             self.sum_nbr_M = int(self.liste_EntryNbrMaitre[r].get()) + self.sum_nbr_M
             #calcul de la somme des interfaces esclaves
@@ -590,7 +586,7 @@ package noc_config is
         self.nbr_M = [0 for i in range(self.nbr_R)]
         self.nbr_S = [0 for i in range(self.nbr_R)]
 
-        for r in range(int(self.EntryNbrRouteur.get())):
+        for r in range(0,int(self.EntryNbrRouteur.get())-1):
             self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
             self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
 
@@ -872,7 +868,7 @@ constant ROUTINGPORT15 	: regPORTADD:= "1111";
         self.nbr_M = [0 for i in range(self.nbr_R)]
         self.nbr_S = [0 for i in range(self.nbr_R)]
 
-        for r in range(int(self.EntryNbrRouteur.get())):
+        for r in range(0,int(self.EntryNbrRouteur.get())-1):
             self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
             self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
         ch='''
@@ -913,7 +909,7 @@ constant ALL_ROUTER_MASTER_SLAVE_ROUTPORT_NB : array_all_record_master_routport_
         self.nbr_M = [0 for i in range(self.nbr_R)]
         self.nbr_S = [0 for i in range(self.nbr_R)]
 
-        for r in range(int(self.EntryNbrRouteur.get())):
+        for r in range(0,int(self.EntryNbrRouteur.get())-1):
             self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
             self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
         ch='''
@@ -934,6 +930,8 @@ constant SLAVE_RANK  : slave_rank_in_vector  := (0,5,7,0,8,12);
         fw.write("%s" %ch)
         fw.close()
 
+        
+    
 
         
     def generate_configurable_part2_3(self):
@@ -941,12 +939,17 @@ constant SLAVE_RANK  : slave_rank_in_vector  := (0,5,7,0,8,12);
         if not os.path.exists(outputdir):
             os.makedirs(outputdir)
         self.nbr_R = int(self.EntryNbrRouteur.get())
+        self.nbr_interface_routeur = [0 for i in range(self.nbr_R)]
         self.nbr_M = [0 for i in range(self.nbr_R)]
         self.nbr_S = [0 for i in range(self.nbr_R)]
-
-        for r in range(int(self.EntryNbrRouteur.get())):
+        
+        for r in range(0,int(self.EntryNbrRouteur.get())-1):
             self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
             self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
+        
+        for r in range(0,int(self.EntryNbrRouteur.get())-1):
+            self.nbr_interface_routeur[r] = self.nbr_M[r] + self.nbr_S[r]
+            
         ch='''
 ------ 3) ROUTER CONNEXIONS (topology)------
 --define a record for each connexion between routers
@@ -955,29 +958,31 @@ constant SLAVE_RANK  : slave_rank_in_vector  := (0,5,7,0,8,12);
 -- 1) SOURCE_ROUTER					
 -- 2) SOURCE_ROUTING_PORT				
 -- 3) DESTINATION_ROUTER				
--- 4) DESTINATION_ROUTING_PORT		
-constant ROUTER_CONNEXION_0 : record_router_connexion :=(0,9,1,2);
-constant ROUTER_CONNEXION_1 : record_router_connexion :=(0,10,3,3);  
-constant ROUTER_CONNEXION_2 : record_router_connexion :=(1,4,3,4); 
-constant ROUTER_CONNEXION_3 : record_router_connexion :=(1,5,4,10);
-constant ROUTER_CONNEXION_4 : record_router_connexion :=(2,5,1,3);
-constant ROUTER_CONNEXION_5 : record_router_connexion :=(3,5,4,8); 
-constant ROUTER_CONNEXION_6 : record_router_connexion :=(4,9,5,1);
-
--- => AGGREGATING ARRAY <= --
-constant ALL_ROUTER_CONNEXIONS : array_all_router_connexion:=(
-	ROUTER_CONNEXION_0,
-	ROUTER_CONNEXION_1,
-	ROUTER_CONNEXION_2,
-	ROUTER_CONNEXION_3,
-	ROUTER_CONNEXION_4,
-	ROUTER_CONNEXION_5,
-	ROUTER_CONNEXION_6
-);
-  
-        '''
+-- 4) DESTINATION_ROUTING_PORT'''
+           
         fw= open(outputdir + "/noc_config_configurable_part2_3.vhd", 'w')
         fw.write("%s" %ch)
+        fw.write("\n")
+        var_num_connexion = 0
+        for ligne in range (0,self.var_NbrRouteurs):
+            for colonne in range (0,self.var_NbrRouteurs):
+                if colonne > ligne:
+                    if self.liste_Cases_Connexions_Routeur[ligne][colonne]["background"]=="orange":
+                        fw.write("constant ROUTER_CONNEXION_%d : record_router_connexion :=(%d,%d,%d,%d);" %(var_num_connexion, ligne, self.nbr_interface_routeur[ligne] , colonne, self.nbr_interface_routeur[colonne]))
+                        fw.write("\n")
+                        var_num_connexion += 1
+                        self.nbr_interface_routeur[ligne] += 1
+                        self.nbr_interface_routeur[colonne] += 1
+        
+        
+        fw.write("\n-- => AGGREGATING ARRAY <= --\n")
+        fw.write("constant ALL_ROUTER_CONNEXIONS : array_all_router_connexion:=(\n")
+        #ecriture de toutes les ROUTER_CONNEXION jusqu'à l'avant dernière avec une virgule à la fin
+        for i in range (0,var_num_connexion-1):
+            fw.write("      ROUTER_CONNEXION_%d,\n" %i)
+        #ecriture de la dernière ROUTER_CONNEXION sans virgule à la fin
+        fw.write("      ROUTER_CONNEXION_%d\n" %(var_num_connexion-1))
+        fw.write(");\n")
         fw.close()
         
     def generate_configurable_part2_4(self):
@@ -986,7 +991,7 @@ constant ALL_ROUTER_CONNEXIONS : array_all_router_connexion:=(
         self.nbr_M = [0 for i in range(self.nbr_R)]
         self.nbr_S = [0 for i in range(self.nbr_R)]
 
-        for r in range(int(self.EntryNbrRouteur.get())):
+        for r in range(0,int(self.EntryNbrRouteur.get())-1):
             self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
             self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
         ch='''
@@ -1030,7 +1035,7 @@ constant ALL_ROUTER_PACKET_INTERFACE_PORT_ADD : array_all_router_packet_interfac
         self.nbr_M = [0 for i in range(self.nbr_R)]
         self.nbr_S = [0 for i in range(self.nbr_R)]
 
-        for r in range(int(self.EntryNbrRouteur.get())):
+        for r in range(0,int(self.EntryNbrRouteur.get())-1):
             self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
             self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
         ch='''
@@ -1074,7 +1079,7 @@ constant TOTAL_ADDRESS_DECOD_SIZE 				: integer := 130;
         self.nbr_M = [0 for i in range(self.nbr_R)]
         self.nbr_S = [0 for i in range(self.nbr_R)]
 
-        for r in range(int(self.EntryNbrRouteur.get())):
+        for r in range(0,int(self.EntryNbrRouteur.get())-1):
             self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
             self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
         ch='''
@@ -1376,7 +1381,7 @@ constant	ROUTER5_MASTER0_address_mapping_for_ROUTER0_SLAVE4_HIGH_ADD 	: std_logi
         self.nbr_M = [0 for i in range(self.nbr_R)]
         self.nbr_S = [0 for i in range(self.nbr_R)]
 
-        for r in range(int(self.EntryNbrRouteur.get())):
+        for r in range(0,int(self.EntryNbrRouteur.get())-1):
             self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
             self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
         ch='''
@@ -1432,7 +1437,7 @@ constant from_ROUTER5_to_ROUTER4_destination_port : regPORTADD:= ROUTINGPORT2;
         self.nbr_M = [0 for i in range(self.nbr_R)]
         self.nbr_S = [0 for i in range(self.nbr_R)]
 
-        for r in range(int(self.EntryNbrRouteur.get())):
+        for r in range(0,int(self.EntryNbrRouteur.get())-1):
             self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
             self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
         ch='''
@@ -1477,7 +1482,7 @@ type unconstrained_array_record_address_decod_table is array (natural range <>) 
         self.nbr_M = [0 for i in range(self.nbr_R)]
         self.nbr_S = [0 for i in range(self.nbr_R)]
 
-        for r in range(int(self.EntryNbrRouteur.get())):
+        for r in range(0,int(self.EntryNbrRouteur.get())-1):
             self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
             self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
         ch='''
@@ -1816,7 +1821,7 @@ constant ALL_MASTER_ADDRESS_DECODER_TABLES : unconstrained_array_record_address_
         self.nbr_M = [0 for i in range(self.nbr_R)]
         self.nbr_S = [0 for i in range(self.nbr_R)]
 
-        for r in range(int(self.EntryNbrRouteur.get())):
+        for r in range(0,int(self.EntryNbrRouteur.get())-1):
             self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
             self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
         ch='''
@@ -1851,7 +1856,7 @@ constant ADD_DECODER_PARAMETER_MX :  matrix_add_decoder_parameter :=(
         self.nbr_M = [0 for i in range(self.nbr_R)]
         self.nbr_S = [0 for i in range(self.nbr_R)]
 
-        for r in range(int(self.EntryNbrRouteur.get())):
+        for r in range(0,int(self.EntryNbrRouteur.get())-1):
             self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
             self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
         ch='''
@@ -1924,7 +1929,7 @@ constant ALL_ROUTING_TABLES : array_all_routing_tables:=(
         self.nbr_M = [0 for i in range(self.nbr_R)]
         self.nbr_S = [0 for i in range(self.nbr_R)]
 
-        for r in range(int(self.EntryNbrRouteur.get())):
+        for r in range(0,int(self.EntryNbrRouteur.get())-1):
             self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
             self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
         ch='''
@@ -1974,7 +1979,7 @@ constant ALL_ROUTING_TABLES : array_all_routing_tables:=(
         self.nbr_M = [0 for i in range(self.nbr_R)]
         self.nbr_S = [0 for i in range(self.nbr_R)]
 
-        for r in range(int(self.EntryNbrRouteur.get())):
+        for r in range(0,int(self.EntryNbrRouteur.get())-1):
             self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
             self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
         ch='''
@@ -2002,7 +2007,7 @@ constant ALL_ROUTER_LOCAL_MATRIX : array_all_local_connexion_matrix:=(
         self.nbr_M = [0 for i in range(self.nbr_R)]
         self.nbr_S = [0 for i in range(self.nbr_R)]
 
-        for r in range(int(self.EntryNbrRouteur.get())):
+        for r in range(0,int(self.EntryNbrRouteur.get())-1):
             self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
             self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
         ch='''
