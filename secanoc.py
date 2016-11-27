@@ -129,11 +129,6 @@ class ScrollableTable(Frame):
 
 # Creation of one class which inherit from Tkinter.Tk
 class Interface(Frame):
-    nbr_R_Global=64
-    nbr_M_Global=0
-    nbr_S_Global=0
-    nbr_RP_Global=16
-    
     # Init
     def __init__(self, fenetre, **kwargs):
         Frame.__init__(self, fenetre, width=1000, height=670, **kwargs)
@@ -535,20 +530,31 @@ class Interface(Frame):
         self.generate_vhdl_file()
 
     # Generation VHDL : ----- GLOBAL CONSTANTS -----
-    def generate_configurable_part1(self):
+    def generate_configurable_part_0(self):
         outputdir = "./Noc0__"
         if not os.path.exists(outputdir):
             os.makedirs(outputdir)
         self.nbr_R = int(self.EntryNbrRouteur.get())
         self.sum_nbr_M =0
         self.sum_nbr_S =0
-		
+        self.sum_nbr_RP = 0
+        
+        #comptage de la somme de nombre de port de routage (connexion à un autre routeur) des routeur
+        for ligne in range (0,self.nbr_R):
+            for colonne in range (0,self.nbr_R):
+                #on ne prend que la partie au dessus/à droite de la diagonale pour générer compter les connexions et éviter de créer des doubles
+                if colonne > ligne:
+                    #si la case est orange et donc qu'une connexion existe
+                    if self.liste_Cases_Connexions_Routeur[ligne][colonne]["background"]=="orange":
+                        #incrémentation de l'index du nombre de port de routage
+                        self.sum_nbr_RP += 2
+
 		# Calcul de la somme totale d'interface maître et d'interface esclave dans le reseau
         for r in range(0,int(self.EntryNbrRouteur.get())):
             #calcul de la somme des interfaces maîtres
-            self.sum_nbr_M = int(self.liste_EntryNbrMaitre[r].get()) + self.sum_nbr_M
+            self.sum_nbr_M += int(self.liste_EntryNbrMaitre[r].get())
             #calcul de la somme des interfaces esclaves
-            self.sum_nbr_S = int(self.liste_EntryNbrEsclave[r].get()) + self.sum_nbr_S
+            self.sum_nbr_S += int(self.liste_EntryNbrEsclave[r].get())
 			
         ch='''
 --------------------------------------------------------------
@@ -573,12 +579,11 @@ package noc_config is
 
 '''
         #generation du code VHDL dans un fichier specifique
-        fw= open(outputdir + "/noc_config_configurable_part1.vhd", 'w')
-        
+        fw= open(outputdir + "/noc_config_configurable_part_0.vhd", 'w')
         fw.write("%s" %ch)
         fw.write('constant TOTAL_MASTER_NB          : integer := %d ;\n' %self.sum_nbr_M)
         fw.write('constant TOTAL_SLAVE_NB           : integer := %d ;\n' %self.sum_nbr_S)
-        fw.write('constant TOTAL_ROUTING_PORT_NB    : integer := %d ;\n' %self.nbr_RP_Global)
+        fw.write('constant TOTAL_ROUTING_PORT_NB    : integer := %d ;\n' %self.sum_nbr_RP)
         fw.write('constant TOTAL_ROUTER_NB          : integer := %d ;\n' %self.nbr_R)
         fw.close()
 
@@ -588,13 +593,7 @@ package noc_config is
         outputdir = "./Noc0__"
         if not os.path.exists(outputdir):
             os.makedirs(outputdir)
-        self.nbr_R = int(self.EntryNbrRouteur.get())
-        self.nbr_M = [0 for i in range(self.nbr_R)]
-        self.nbr_S = [0 for i in range(self.nbr_R)]
-
-        for r in range(0,int(self.EntryNbrRouteur.get())):
-            self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
-            self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
+        
 
         ch='''
 ----------------------------------------------------------------
@@ -860,13 +859,10 @@ constant ROUTINGPORT15 	: regPORTADD:= "1111";
 '''
         fw= open(outputdir + "/noc_config_fixed_part.vhd", 'w')
         fw.write("%s" %ch)
-        get_bin = lambda x, n: format(x, 'b').zfill(n)
-        for r in range(self.nbr_R):
-            fw.write('constant ROUTER%d : regROUTERADD:= "%r"; \n' %(r,get_bin(r, 6)))
         fw.close()
 
     #Génération VHDL : ------ 1) MASTER, SLAVE and ROUTING PORT NUMBERS by ROUTER ------
-    def generate_configurable_part2_1(self):
+    def generate_configurable_part_1(self):
         outputdir = "./Noc0__"
         if not os.path.exists(outputdir):
             os.makedirs(outputdir)
@@ -880,8 +876,8 @@ constant ROUTINGPORT15 	: regPORTADD:= "1111";
             self.nbr_S[r] = int(self.liste_EntryNbrEsclave[r].get())
            
         #pour chaque routeur
-        for ligne in range (0,self.var_NbrRouteurs):
-            for colonne in range (0,self.var_NbrRouteurs):
+        for ligne in range (0,self.nbr_R):
+            for colonne in range (0,self.nbr_R):
                 #on ne prend que la partie au dessus/à droite de la diagonale pour générer compter les connexions et éviter de créer des doubles
                 if colonne > ligne:
                     #si la case est orange et donc qu'une connexion existe
@@ -898,9 +894,8 @@ constant ROUTINGPORT15 	: regPORTADD:= "1111";
 
 ------ 1) MASTER, SLAVE and ROUTING PORT NUMBERS by ROUTER ------
 --for each router, declare the number of master interface port(s), slave interface port(s) and routing port(s)'''
-     
-   
-        fw= open(outputdir + "/noc_config_configurable_part2_1.vhd", 'w')
+
+        fw= open(outputdir + "/noc_config_configurable_part_1.vhd", 'w')
         fw.write("%s" %ch)
         fw.write("\n")
         for r in range (0,self.nbr_R):
@@ -916,12 +911,9 @@ constant ROUTINGPORT15 	: regPORTADD:= "1111";
         
         fw.close()
 
-        
-        
-        
 
     #Génération VHDL : ------ 2) MASTER and SLAVE RANKS ------
-    def generate_configurable_part2_2(self):
+    def generate_configurable_part_2(self):
         outputdir = "./Noc0__"
         self.nbr_R = int(self.EntryNbrRouteur.get())
         self.nbr_M = [0 for i in range(self.nbr_R)]
@@ -944,7 +936,7 @@ constant MASTER_RANK : master_rank_in_vector := (0,0,4,8,11,15);
 constant SLAVE_RANK  : slave_rank_in_vector  := (0,5,7,0,8,12);
 
         '''
-        fw= open(outputdir + "/noc_config_configurable_part2_2.vhd", 'w')
+        fw= open(outputdir + "/noc_config_configurable_part_2.vhd", 'w')
         fw.write("%s" %ch)
         fw.close()
 
@@ -952,7 +944,7 @@ constant SLAVE_RANK  : slave_rank_in_vector  := (0,5,7,0,8,12);
    
 
     # Génération VHDL : ------ 3) ROUTER CONNEXIONS (topology)------
-    def generate_configurable_part2_3(self):
+    def generate_configurable_part_3(self):
         outputdir = "./Noc0__"
         if not os.path.exists(outputdir):
             os.makedirs(outputdir)
@@ -979,14 +971,14 @@ constant SLAVE_RANK  : slave_rank_in_vector  := (0,5,7,0,8,12);
 -- 3) DESTINATION_ROUTER				
 -- 4) DESTINATION_ROUTING_PORT'''
            
-        fw= open(outputdir + "/noc_config_configurable_part2_3.vhd", 'w')
+        fw= open(outputdir + "/noc_config_configurable_part_3.vhd", 'w')
         fw.write("%s" %ch)
         fw.write("\n")
         #index du nombre total de connexion entre les routeurs
         var_num_connexion = 0
         #pour chaque routeur
-        for ligne in range (0,self.var_NbrRouteurs):
-            for colonne in range (0,self.var_NbrRouteurs):
+        for ligne in range (0,self.nbr_R):
+            for colonne in range (0,self.nbr_R):
                 #on ne prend que la partie au dessus/à droite de la diagonale pour générer compter les connexions et éviter de créer des doubles
                 if colonne > ligne:
                     #si la case est orange et donc qu'une connexion existe
@@ -1012,7 +1004,7 @@ constant SLAVE_RANK  : slave_rank_in_vector  := (0,5,7,0,8,12);
         fw.close()
         
     # Génération VHDL : ------ 4) PACKET INTERFACE DECLARATION ------
-    def generate_configurable_part2_4(self):
+    def generate_configurable_part_4(self):
         outputdir = "./Noc0__"
         self.nbr_R = int(self.EntryNbrRouteur.get())
         self.nbr_M = [0 for i in range(self.nbr_R)]
@@ -1050,13 +1042,13 @@ constant ALL_ROUTER_PACKET_INTERFACE_PORT_ADD : array_all_router_packet_interfac
 );
 	
         '''
-        fw= open(outputdir + "/noc_config_configurable_part2_4.vhd", 'w')
+        fw= open(outputdir + "/noc_config_configurable_part_4.vhd", 'w')
         fw.write("%s" %ch)
         fw.close()
         
 		
     # Génération VHDL : ------ 5) ADDRESS DECODER TABLE SIZES  ------
-    def generate_configurable_part2_5(self):
+    def generate_configurable_part_5(self):
         outputdir = "./Noc0__"
         self.nbr_R = int(self.EntryNbrRouteur.get())
         self.nbr_M = [0 for i in range(self.nbr_R)]
@@ -1094,13 +1086,13 @@ constant TOTAL_ADDRESS_DECOD_SIZE 				: integer := 130;
 
 	
         '''
-        fw= open(outputdir + "/noc_config_configurable_part2_4.vhd", 'w')
+        fw= open(outputdir + "/noc_config_configurable_part_4.vhd", 'w')
         fw.write("%s" %ch)
         fw.close()
 		
 
     # Génération VHDL : ------ 6) SLAVE ADDRESS MAPPING (32-bits) ------
-    def generate_configurable_part2_6(self):
+    def generate_configurable_part_6(self):
         outputdir = "./Noc0__"
         self.nbr_R = int(self.EntryNbrRouteur.get())
         self.nbr_M = [0 for i in range(self.nbr_R)]
@@ -1396,13 +1388,13 @@ constant	ROUTER5_MASTER0_address_mapping_for_ROUTER0_SLAVE4_HIGH_ADD 	: std_logi
 
         
         '''
-        fw= open(outputdir + "/noc_config_configurable_part2_6.vhd", 'w')
+        fw= open(outputdir + "/noc_config_configurable_part_6.vhd", 'w')
         fw.write("%s" %ch)
         fw.close()
         
         
  # Génération VHDL : ---- 7) ROUTING TABLE CONTENTS ------
-    def generate_configurable_part2_7(self):
+    def generate_configurable_part_7(self):
         outputdir = "./Noc0__"
         if not os.path.exists(outputdir):
             os.makedirs(outputdir)
@@ -1454,12 +1446,12 @@ constant from_ROUTER5_to_ROUTER3_destination_port : regPORTADD:= ROUTINGPORT2;
 constant from_ROUTER5_to_ROUTER4_destination_port : regPORTADD:= ROUTINGPORT2;
 
         '''
-        fw= open(outputdir + "/noc_config_configurable_part2_7.vhd", 'w')
+        fw= open(outputdir + "/noc_config_configurable_part_7.vhd", 'w')
         fw.write("%s" %ch)
         fw.close()
         
  # Génération VHDL : ------ 8) ADDRESS DECODER TYPES ------
-    def generate_configurable_part2_8(self):
+    def generate_configurable_part_8(self):
         outputdir = "./Noc0__"
         if not os.path.exists(outputdir):
             os.makedirs(outputdir)
@@ -1498,13 +1490,13 @@ type unconstrained_array_record_address_decod_table is array (natural range <>) 
 
 
         '''
-        fw= open(outputdir + "/noc_config_configurable_part2_8.vhd", 'w')
+        fw= open(outputdir + "/noc_config_configurable_part_8.vhd", 'w')
         fw.write("%s" %ch)
         fw.close()
         
 		
  # Génération VHDL : ------ 9) ADDRESS DECODER TABLES ------
-    def generate_configurable_part2_9(self):
+    def generate_configurable_part_9(self):
         outputdir = "./Noc0__"
         if not os.path.exists(outputdir):
             os.makedirs(outputdir)
@@ -1837,13 +1829,13 @@ constant ALL_MASTER_ADDRESS_DECODER_TABLES : unconstrained_array_record_address_
 	ROUTER5_MASTER0_ADDRESS_DECODER_TABLE(8)
 	); 
         '''
-        fw= open(outputdir + "/noc_config_configurable_part2_9.vhd", 'w')
+        fw= open(outputdir + "/noc_config_configurable_part_9.vhd", 'w')
         fw.write("%s" %ch)
         fw.close()
 		
 		
  # Génération VHDL : ------ 10) ADDRESS DECODER PARAMETER MATRIX ------
-    def generate_configurable_part2_10(self):
+    def generate_configurable_part_10(self):
         outputdir = "./Noc0__"
         if not os.path.exists(outputdir):
             os.makedirs(outputdir)
@@ -1873,12 +1865,12 @@ constant ADD_DECODER_PARAMETER_MX :  matrix_add_decoder_parameter :=(
 --0			1			2			3			4			5			6			7		8		9	   10	  11    12     13      14   
 
         '''
-        fw= open(outputdir + "/noc_config_configurable_part2_10.vhd", 'w')
+        fw= open(outputdir + "/noc_config_configurable_part_10.vhd", 'w')
         fw.write("%s" %ch)
         fw.close()
 		
  # Génération VHDL : ------ 11) ROUTING TABLE  -------
-    def generate_configurable_part2_11(self):
+    def generate_configurable_part_11(self):
         outputdir = "./Noc0__"
         if not os.path.exists(outputdir):
             os.makedirs(outputdir)
@@ -1947,13 +1939,13 @@ constant ALL_ROUTING_TABLES : array_all_routing_tables:=(
 	ROUTER5_ROUTING_TABLE
 );
         '''
-        fw= open(outputdir + "/noc_config_configurable_part2_11.vhd", 'w')
+        fw= open(outputdir + "/noc_config_configurable_part_11.vhd", 'w')
         fw.write("%s" %ch)
         fw.close()
 	
 	
  # Génération VHDL : ------ 12) LOCAL CONNEXIONS MATRIX ------ 
-    def generate_configurable_part2_12_1(self):
+    def generate_configurable_part_12_1(self):
         outputdir = "./Noc0__"
         self.nbr_R = int(self.EntryNbrRouteur.get())
         self.nbr_M = [0 for i in range(self.nbr_R)]
@@ -1965,7 +1957,7 @@ constant ALL_ROUTING_TABLES : array_all_routing_tables:=(
         ch='''
         
         '''
-        fw= open(outputdir + "/noc_config_configurable_part2_12_1.vhd", 'w')
+        fw= open(outputdir + "/noc_config_configurable_part_12_1.vhd", 'w')
         fw.write("------ 12) LOCAL CONNEXIONS MATRIX ------ \n")
         for r in range(self.nbr_R):
             fw.write('constant ROUTER%d_LOCAL_MX    : local_connexion_matrix :=(           \n ' %r)
@@ -2001,7 +1993,7 @@ constant ALL_ROUTING_TABLES : array_all_routing_tables:=(
         fw.close()
 
 
-    def generate_configurable_part2_12_2(self):
+    def generate_configurable_part_12_2(self):
         outputdir = "./Noc0__"
         if not os.path.exists(outputdir):
             os.makedirs(outputdir)
@@ -2024,7 +2016,7 @@ constant ALL_ROUTER_LOCAL_MATRIX : array_all_local_connexion_matrix:=(
 	ROUTER5_LOCAL_MX
 );
     '''
-        fw= open(outputdir + "/noc_config_configurable_part2_12_2.vhd", 'w')
+        fw= open(outputdir + "/noc_config_configurable_part_12_2.vhd", 'w')
         fw.write("%s" %ch)
         fw.close()
 	
@@ -2077,22 +2069,22 @@ end noc_address_pack;
         outputdir = "./Noc0__"
         if not os.path.exists(outputdir):
             os.makedirs(outputdir)
-        generated_files=["/noc_config_configurable_part1.vhd","/noc_config_fixed_part.vhd","/noc_config_configurable_part2_1.vhd","/noc_config_configurable_part2_2.vhd","/noc_config_configurable_part2_3.vhd","/noc_config_configurable_part2_4.vhd","/noc_config_configurable_part2_5.vhd","/noc_config_configurable_part2_6.vhd","/noc_config_configurable_part2_7.vhd","/noc_config_configurable_part2_8.vhd","/noc_config_configurable_part2_9.vhd","/noc_config_configurable_part2_10.vhd","/noc_config_configurable_part2_11.vhd","/noc_config_configurable_part2_12_1.vhd","/noc_config_configurable_part2_12_2.vhd","/noc_config_end_of_file_with_function.vhd"]
-        self.generate_configurable_part1()
+        generated_files=["/noc_config_configurable_part_0.vhd","/noc_config_fixed_part.vhd","/noc_config_configurable_part_1.vhd","/noc_config_configurable_part_2.vhd","/noc_config_configurable_part_3.vhd","/noc_config_configurable_part_4.vhd","/noc_config_configurable_part_5.vhd","/noc_config_configurable_part_6.vhd","/noc_config_configurable_part_7.vhd","/noc_config_configurable_part_8.vhd","/noc_config_configurable_part_9.vhd","/noc_config_configurable_part_10.vhd","/noc_config_configurable_part_11.vhd","/noc_config_configurable_part_12_1.vhd","/noc_config_configurable_part_12_2.vhd","/noc_config_end_of_file_with_function.vhd"]
+        self.generate_configurable_part_0()
         self.generate_fixed_part()
-        self.generate_configurable_part2_1()
-        self.generate_configurable_part2_2()
-        self.generate_configurable_part2_3()
-        self.generate_configurable_part2_4()
+        self.generate_configurable_part_1()
+        self.generate_configurable_part_2()
+        self.generate_configurable_part_3()
+        self.generate_configurable_part_4()
         #self.generate_configurable_part2_5()
-        self.generate_configurable_part2_6()
-        self.generate_configurable_part2_7()
-        self.generate_configurable_part2_8()
-        self.generate_configurable_part2_9()
-        self.generate_configurable_part2_10()
-        self.generate_configurable_part2_11()
-        self.generate_configurable_part2_12_1()
-        self.generate_configurable_part2_12_2()
+        self.generate_configurable_part_6()
+        self.generate_configurable_part_7()
+        self.generate_configurable_part_8()
+        self.generate_configurable_part_9()
+        self.generate_configurable_part_10()
+        self.generate_configurable_part_11()
+        self.generate_configurable_part_12_1()
+        self.generate_configurable_part_12_2()
         self.generate_end_of_file_with_function()
         for i in range(len(generated_files)):
             if not os.path.exists(outputdir+generated_files[i]):
@@ -2102,70 +2094,70 @@ end noc_address_pack;
         else:
             # genere le fichier de sortie
             with open(outputdir + "/noc_config.vhd",'w') as new_file:
-                with open(outputdir + "/noc_config_configurable_part1.vhd") as old_file:
+                with open(outputdir + "/noc_config_configurable_part_0.vhd") as old_file:
                     for line in old_file:   
                         new_file.write(line)
                 with open(outputdir + "/noc_config_fixed_part.vhd") as old_file:
                     for line in old_file:   
                         new_file.write(line)
-                with open(outputdir + "/noc_config_configurable_part2_1.vhd") as old_file:
+                with open(outputdir + "/noc_config_configurable_part_1.vhd") as old_file:
                     for line in old_file:   
                         new_file.write(line)
-                with open(outputdir + "/noc_config_configurable_part2_2.vhd") as old_file:
+                with open(outputdir + "/noc_config_configurable_part_2.vhd") as old_file:
                     for line in old_file:   
                         new_file.write(line)
-                with open(outputdir + "/noc_config_configurable_part2_3.vhd") as old_file:
+                with open(outputdir + "/noc_config_configurable_part_3.vhd") as old_file:
                     for line in old_file:   
                         new_file.write(line)
-                with open(outputdir + "/noc_config_configurable_part2_4.vhd") as old_file:
+                with open(outputdir + "/noc_config_configurable_part_4.vhd") as old_file:
                     for line in old_file:   
                         new_file.write(line)
-                with open(outputdir + "/noc_config_configurable_part2_5.vhd") as old_file:
+                with open(outputdir + "/noc_config_configurable_part_5.vhd") as old_file:
                     for line in old_file:   
                         new_file.write(line)
-                with open(outputdir + "/noc_config_configurable_part2_6.vhd") as old_file:
+                with open(outputdir + "/noc_config_configurable_part_6.vhd") as old_file:
                     for line in old_file:   
                         new_file.write(line)
-                with open(outputdir + "/noc_config_configurable_part2_7.vhd") as old_file:
+                with open(outputdir + "/noc_config_configurable_part_7.vhd") as old_file:
                     for line in old_file:   
                         new_file.write(line)
-                with open(outputdir + "/noc_config_configurable_part2_8.vhd") as old_file:
+                with open(outputdir + "/noc_config_configurable_part_8.vhd") as old_file:
                     for line in old_file:   
                         new_file.write(line)
-                with open(outputdir + "/noc_config_configurable_part2_9.vhd") as old_file:
+                with open(outputdir + "/noc_config_configurable_part_9.vhd") as old_file:
                     for line in old_file:   
                         new_file.write(line)
-                with open(outputdir + "/noc_config_configurable_part2_10.vhd") as old_file:
+                with open(outputdir + "/noc_config_configurable_part_10.vhd") as old_file:
                     for line in old_file:
                         new_file.write(line)
-                with open(outputdir + "/noc_config_configurable_part2_11.vhd") as old_file:
+                with open(outputdir + "/noc_config_configurable_part_11.vhd") as old_file:
                     for line in old_file:   
                         new_file.write(line)
-                with open(outputdir + "/noc_config_configurable_part2_12_1.vhd") as old_file:
+                with open(outputdir + "/noc_config_configurable_part_12_1.vhd") as old_file:
                     for line in old_file:   
                         new_file.write(line)
-                with open(outputdir + "/noc_config_configurable_part2_12_2.vhd") as old_file:
+                with open(outputdir + "/noc_config_configurable_part_12_2.vhd") as old_file:
                     for line in old_file:   
                         new_file.write(line)
                 with open(outputdir + "/noc_config_end_of_file_with_function.vhd") as old_file:
                     for line in old_file:   
                         new_file.write(line)
 				
-            os.remove(outputdir + "/noc_config_configurable_part1.vhd")
+            os.remove(outputdir + "/noc_config_configurable_part_0.vhd")
             os.remove(outputdir + "/noc_config_fixed_part.vhd")
-            os.remove(outputdir + "/noc_config_configurable_part2_1.vhd")
-            os.remove(outputdir + "/noc_config_configurable_part2_2.vhd")
-            os.remove(outputdir + "/noc_config_configurable_part2_3.vhd")
-            os.remove(outputdir + "/noc_config_configurable_part2_4.vhd")
-            os.remove(outputdir + "/noc_config_configurable_part2_5.vhd")
-            os.remove(outputdir + "/noc_config_configurable_part2_6.vhd")
-            os.remove(outputdir + "/noc_config_configurable_part2_7.vhd")
-            os.remove(outputdir + "/noc_config_configurable_part2_8.vhd")
-            os.remove(outputdir + "/noc_config_configurable_part2_9.vhd")
-            os.remove(outputdir + "/noc_config_configurable_part2_10.vhd")
-            os.remove(outputdir + "/noc_config_configurable_part2_11.vhd")
-            os.remove(outputdir + "/noc_config_configurable_part2_12_1.vhd")
-            os.remove(outputdir + "/noc_config_configurable_part2_12_2.vhd")
+            os.remove(outputdir + "/noc_config_configurable_part_1.vhd")
+            os.remove(outputdir + "/noc_config_configurable_part_2.vhd")
+            os.remove(outputdir + "/noc_config_configurable_part_3.vhd")
+            os.remove(outputdir + "/noc_config_configurable_part_4.vhd")
+            os.remove(outputdir + "/noc_config_configurable_part_5.vhd")
+            os.remove(outputdir + "/noc_config_configurable_part_6.vhd")
+            os.remove(outputdir + "/noc_config_configurable_part_7.vhd")
+            os.remove(outputdir + "/noc_config_configurable_part_8.vhd")
+            os.remove(outputdir + "/noc_config_configurable_part_9.vhd")
+            os.remove(outputdir + "/noc_config_configurable_part_10.vhd")
+            os.remove(outputdir + "/noc_config_configurable_part_11.vhd")
+            os.remove(outputdir + "/noc_config_configurable_part_12_1.vhd")
+            os.remove(outputdir + "/noc_config_configurable_part_12_2.vhd")
             os.remove(outputdir + "/noc_config_end_of_file_with_function.vhd")
 
 # copier les sources VHDL
@@ -2366,7 +2358,7 @@ class Decodeur_d_adresse(Tk):
             outputdir = "./Noc0__"
             if not os.path.exists(outputdir):
                 os.makedirs(outputdir)
-            fw= open(outputdir + "/noc_config_configurable_part2_5.vhd", 'w')
+            fw= open(outputdir + "/noc_config_configurable_part_5.vhd", 'w')
             fw.write("------ 5) CROSSBAR 32-bits SLAVE ADDRESSES ------ \n")
             fw.write('\n')
             for r in range(0,self.nbr_R):
@@ -2391,7 +2383,6 @@ if __name__ == "__main__":
     interface = Interface(fenetre)
     
     
-    # print('nbr_R_Global in Main = %d' % Interface.nbr_R_Global)
     #definit une taille minimale pour la fenêtre (en dessous de laquelle on ne peut descendre)
     # fenetre.update()
     # fenetre.minsize(fenetre.winfo_width(), fenetre.winfo_height())
