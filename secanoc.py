@@ -575,7 +575,8 @@ package noc_config is
 
 ----------------------------------------------------------------
 				----- GLOBAL CONSTANTS  -----
-----------------------------------------------------------------'''
+----------------------------------------------------------------
+'''
         #generation du code VHDL dans un fichier specifique
         fw= open(outputdir + "/noc_config_configurable_part_0.vhd", 'w')
         fw.write("%s" %ch)
@@ -1473,47 +1474,23 @@ constant from_ROUTER5_to_ROUTER4_destination_port : regPORTADD:= ROUTINGPORT2;
         if not os.path.exists(outputdir):
             os.makedirs(outputdir)
         self.nbr_R = int(self.EntryNbrRouteur.get())
-        self.nbr_M = [0 for i in range(0, self.nbr_R+1)]
+        self.nbr_M = [0 for i in range(0, self.nbr_R)]
         
         for r in range(0,self.nbr_R):
             self.nbr_M[r] = int(self.liste_EntryNbrMaitre[r].get())
-                  
+            
         ch='''
 ------ 8) ADDRESS DECODER TYPES ------
 --define the size of each address decoding table of each master of each router (in the number of rules that it contain)
 '''
-# type router0_master0_record_address_decod_table is array (0 to ROUTER0_MASTER0_ADD_DECOD_TABLE_SIZE-1) of record_master_interface_address_decode_routing_table;
-# type router0_master1_record_address_decod_table is array (0 to ROUTER0_MASTER1_ADD_DECOD_TABLE_SIZE-1) of record_master_interface_address_decode_routing_table;
-# type router0_master2_record_address_decod_table is array (0 to ROUTER0_MASTER2_ADD_DECOD_TABLE_SIZE-1) of record_master_interface_address_decode_routing_table;
-# type router0_master3_record_address_decod_table is array (0 to ROUTER0_MASTER3_ADD_DECOD_TABLE_SIZE-1) of record_master_interface_address_decode_routing_table;
-                                                                                                   
-# type router2_master0_record_address_decod_table is array (0 to ROUTER2_MASTER0_ADD_DECOD_TABLE_SIZE-1) of record_master_interface_address_decode_routing_table;
-# type router2_master1_record_address_decod_table is array (0 to ROUTER2_MASTER1_ADD_DECOD_TABLE_SIZE-1) of record_master_interface_address_decode_routing_table;
-# type router2_master2_record_address_decod_table is array (0 to ROUTER2_MASTER2_ADD_DECOD_TABLE_SIZE-1) of record_master_interface_address_decode_routing_table;
-# type router2_master3_record_address_decod_table is array (0 to ROUTER2_MASTER3_ADD_DECOD_TABLE_SIZE-1) of record_master_interface_address_decode_routing_table;
-                                                                                                   
-# type router3_master0_record_address_decod_table is array (0 to ROUTER3_MASTER0_ADD_DECOD_TABLE_SIZE-1) of record_master_interface_address_decode_routing_table;
-# type router3_master1_record_address_decod_table is array (0 to ROUTER3_MASTER1_ADD_DECOD_TABLE_SIZE-1) of record_master_interface_address_decode_routing_table;
-# type router3_master2_record_address_decod_table is array (0 to ROUTER3_MASTER2_ADD_DECOD_TABLE_SIZE-1) of record_master_interface_address_decode_routing_table;
-                                                                                                   
-# type router4_master0_record_address_decod_table is array (0 to ROUTER4_MASTER0_ADD_DECOD_TABLE_SIZE-1) of record_master_interface_address_decode_routing_table;
-# type router4_master1_record_address_decod_table is array (0 to ROUTER4_MASTER1_ADD_DECOD_TABLE_SIZE-1) of record_master_interface_address_decode_routing_table;
-# type router4_master2_record_address_decod_table is array (0 to ROUTER4_MASTER2_ADD_DECOD_TABLE_SIZE-1) of record_master_interface_address_decode_routing_table;
-# type router4_master3_record_address_decod_table is array (0 to ROUTER4_MASTER3_ADD_DECOD_TABLE_SIZE-1) of record_master_interface_address_decode_routing_table;
-                                                                                                    
-# type router5_master0_record_address_decod_table is array (0 to ROUTER5_MASTER0_ADD_DECOD_TABLE_SIZE-1) of record_master_interface_address_decode_routing_table;
 
-# 
         fw= open(outputdir + "/noc_config_configurable_part_8.vhd", 'w')
         fw.write("%s" %ch)
-        # for r in (0, self.nbr_R):   
-            # print(self.nbr_M[r])
-            # print(self.nbr_R)
-            # for m in range (0, self.nbr_M[r]):
-                
-                # fw.write("type router%d_master%d_record_address_decod_table is array (0 to ROUTER%d_MASTER%d_ADD_DECOD_TABLE_SIZE-1) of record_master_interface_address_decode_routing_table;\n" %(r,m,r,m))
-            # fw.write("\n")
-        # fw.write("type unconstrained_array_record_address_decod_table is array (natural range <>) of record_master_interface_address_decode_routing_table;\n")
+        for r in range(0,self.nbr_R):
+            for m in range (0, self.nbr_M[r]):
+                fw.write("type router%d_master%d_record_address_decod_table is array (0 to ROUTER%d_MASTER%d_ADD_DECOD_TABLE_SIZE-1) of record_master_interface_address_decode_routing_table;\n" %(r,m,r,m))
+            fw.write("\n")
+        fw.write("type unconstrained_array_record_address_decod_table is array (natural range <>) of record_master_interface_address_decode_routing_table;\n")
         fw.close()
         
 		
