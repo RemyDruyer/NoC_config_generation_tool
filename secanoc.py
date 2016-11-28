@@ -28,7 +28,7 @@ class VerticalScrolledFrame(Frame):
         # create a canvas object and a vertical scrollbar for scrolling it
         vscrollbar = Scrollbar(self, orient=VERTICAL)
         vscrollbar.pack(fill=Y, side=RIGHT, expand=FALSE)
-        canvas = Canvas(self, bd=0, highlightthickness=0, width = 200, height = 280, yscrollcommand=vscrollbar.set)
+        canvas = Canvas(self, bd=0, highlightthickness=0, width = 200, height = 500, yscrollcommand=vscrollbar.set)
         #canvas.config(scrollregion="0 0 110 110")
         canvas.pack(side=LEFT, fill=BOTH, expand=TRUE)
         vscrollbar.config(command=canvas.yview)
@@ -1042,29 +1042,30 @@ constant ROUTINGPORT15 	: regPORTADD:= "1111";
 -- '2': slave packet interface
 -- '3': routing port interface
 --The first value correspond to "PORT0" of the router, second value to "PORT1" of the ROUTER, etc ...
-constant R0_PACKET_INTERFACE_PORT_ADD : packet_interface_portadd_vector := (1,1,1,1,2,2,2,2,2,3,3,0,0,0,0,0); 
-constant R1_PACKET_INTERFACE_PORT_ADD : packet_interface_portadd_vector := (2,2,3,3,3,3,0,0,0,0,0,0,0,0,0,0);
-constant R2_PACKET_INTERFACE_PORT_ADD : packet_interface_portadd_vector := (1,1,1,1,2,3,0,0,0,0,0,0,0,0,0,0); 
-constant R3_PACKET_INTERFACE_PORT_ADD : packet_interface_portadd_vector := (1,1,1,3,3,3,0,0,0,0,0,0,0,0,0,0); 
-constant R4_PACKET_INTERFACE_PORT_ADD : packet_interface_portadd_vector := (1,1,1,1,2,2,2,2,3,3,3,0,0,0,0,0);
-constant R5_PACKET_INTERFACE_PORT_ADD : packet_interface_portadd_vector := (1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,0); 
+'''
+# constant R0_PACKET_INTERFACE_PORT_ADD : packet_interface_portadd_vector := (1,1,1,1,2,2,2,2,2,3,3,0,0,0,0,0); 
+# constant R1_PACKET_INTERFACE_PORT_ADD : packet_interface_portadd_vector := (2,2,3,3,3,3,0,0,0,0,0,0,0,0,0,0);
+# constant R2_PACKET_INTERFACE_PORT_ADD : packet_interface_portadd_vector := (1,1,1,1,2,3,0,0,0,0,0,0,0,0,0,0); 
+# constant R3_PACKET_INTERFACE_PORT_ADD : packet_interface_portadd_vector := (1,1,1,3,3,3,0,0,0,0,0,0,0,0,0,0); 
+# constant R4_PACKET_INTERFACE_PORT_ADD : packet_interface_portadd_vector := (1,1,1,1,2,2,2,2,3,3,3,0,0,0,0,0);
+# constant R5_PACKET_INTERFACE_PORT_ADD : packet_interface_portadd_vector := (1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,0); 
 
--- => AGGREGATING ARRAY <= --
-constant ALL_ROUTER_PACKET_INTERFACE_PORT_ADD : array_all_router_packet_interface_portadd:=(
-	R0_PACKET_INTERFACE_PORT_ADD,
-	R1_PACKET_INTERFACE_PORT_ADD,
-	R2_PACKET_INTERFACE_PORT_ADD,
-	R3_PACKET_INTERFACE_PORT_ADD,
-	R4_PACKET_INTERFACE_PORT_ADD,
-	R5_PACKET_INTERFACE_PORT_ADD
-);
+
 	
-        '''
         fw= open(outputdir + "/noc_config_configurable_part_4.vhd", 'w')
         fw.write("%s" %ch)
+        fw.write("\n")
+        for r in range (0, self.nbr_R-1):
+            fw.write("constant R%d_PACKET_INTERFACE_PORT_ADD : packet_interface_portadd_vector := (%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d);\n" %(r,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15))
+        fw.write("\n")
+        fw.write("-- => AGGREGATING ARRAY <= --\n")
+        fw.write("constant ALL_ROUTER_PACKET_INTERFACE_PORT_ADD : array_all_router_packet_interface_portadd:=(\n")
+        for r in range (0, self.nbr_R-1):
+            fw.write("	    R%d_PACKET_INTERFACE_PORT_ADD,\n" %r)
+        fw.write("	    R%d_PACKET_INTERFACE_PORT_ADD\n" %(self.nbr_R-1))
+        fw.write(");\n")
         fw.close()
         
-		
     # Génération VHDL : ------ 5) ADDRESS DECODER TABLE SIZES  ------
     def generate_configurable_part_5(self):
         outputdir = "./Noc0__"
@@ -2212,55 +2213,81 @@ class PaquetConnexion(Tk):
         root = Tk.__init__(self)
         self.var = []
         self.title("Configuration des connexions en paquets")
-        self.geometry("520x370")
+        self.geometry("430x580")
         self.frame = VerticalScrolledFrame(self)
-        self.frame.grid(row=0, column=0,sticky=N)
+        self.frame.grid(row=0, column=0, sticky=N)
         self.nbr_R = nbr_r_p
         self.nbr_M = nbr_m_p
         self.nbr_S = nbr_s_p
-        self.is_selected_flag=0
-        Connexion_local =[[[ 0 for i in range(0,self.nbr_R) ] for j in range(0,len(self.nbr_M))] for j in range(0,len(self.nbr_S)) ]
-        label_0    = []
-        Routeurs   = []
-        Maitres    = []
-        #Esclaves   = []
-        self.Connexions = []
-        label_0   .append(Label(self.frame.interior, text="", width=6))
-        Routeurs  .append(Label(self.frame.interior, text="Routeur  "))
-        Maitres   .append(Label(self.frame.interior, text="  IP "))
-        self.Connexions.append(Label(self.frame.interior, text="Connexion"))
-
+        self.flag_tout_connecter=0
+        # Connexion_local =[[[ 0 for i in range(0,self.nbr_R) ] for j in range(0,len(self.nbr_M))] for j in range(0,len(self.nbr_S)) ]
+        self.Cases_num_routeur_co_maitre = []
+        self.Cases_num_routeur_co_esclave = []
+        self.Cases_maitres_connexion_paquet    = []
+        self.Cases_esclaves_connexion_paquet   = []
+        self.Connexions_paquet_maitre = []
+        self.Connexions_paquet_esclave = []
+        self.Label_Espace = Label(self.frame.interior, text="", width=6)
+        self.Label_Routeur_co_maitre = Label(self.frame.interior, text="Routeur  ")
+        self.Label_Routeur_co_esclave = Label(self.frame.interior, text="Routeur  ")
+        self.Label_IP_co_maitre = Label(self.frame.interior, text="  IP ")
+        self.Label_IP_co_esclave = Label(self.frame.interior, text="  IP ")
+        self.Label_Connexion_co_maitre = Label(self.frame.interior, text="Connexion")
+        self.Label_Connexion_co_esclave = Label(self.frame.interior, text="Connexion")
+        
+        
         for r in range(self.nbr_R):
             for m in range(self.nbr_M[r]):
-                Routeurs  .append(Button(self.frame.interior, text=str(r), state=DISABLED, width=7))
-                Maitres   .append(Button(self.frame.interior, text=str(m)+" (Maitre)", state=DISABLED, width=7))
-                self.Connexions.append(Checkbutton(self.frame.interior, variable=self.var))
-
+                self.Cases_num_routeur_co_maitre  .append(Button(self.frame.interior, text=str(r), state=DISABLED, width=7))
+                self.Cases_maitres_connexion_paquet   .append(Button(self.frame.interior, text=str(m)+" (Maitre)", state=DISABLED, width=7))
+                self.Connexions_paquet_maitre.append(Checkbutton(self.frame.interior, variable=self.var))
+                
+        for r in range(self.nbr_R):
             for s in range(self.nbr_M[r],self.nbr_M[r]+self.nbr_S[r]):
-                Routeurs  .append(Button(self.frame.interior, text=str(r), state=DISABLED, width=7))
-                Maitres   .append(Button(self.frame.interior, text=str(s)+" (Esclave)", state=DISABLED, width=7))
-                self.Connexions.append(Checkbutton(self.frame.interior, variable=self.var))
+                self.Cases_num_routeur_co_esclave .append(Button(self.frame.interior, text=str(r), state=DISABLED, width=7))
+                self.Cases_esclaves_connexion_paquet   .append(Button(self.frame.interior, text=str(s)+" (Esclave)", state=DISABLED, width=7))
+                self.Connexions_paquet_esclave.append(Checkbutton(self.frame.interior, variable=self.var))
         
-        label_0[0]      .grid(row=0, column=1)
-        for i in range(len(Maitres)):
-            Routeurs[i]  .grid(row=i, column=2)
-            Maitres[i]   .grid(row=i, column=3)
+        self.Label_Espace.grid(row=0, column=1)
+        self.Label_Routeur_co_maitre.grid(row=0, column=2)
+        self.Label_IP_co_maitre.grid(row=0, column=3)
+        self.Label_Connexion_co_maitre.grid(row=0, column=4)
+        
+        self.Label_Routeur_co_esclave.grid(row=0, column=5)
+        self.Label_IP_co_esclave.grid(row=0, column=6)
+        self.Label_Connexion_co_esclave.grid(row=0, column=7)
+        
+        for i in range(len(self.Cases_maitres_connexion_paquet)):
+            self.Cases_num_routeur_co_maitre[i]  .grid(row=i+1, column=2)
+            self.Cases_maitres_connexion_paquet[i]   .grid(row=i+1, column=3)
+            self.Connexions_paquet_maitre[i].grid(row=i+1, column=4)
             
-            self.Connexions[i].grid(row=i, column=4)
-        Button(self, text="Tout Connecter/Deconnecter", width=22, command=self.on_buttonToutConnecter_clicked).grid(row=18, column=3)
-        Button(self, text="Save", width=22, command=self.on_buttonsave_clicked).grid(row=19, column=3)
+        for i in range(len(self.Cases_maitres_connexion_paquet),len(self.Cases_maitres_connexion_paquet)+len(self.Cases_esclaves_connexion_paquet)):
+            self.Cases_num_routeur_co_esclave[i-len(self.Cases_maitres_connexion_paquet)]  .grid(row=i-len(self.Cases_maitres_connexion_paquet)+1, column=5)
+            self.Cases_esclaves_connexion_paquet[i-len(self.Cases_maitres_connexion_paquet)].grid(row=i-len(self.Cases_maitres_connexion_paquet)+1, column=6)
+            self.Connexions_paquet_esclave[i-len(self.Cases_maitres_connexion_paquet)].grid(row=i-len(self.Cases_maitres_connexion_paquet)+1, column=7)
+         
+        Button(self, text="Tout connecter/deconnecter", width=22, command=self.on_buttonToutConnecter_paquet_clicked, pady=5).grid(row=2, column=0)
+        Button(self, text="Sauvegarder", width=22, command=self.on_buttonsave_clicked, pady=5).grid(row=3, column=0)
 
-
-    def on_buttonToutConnecter_clicked(self):
+        
+    def on_buttonToutConnecter_paquet_clicked(self):
         print("Tout connecter")
-        if self.is_selected_flag==0:
-            for i in range(1,len(self.Connexions)):
-                self.Connexions[i].select()
-            self.is_selected_flag=1
+        if self.flag_tout_connecter==0:
+            for i in range(len(self.Connexions_paquet_maitre)):
+                self.Connexions_paquet_maitre[i].select()
+                
+            for i in range(len(self.Connexions_paquet_esclave)):
+                self.Connexions_paquet_esclave[i].select()
+            self.flag_tout_connecter=1
         else:
-            for i in range(1,len(self.Connexions)):
-                self.Connexions[i].deselect()
-            self.is_selected_flag=0
+            for i in range(len(self.Connexions_paquet_maitre)):
+                self.Connexions_paquet_maitre[i].deselect()
+            
+            for i in range(len(self.Connexions_paquet_esclave)):
+                self.Connexions_paquet_esclave[i].deselect()
+            self.flag_tout_connecter=0
+            
 
     def on_buttonsave_clicked(self):
         print("Configuration des connexions en paquets")    
