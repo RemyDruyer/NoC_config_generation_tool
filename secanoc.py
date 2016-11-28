@@ -1483,13 +1483,11 @@ constant from_ROUTER5_to_ROUTER4_destination_port : regPORTADD:= ROUTINGPORT2;
 ------ 8) ADDRESS DECODER TYPES ------
 --define the size of each address decoding table of each master of each router (in the number of rules that it contain)
 '''
-
         fw= open(outputdir + "/noc_config_configurable_part_8.vhd", 'w')
         fw.write("%s" %ch)
         for r in range(0,self.nbr_R):
             for m in range (0, self.nbr_M[r]):
                 fw.write("type router%d_master%d_record_address_decod_table is array (0 to ROUTER%d_MASTER%d_ADD_DECOD_TABLE_SIZE-1) of record_master_interface_address_decode_routing_table;\n" %(r,m,r,m))
-            fw.write("\n")
         fw.write("type unconstrained_array_record_address_decod_table is array (natural range <>) of record_master_interface_address_decode_routing_table;\n")
         fw.close()
         
