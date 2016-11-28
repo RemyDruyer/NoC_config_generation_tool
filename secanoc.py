@@ -158,7 +158,7 @@ class Interface(Frame):
         # Creation du menu "Fichier"
         self.fichier = Menu(self.barremenu, tearoff = 0)
         self.barremenu.add_cascade(label="Fichier", menu = self.fichier)
-        self.fichier.add_command(label = "Nouveau", command=self.quit)
+        self.fichier.add_command(label = "Nouveau", command=self.nouveau_action)
         self.fichier.add_command(label = "Ouvrir", command=self.quit)
         self.fichier.add_command(label = "Enregistrer", command=self.quit)
         self.fichier.add_command(label = "Enregistrer-sous", command=self.quit)
@@ -174,10 +174,10 @@ class Interface(Frame):
         self.EntryNbrRouteur.grid(row=0, column=2)
         self.EntryNbrRouteur.insert(0,"3")
         
-        Matrice_connexions_routeurs_LabelFrame = LabelFrame(self, text="Matrice de parametrage des connexions et du nombre d'interaces maitres/esclaves des routeurs", padx=5, pady=5)
-        Matrice_connexions_routeurs_LabelFrame.grid(row=1, column=0, columnspan=8)
+        self.Matrice_connexions_routeurs_LabelFrame = LabelFrame(self, text="Matrice de parametrage des connexions et du nombre d'interaces maitres/esclaves des routeurs", padx=5, pady=5)
+        self.Matrice_connexions_routeurs_LabelFrame.grid(row=1, column=0, columnspan=8)
         
-        self.Scrollable_Table = ScrollableTable(Matrice_connexions_routeurs_LabelFrame)
+        self.Scrollable_Table = ScrollableTable(self.Matrice_connexions_routeurs_LabelFrame)
         self.Scrollable_Table.grid(row=0, column=0)
         
         
@@ -338,8 +338,6 @@ class Interface(Frame):
             self.Scrollable_Table.Canvas_center_interior_Frame.update_idletasks()
             self.Scrollable_Table.Canvas_center.configure(scrollregion=self.Scrollable_Table.Canvas_center.bbox("all"))
             
-            
-
         def _reinitialisation_grille_routeur (self):
 
             #case inactive dans le coin en haut a gauche de la matrice/damier de connexions de routeurs 
@@ -421,7 +419,12 @@ class Interface(Frame):
         else :
             _generation_grille_routeur(self)
             
-                            
+    def nouveau_action(self):
+        self.Scrollable_Table.destroy()
+        self.Scrollable_Table = ScrollableTable(self.Matrice_connexions_routeurs_LabelFrame)
+        self.EntryNbrRouteur.delete(0, END)
+        self.EntryNbrRouteur.insert(0,"3")
+
                         
     def infos_action(self):
         showinfo("Fonctionnement de l'outil", "Cet outil permet de :\n- Selectionner le nombre de routeurs que vous souhaiter dans le reseau et lancer la generation de la grille d'initialisation des connexions entre les routeurs.\n- Choisir le nombre d'interface maitre et esclave que possede chaque routeur (attention pour chaque routeur : le nombre d'interface maitre, esclave et le nombre de connexions a d'autre routeurs ne doit pas depasser 16, car chaque routeur a 16 ports maximum).\n ATTENTION : modifier le nombre de routeurs et relancer une generation de la grille reinitialise toute la configuration.\n- Etablir des connexions en paquet entre les routeurs en cliquant sur la case correspondante (la case reciproque est automatiquement cochee).\n- Configurer les connexions locales des interfaces (si la case entre une interface maitre et une interface esclave est cochee , ces deux interfaces pourront communiquer entre elles au niveau local).\n- Configurer les connexions en paquets (les communications paquets permettent aux interfaces n'appartenant pas au meme routeur de communiquer entre elles).\n- Configurer le decodage d'adresse de chaque interface esclave pour chaque interface maitre (chaque maitre voit chaque esclave a une certaine adresse de 32 bits pouvant etre specifique).\n- Configurer la taille des tables de decodage d'adresse de chaque maitre : les maitres n'ont besoins de posseder seulement les adresses des esclaves avec lesquels ils souhaitent communiquer.\n- Une fois tous ces parametres enregistres -> lancer la generation du fichier de configuration du NoC : noc_config.vhd.\n\nInfo :\n- Les routeurs sont numerotes de 0 a i (nb de routeurs du reseau compris entre 3 et 64).\n- Pour chaque routeur les interfaces sont numerotees de 0 a j : d'abord les interfaces maitre, puis suivent les interfaces esclaves et en dernier les interfaces entre les routeurs (nb d'interface par routeur est compris entre 1 et 16).\n Attention : il faut s'assurer que tous les routeurs appartiennent au meme reseau via les connexions entre les routeurs.")
