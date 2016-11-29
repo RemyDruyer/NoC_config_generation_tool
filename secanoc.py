@@ -239,9 +239,52 @@ class MainInterface(Frame):
         # # bouton "Generation du VHDL"
         self.bouton_generation_vhdl = Button(self, text="Generation \n du VHDL", command= self.on_buttonGenerate_clicked, state=DISABLED)
         self.bouton_generation_vhdl.grid(row= 4, column=5, sticky=NSEW)
+        
+        
+        self.bouton_chargement_save_exemple = Button(self, text="Chargement Save", command=self.Chargement_sauvegarde_exemple)
+        self.bouton_chargement_save_exemple.grid(row=2, column=3, padx=2, pady=2)
             
+    def Chargement_sauvegarde_exemple(self):
+        CHARGED_FROM_SAVE_nbr_routeur = 4
+        CHARGED_FROM_SAVE_nbr_M_par_routeur = [0,4,2,0]
+        CHARGED_FROM_SAVE_nbr_S_par_routeur = [0,2,0,3]
+        CHARGED_FROM_SAVE_connexions_routeurs = [[0,1,0,1],[1,0,1,0],[0,1,0,0],[1,0,0,0]]
+        CHARGED_FROM_SAVE_connexions_locales = [[[0]], [[1,1],[0,0],[1,0],[0,1]], [[0]], [[0]]]
+        CHARGED_FROM_SAVE_connexions_paquets = [[0],[0,0,1,0,0,1],[0,1],[1,0,0]]
+        
+        #chargement du nbr de routeur
+        self.EntryNbrRouteur.delete(0,END)
+        self.EntryNbrRouteur.insert(0,CHARGED_FROM_SAVE_nbr_routeur)
+        ##Bouton de génération de la matrice
+        self.run_action()
+  
+        #chargement des connexions entre les routeurs (self.nbr_R initisalité dans run_action() donc utilisable)
+        for ligne in range (0,self.nbr_R):
+            for colonne in range (0,self.nbr_R):
+                if CHARGED_FROM_SAVE_connexions_routeurs[ligne][colonne] == 1:
+                    self.liste_Cases_Connexions_Routeur[ligne][colonne]["background"]="orange"
+        
+        #chargement du nombre d'interface/maitre esclave par routeur
+        for r in range(self.nbr_R):
+            self.liste_EntryNbrMaitre[r].delete(0,END)
+            self.liste_EntryNbrMaitre[r].insert(0,CHARGED_FROM_SAVE_nbr_M_par_routeur[r])
+            self.liste_EntryNbrEsclave[r].delete(0,END)
+            self.liste_EntryNbrEsclave[r].insert(0,CHARGED_FROM_SAVE_nbr_S_par_routeur[r])
             
-            
+        ##Bouton sauvegarde principaux paramètres routeurs
+        self.bouton_sauvegarde_param_connex_routeur_action()
+
+        #chargement des connexions locales
+        for r in range(self.nbr_R):
+            for m in range(self.nbr_M_par_routeur[r]):
+                for s in range(self.nbr_S_par_routeur[r]):
+                    self.Connexions_locales[r][m][s].set(value=CHARGED_FROM_SAVE_connexions_locales[r][m][s])
+        
+        #chargement des connexions paquets
+        for r in range(self.nbr_R):
+            for m_s in range(self.nbr_M_par_routeur[r]+self.nbr_S_par_routeur[r]):
+                self.Connexions_paquets[r][m_s].set(value=CHARGED_FROM_SAVE_connexions_paquets[r][m_s])
+        
             
         # Action du bouton "RUN/Generation de la matrice de connexions des routeurs"
     def run_action(self):
@@ -501,19 +544,11 @@ class MainInterface(Frame):
             self.rang_nbr_S[r] = self.nbr_S_par_routeur[r-1] + var_somme_rang_nbr_S
             var_somme_rang_nbr_S += self.nbr_S_par_routeur[r-1]
                         
-        # self.type_interface_par_routeur = [0 for i in range(self.nbr_R)]
-        # for r in range(self.nbr_R):
-        
-        # self.nbr_interface_routeur[r] = self.nbr_M[r] + self.nbr_S[r]
-        
-        
         self.Connexions_locales = [[[ IntVar() for s in range (self.nbr_S_par_routeur[r])] for m in range (self.nbr_M_par_routeur[r])] for r in range (self.nbr_R)]
-        
         self.Connexions_paquets = [[IntVar() for m_s in range(self.nbr_M_par_routeur[r]+self.nbr_S_par_routeur[r])] for r in range(self.nbr_R)]
         
 
-               
-               
+
     def checkbouton_moniteur_securite_action(self):
         if self.flag_checkbouton_moniteur_securite == 0:
             self.bouton_moniteur_securite.config(state = DISABLED)
