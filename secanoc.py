@@ -143,9 +143,9 @@ class MainInterface(Frame):
         self.offset_grid_ligne = 3
         self.offset_grid_colonne = 3
         self.flag_checkbouton_moniteur_securite = 0
-        self.flag_checkbouton_connexions_locales = 0
+        self.flag_checkBouton_Connexions_Locales = 0
         self.flag_checkbouton_decodeurs_adresse =0
-        self.flag_checkbouton_connexions_paquets = 0
+        self.flag_checkBouton_Connexions_Paquets = 0
         self.flag_clic_bouton_run = 0
         self.i_Cases_Connexions_Routeurs_X = 0
         self.i_Cases_Connexions_Routeurs_Y = 0
@@ -168,6 +168,8 @@ class MainInterface(Frame):
         self.type_interface_par_routeur.append([])
         self.Connexions_paquet_maitre   = []
         self.Connexions_paquet_esclave  = []
+        self.IntVar_checkBouton_Connexions_Locales = IntVar()
+        self.IntVar_checkBouton_Connexions_Paquets = IntVar()
         
         self.flag_tout_connecter = 0
         
@@ -221,17 +223,17 @@ class MainInterface(Frame):
         self.bouton_moniteur_securite = Button(self, text="Configuration des moniteurs \n de securite", command=self.quit, state=DISABLED)
         self.bouton_moniteur_securite.grid(row=4, column=0, sticky=NSEW)
         # # Case a cocher "Interfaces toutes connectees en local"
-        self.checkbouton_connexions_locales = Checkbutton(self, text="Interfaces toutes \n connectees en local", command= self.checkbouton_connexions_locales_action, state=DISABLED)
-        self.checkbouton_connexions_locales.grid(row=3, column=1, sticky=NSEW)
+        self.checkBouton_Connexions_Locales = Checkbutton(self, text="Interfaces toutes \n connectees en local", command= self.checkBouton_Connexions_Locales_action, variable = self.IntVar_checkBouton_Connexions_Locales, state=DISABLED)
+        self.checkBouton_Connexions_Locales.grid(row=3, column=1, sticky=NSEW)
         # # Bouton - appel fenêtre secondaire "Configuration des connexions locales"
-        self.bouton_connexions_locales = Button(self, text="Configuration des \n connexions locales", command=self.FenetreSecondaire_ConnexionLocale, state=DISABLED)
-        self.bouton_connexions_locales.grid(row=4, column=1, sticky=NSEW)
+        self.Bouton_Connexions_Locales = Button(self, text="Configuration des \n connexions locales", command=self.FenetreSecondaire_ConnexionLocale, state=DISABLED)
+        self.Bouton_Connexions_Locales.grid(row=4, column=1, sticky=NSEW)
         # # Case a cocher "Interfaces toutes connectees en paquets"
-        self.checkbouton_connexions_paquets = Checkbutton(self, text="Interfaces toutes \n connectees en paquets", command= self.checkbouton_connexions_paquets_action, state=DISABLED)
-        self.checkbouton_connexions_paquets.grid(row=3, column=2, sticky=NSEW)
+        self.checkBouton_Connexions_Paquets = Checkbutton(self, text="Interfaces toutes \n connectees en paquets", command= self.checkBouton_Connexions_Paquets_action, variable = self.IntVar_checkBouton_Connexions_Paquets, state=DISABLED)
+        self.checkBouton_Connexions_Paquets.grid(row=3, column=2, sticky=NSEW)
         # # Bouton - appel fenêtre secondaire "Configuration des connexions en paquets"
-        self.bouton_connexions_paquets = Button(self, text="Configuration des \n connexions en paquets", command=self.FenetreSecondaire_ConnexionPaquet, state=DISABLED)
-        self.bouton_connexions_paquets.grid(row= 4, column=2, sticky=NSEW)
+        self.Bouton_Connexions_Paquets = Button(self, text="Configuration des \n connexions en paquets", command=self.FenetreSecondaire_ConnexionPaquet, state=DISABLED)
+        self.Bouton_Connexions_Paquets.grid(row= 4, column=2, sticky=NSEW)
         # # Bouton - appel fenêtre secondaire "Configuration des decodeurs d'adresse"
         self.bouton_decodeurs_adresses = Button(self, text="Configuration des decodeurs \n d'adresse", command=self.FenetreSecondaire_DecodeurAdresse, state=DISABLED)
         self.bouton_decodeurs_adresses.grid(row= 4, column=3, sticky=NSEW)
@@ -293,6 +295,9 @@ class MainInterface(Frame):
             
             #Case horizontale "Connecté à routeur" dans Canvas_top_interior_frame    
             ligne = 2
+            ###conf ubuntu
+            #self.Case_Label_top_matrice =  Button(self.Scrollable_Table.Canvas_top_interior_Frame, borderwidth=2, text = "Connecte a routeur", height = 1, background = "gainsboro", width = self.nbr_R*3+10 ,padx = (self.nbr_R-1)*8)
+            ###conf windows
             self.Case_Label_top_matrice =  Button(self.Scrollable_Table.Canvas_top_interior_Frame, borderwidth=2, text = "Connecte a routeur", height = 1, background = "gainsboro", width = self.nbr_R ,padx = (self.nbr_R-1)*8)
             self.Case_Label_top_matrice.grid(row= ligne, column=self.nbr_R+self.offset_grid_colonne, sticky=N+W+S)
              
@@ -458,10 +463,10 @@ class MainInterface(Frame):
                         
                         
     def bouton_sauvegarde_param_connex_routeur_action(self):
-        self.checkbouton_connexions_locales.config(state=NORMAL)
-        self.bouton_connexions_locales.config(state=NORMAL)
-        self.checkbouton_connexions_paquets.config(state=NORMAL)
-        self.bouton_connexions_paquets.config(state=NORMAL)
+        self.checkBouton_Connexions_Locales.config(state=NORMAL)
+        self.Bouton_Connexions_Locales.config(state=NORMAL)
+        self.checkBouton_Connexions_Paquets.config(state=NORMAL)
+        self.Bouton_Connexions_Paquets.config(state=NORMAL)
         self.bouton_decodeurs_adresses.config(state=NORMAL)
         self.bouton_generation_vhdl.config(state=NORMAL)
         
@@ -531,12 +536,7 @@ class MainInterface(Frame):
                     self.Interfaces_paquets_routeur[r][index_int_paquet] = 3
                     index_int_paquet += 1
                 
-        # for r in range(self.nbr_R):
-            # print("\nRouteur %d : " %r)
-            # for nbr_port in range(self.nbr_port_routeur_max):
-                # print("%d" %self.Interfaces_paquets_routeur[r][nbr_port])
-                
-        
+
         
     def Chargement_sauvegarde_exemple(self):
         CHARGED_FROM_SAVE_nbr_routeur = 4
@@ -588,48 +588,45 @@ class MainInterface(Frame):
             self.bouton_moniteur_securite.config(state = NORMAL)
             self.flag_checkbouton_moniteur_securite = 0
     
-    def bouton_connexions_locales_action(self):
-        app_localConnexion = LocalConnexion(self.nbr_R,self.nbr_M_par_routeur,self.nbr_S_par_routeur)
-        app_localConnexion.mainloop()
-        app_localConnexion.destroy()
 
-    def checkbouton_connexions_locales_action(self):
-        if self.flag_checkbouton_connexions_locales == 0:
-            self.bouton_connexions_locales.config(state = DISABLED)
-            self.flag_checkbouton_connexions_locales = 1
-        elif self.flag_checkbouton_connexions_locales ==1:
-            self.bouton_connexions_locales.config(state = NORMAL)
-            self.flag_checkbouton_connexions_locales = 0
-
-    def bouton_decodeurs_adresse_action(self):
-        app_Decodeur_d_adresse = Decodeur_d_adresse(self.nbr_R,self.nbr_M_par_routeur,self.nbr_S_par_routeur)
-        app_Decodeur_d_adresse.mainloop()
-        app_Decodeur_d_adresse.destroy()
-        
-
-    def checkbouton_connexions_paquets_action(self):
-        if self.flag_checkbouton_connexions_paquets == 0:
-            self.bouton_connexions_paquets.config(state = DISABLED)
-            self.flag_checkbouton_connexions_paquets = 1
-        elif self.flag_checkbouton_connexions_paquets ==1:
-            self.bouton_connexions_paquets.config(state = NORMAL)
-            self.flag_checkbouton_connexions_paquets = 0
+    def checkBouton_Connexions_Locales_action(self):
+        #tout connecter
+        if self.IntVar_checkBouton_Connexions_Locales.get() == 1:
+            self.Bouton_Connexions_Locales.config(state = DISABLED)
+            for r in range(self.nbr_R):
+                for m in range(self.nbr_M_par_routeur[r]):
+                    for s in range(self.nbr_S_par_routeur[r]):
+                        self.Connexions_locales[r][m][s].set(value=1)
+        #permettre le paramètrage 
+        else:
+            self.Bouton_Connexions_Locales.config(state = NORMAL)
 
 
+    def checkBouton_Connexions_Paquets_action(self):
+        #tout connecter
+        if self.IntVar_checkBouton_Connexions_Paquets.get() == 1:
+            self.Bouton_Connexions_Paquets.config(state = DISABLED)
+            for r in range(self.nbr_R):
+                for m_s in range(self.nbr_M_par_routeur[r]+self.nbr_S_par_routeur[r]):
+                    self.Connexions_paquets[r][m_s].set(value=1)
+        #permettre le paramètrage     
+        else:
+            self.Bouton_Connexions_Paquets.config(state = NORMAL)
+
+           
 
     #Méthode pour gérer le paramètrage des connexions locales
     def FenetreSecondaire_ConnexionLocale(self):
 
-        def _Bouton_ToutConnecter_CoLocale_action():
-            print("Tout connecter")
-            if self.flag_tout_connecter_local==0:
+        def _CheckButt_ToutConnecter_CoLocale_action():
+            #tout connecter
+            if self.Intvar_CheckFenetreLocale_tout_connecter.get()==1:
                 for i in range(len(CheckButt_Connexions_locales)):
                     CheckButt_Connexions_locales[i].select()
-                self.flag_tout_connecter_local=1
+            #tout déconnecter
             else:
                 for i in range(len(CheckButt_Connexions_locales)):
                     CheckButt_Connexions_locales[i].deselect()
-                self.flag_tout_connecter_local=0
      
         def _on_buttonsave_clicked():
             print("Configuration des connexions locales")    
@@ -642,11 +639,12 @@ class MainInterface(Frame):
         self.frame = VerticalScrolledFrame(Fenetre_ConnexionLocale)
         self.frame.grid(row=0, column=0,sticky=N)
         
-        self.flag_tout_connecter_local=0
         Cases_Routeurs   = []
         Cases_Maitres    = []
         Cases_Esclaves   = []
         CheckButt_Connexions_locales = []
+        self.Intvar_CheckFenetreLocale_tout_connecter= IntVar(value=1)
+        
         Label_Espace   = Label(self.frame.interior, text="", width=6)
         Label_Routeurs  = Label(self.frame.interior, text="Routeur  ")
         Label_Maitres   = Label(self.frame.interior, text="Maitre   ")
@@ -674,12 +672,94 @@ class MainInterface(Frame):
             Cases_Esclaves[i]  .grid(row=i+1, column=4)
             CheckButt_Connexions_locales[i].grid(row=i+1, column=5)
             
-        Button(Fenetre_ConnexionLocale, text="Tout connecter/deconnecter", width=22, command=_Bouton_ToutConnecter_CoLocale_action).grid(row=1, column=0, pady=5)
+        Checkbutton(Fenetre_ConnexionLocale, text="Tout connecter/deconnecter", command=_CheckButt_ToutConnecter_CoLocale_action, variable = self.Intvar_CheckFenetreLocale_tout_connecter).grid(row=1, column=0, pady=5)
         Button(Fenetre_ConnexionLocale, text="Ok", width=22, command=lambda:Fenetre_ConnexionLocale.destroy()).grid(row=2, column=0, pady=5)
 
 
 
-    #Méthode pour gerer la fenêtre secondaire de configuration des decodeurs d'adresses
+
+        
+    #methode pour gerer la fenêtre des connexions en paquets
+    def FenetreSecondaire_ConnexionPaquet(self):
+       
+        def _CheckButt_ToutConnecter_CoPaquet_action():
+
+            #tout connecter
+            if self.Intvar_CheckFenetrePaquet_tout_connecter.get()==1:
+                for i in range(len(CheckButt_Connexions_paquet_maitre)):
+                    CheckButt_Connexions_paquet_maitre[i].select()
+                for i in range(len(CheckButt_Connexions_paquet_esclave)):
+                    CheckButt_Connexions_paquet_esclave[i].select()
+            #tout déconnecter
+            else:
+                for i in range(len(CheckButt_Connexions_paquet_maitre)):
+                    CheckButt_Connexions_paquet_maitre[i].deselect()
+                for i in range(len(CheckButt_Connexions_paquet_esclave)):
+                    CheckButt_Connexions_paquet_esclave[i].deselect()
+
+                
+
+        # Main méthode : FenetreSecondaire_ConnexionPaquet #
+        Fenetre_ConnexionPaquet = Toplevel(fenetre_tk)
+        self.frame = VerticalScrolledFrame(Fenetre_ConnexionPaquet)
+        self.frame.grid(row=0, column=0, sticky=N)
+        
+        Cases_num_routeur_co_maitre                    = []
+        Cases_num_routeur_co_esclave                   = []
+        Cases_maitres_connexion_paquet                 = []
+        Cases_esclaves_connexion_paquet                = []
+        CheckButt_Connexions_paquet_maitre             = []
+        CheckButt_Connexions_paquet_esclave            = []
+        self.Intvar_CheckFenetrePaquet_tout_connecter  = IntVar(value=1)
+        
+        
+        #déclaration des labels
+        Label_Espace = Label(self.frame.interior, text="", width=6)
+        Label_Routeur_co_maitre = Label(self.frame.interior, text="Routeur  ")
+        Label_Routeur_co_esclave = Label(self.frame.interior, text="Routeur  ")
+        Label_IP_co_maitre = Label(self.frame.interior, text="  IP ")
+        Label_IP_co_esclave = Label(self.frame.interior, text="  IP ")
+        Label_Connexion_co_maitre = Label(self.frame.interior, text="Connexion")
+        Label_Connexion_co_esclave = Label(self.frame.interior, text="Connexion")
+
+       #déclaration des cases maitres
+        for r in range(self.nbr_R):
+            for m in range(self.nbr_M_par_routeur[r]):
+                Cases_num_routeur_co_maitre.append(Button(self.frame.interior, text=str(r), state=DISABLED, width=7))
+                Cases_maitres_connexion_paquet.append(Button(self.frame.interior, text=str(m)+" (Maitre)", state=DISABLED, width=7))
+                CheckButt_Connexions_paquet_maitre.append(Checkbutton(self.frame.interior, variable=self.Connexions_paquets[r][m]))
+        #déclaration des cases esclaves
+        for r in range(self.nbr_R):
+            for s in range(self.nbr_M_par_routeur[r],self.nbr_M_par_routeur[r]+self.nbr_S_par_routeur[r]):
+                Cases_num_routeur_co_esclave.append(Button(self.frame.interior, text=str(r), state=DISABLED, width=7))
+                Cases_esclaves_connexion_paquet.append(Button(self.frame.interior, text=str(s)+" (Esclave)", state=DISABLED, width=7))
+                CheckButt_Connexions_paquet_esclave.append(Checkbutton(self.frame.interior, variable=self.Connexions_paquets[r][s]))
+                
+        #affichage des label
+        Label_Espace.grid(row=0, column=0)
+        Label_Routeur_co_maitre.grid(row=0, column=1)
+        Label_IP_co_maitre.grid(row=0, column=2)
+        Label_Connexion_co_maitre.grid(row=0, column=3)
+        Label_Routeur_co_esclave.grid(row=0, column=4)
+        Label_IP_co_esclave.grid(row=0, column=5)
+        Label_Connexion_co_esclave.grid(row=0, column=6)
+        
+        #affichage cases maitres
+        for i in range(len(Cases_maitres_connexion_paquet)):
+            Cases_num_routeur_co_maitre[i]  .grid(row=i+1, column=1)
+            Cases_maitres_connexion_paquet[i]   .grid(row=i+1, column=2)
+            CheckButt_Connexions_paquet_maitre[i].grid(row=i+1, column=3)
+        #affichage cases esclaves
+        for i in range(len(Cases_maitres_connexion_paquet),len(Cases_maitres_connexion_paquet)+len(Cases_esclaves_connexion_paquet)):
+            Cases_num_routeur_co_esclave[i-len(Cases_maitres_connexion_paquet)].grid(row=i-len(Cases_maitres_connexion_paquet)+1, column=4)
+            Cases_esclaves_connexion_paquet[i-len(Cases_maitres_connexion_paquet)].grid(row=i-len(Cases_maitres_connexion_paquet)+1, column=5)
+            CheckButt_Connexions_paquet_esclave[i-len(Cases_maitres_connexion_paquet)].grid(row=i-len(Cases_maitres_connexion_paquet)+1, column=6)
+         
+        Checkbutton(Fenetre_ConnexionPaquet, text="Tout connecter/deconnecter", command= _CheckButt_ToutConnecter_CoPaquet_action, pady=5, variable = self.Intvar_CheckFenetrePaquet_tout_connecter).grid(row=2, column=0)
+        Button(Fenetre_ConnexionPaquet, text="Ok", width=22, command=lambda:Fenetre_ConnexionPaquet.destroy(), pady=5).grid(row=3, column=0)
+            
+
+                #Méthode pour gerer la fenêtre secondaire de configuration des decodeurs d'adresses
     def FenetreSecondaire_DecodeurAdresse(self):
 
         def _on_buttonsave_clicked():
@@ -743,87 +823,7 @@ class MainInterface(Frame):
             Adresse_haute[i].insert(0,"00000000")
         Button(Fenetre_DecodeurAdresse, text="Ok", width=12, command=lambda:Fenetre_DecodeurAdresse.destroy()).grid(row=1, column=0)
             
-            
         
-        
-    #methode pour gerer la fenêtre des connexions en paquets
-    def FenetreSecondaire_ConnexionPaquet(self):
-       
-        def _Bouton_ToutConnecter_CoPaquet_action():
-            print("Tout connecter")
-            
-            if self.flag_tout_connecter_paquet==0:
-                for i in range(len(CheckButt_Connexions_paquet_maitre)):
-                    CheckButt_Connexions_paquet_maitre[i].select()
-                for i in range(len(CheckButt_Connexions_paquet_esclave)):
-                    CheckButt_Connexions_paquet_esclave[i].select()
-                self.flag_tout_connecter_paquet=1
-            else:
-                for i in range(len(CheckButt_Connexions_paquet_maitre)):
-                    CheckButt_Connexions_paquet_maitre[i].deselect()
-                for i in range(len(CheckButt_Connexions_paquet_esclave)):
-                    CheckButt_Connexions_paquet_esclave[i].deselect()
-                self.flag_tout_connecter_paquet=0
-        
-        # Main méthode : FenetreSecondaire_ConnexionPaquet #
-        Fenetre_ConnexionPaquet = Toplevel(fenetre_tk)
-        self.frame = VerticalScrolledFrame(Fenetre_ConnexionPaquet)
-        self.frame.grid(row=0, column=0, sticky=N)
-        
-        Cases_num_routeur_co_maitre                    = []
-        Cases_num_routeur_co_esclave                   = []
-        Cases_maitres_connexion_paquet                 = []
-        Cases_esclaves_connexion_paquet                = []
-        CheckButt_Connexions_paquet_maitre             = []
-        CheckButt_Connexions_paquet_esclave            = []
-        self.flag_tout_connecter_paquet=0
-
-        #déclaration des labels
-        Label_Espace = Label(self.frame.interior, text="", width=6)
-        Label_Routeur_co_maitre = Label(self.frame.interior, text="Routeur  ")
-        Label_Routeur_co_esclave = Label(self.frame.interior, text="Routeur  ")
-        Label_IP_co_maitre = Label(self.frame.interior, text="  IP ")
-        Label_IP_co_esclave = Label(self.frame.interior, text="  IP ")
-        Label_Connexion_co_maitre = Label(self.frame.interior, text="Connexion")
-        Label_Connexion_co_esclave = Label(self.frame.interior, text="Connexion")
-
-       #déclaration des cases maitres
-        for r in range(self.nbr_R):
-            for m in range(self.nbr_M_par_routeur[r]):
-                Cases_num_routeur_co_maitre.append(Button(self.frame.interior, text=str(r), state=DISABLED, width=7))
-                Cases_maitres_connexion_paquet.append(Button(self.frame.interior, text=str(m)+" (Maitre)", state=DISABLED, width=7))
-                CheckButt_Connexions_paquet_maitre.append(Checkbutton(self.frame.interior, variable=self.Connexions_paquets[r][m]))
-        #déclaration des cases esclaves
-        for r in range(self.nbr_R):
-            for s in range(self.nbr_M_par_routeur[r],self.nbr_M_par_routeur[r]+self.nbr_S_par_routeur[r]):
-                Cases_num_routeur_co_esclave.append(Button(self.frame.interior, text=str(r), state=DISABLED, width=7))
-                Cases_esclaves_connexion_paquet.append(Button(self.frame.interior, text=str(s)+" (Esclave)", state=DISABLED, width=7))
-                CheckButt_Connexions_paquet_esclave.append(Checkbutton(self.frame.interior, variable=self.Connexions_paquets[r][s]))
-                
-        #affichage des label
-        Label_Espace.grid(row=0, column=0)
-        Label_Routeur_co_maitre.grid(row=0, column=1)
-        Label_IP_co_maitre.grid(row=0, column=2)
-        Label_Connexion_co_maitre.grid(row=0, column=3)
-        Label_Routeur_co_esclave.grid(row=0, column=4)
-        Label_IP_co_esclave.grid(row=0, column=5)
-        Label_Connexion_co_esclave.grid(row=0, column=6)
-        
-        #affichage cases maitres
-        for i in range(len(Cases_maitres_connexion_paquet)):
-            Cases_num_routeur_co_maitre[i]  .grid(row=i+1, column=1)
-            Cases_maitres_connexion_paquet[i]   .grid(row=i+1, column=2)
-            CheckButt_Connexions_paquet_maitre[i].grid(row=i+1, column=3)
-        #affichage cases esclaves
-        for i in range(len(Cases_maitres_connexion_paquet),len(Cases_maitres_connexion_paquet)+len(Cases_esclaves_connexion_paquet)):
-            Cases_num_routeur_co_esclave[i-len(Cases_maitres_connexion_paquet)].grid(row=i-len(Cases_maitres_connexion_paquet)+1, column=4)
-            Cases_esclaves_connexion_paquet[i-len(Cases_maitres_connexion_paquet)].grid(row=i-len(Cases_maitres_connexion_paquet)+1, column=5)
-            CheckButt_Connexions_paquet_esclave[i-len(Cases_maitres_connexion_paquet)].grid(row=i-len(Cases_maitres_connexion_paquet)+1, column=6)
-         
-        Button(Fenetre_ConnexionPaquet, text="Tout connecter/deconnecter", width=22, command= _Bouton_ToutConnecter_CoPaquet_action, pady=5).grid(row=2, column=0)
-        Button(Fenetre_ConnexionPaquet, text="Ok", width=22, command=lambda:Fenetre_ConnexionPaquet.destroy(), pady=5).grid(row=3, column=0)
-            
-            
             
     # Action bouton Generation code VHDL
     def on_buttonGenerate_clicked(self):
@@ -2318,15 +2318,17 @@ end noc_address_pack;
             os.remove(outputdir + "/noc_config_end_of_file_with_function.vhd")
 
 
-
-
 # Main        
 if __name__ == "__main__":
     
     fenetre_tk = Tk()
     fenetre_tk.title("Outil de generation de configurations NoC (Version 0.i)")
+    ###conf ubuntu
+    #fenetre_tk.geometry('1290x800')
+    ###conf windows
     fenetre_tk.geometry('1070x800')
     Outil_Python = MainInterface(fenetre_tk)
     
 
     Outil_Python.mainloop()
+
