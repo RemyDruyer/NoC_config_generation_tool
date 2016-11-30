@@ -540,41 +540,128 @@ class MainInterface(Frame):
                     
                     
         #5) ADD DECODER TABLE SIZE
-        self.Taille_table_decodeur_adr_maitre = [[0 for m in range(self.nbr_M_par_routeur[r])] for r in range (self.nbr_R)]
+        self.Taille_table_decodeur_adr_maitre = [[0 for m in range(self.nbr_M_par_routeur[r])] for r in range(self.nbr_R)]
         
         
-        #Routeur 0 : 4 Maitres
+        # Routeur 0 : 4 Maitres
         self.Taille_table_decodeur_adr_maitre[0][0] = 1
         self.Taille_table_decodeur_adr_maitre[0][1] = 2
         self.Taille_table_decodeur_adr_maitre[0][2] = 2
         self.Taille_table_decodeur_adr_maitre[0][3] = 4
-        #Routeur 1 : 1 Maitre
-        self.Taille_table_decodeur_adr_maitre[1][0] = 3
-        #Routeur 2 : 15 Maitre
+        # Routeur 1 : 1 Maitre
+        self.Taille_table_decodeur_adr_maitre[1][0] = 1
+        # Routeur 2 : 15 Maitre
         self.Taille_table_decodeur_adr_maitre[2][0] = 1
         self.Taille_table_decodeur_adr_maitre[2][1] = 2
         self.Taille_table_decodeur_adr_maitre[2][2] = 3
-        self.Taille_table_decodeur_adr_maitre[2][3] = 4
-        self.Taille_table_decodeur_adr_maitre[2][4] = 5
-        self.Taille_table_decodeur_adr_maitre[2][5] = 6
-        self.Taille_table_decodeur_adr_maitre[2][6] = 7
-        self.Taille_table_decodeur_adr_maitre[2][7] = 8
-        self.Taille_table_decodeur_adr_maitre[2][8] = 9
-        self.Taille_table_decodeur_adr_maitre[2][9] = 10
-        self.Taille_table_decodeur_adr_maitre[2][10] = 11
-        self.Taille_table_decodeur_adr_maitre[2][11] = 12
-        self.Taille_table_decodeur_adr_maitre[2][12] = 13
-        self.Taille_table_decodeur_adr_maitre[2][13] = 14
-        self.Taille_table_decodeur_adr_maitre[2][14] = 15
-        #Routeur 3 : 2 Maitre
+
+        # Routeur 3 : 2 Maitre
         self.Taille_table_decodeur_adr_maitre[3][0] = 2
-        self.Taille_table_decodeur_adr_maitre[3][1] = 3
+        self.Taille_table_decodeur_adr_maitre[3][1] = 2
         
+  
         self.Nombre_total_regles_decodeur_adresse = 0
-        
+        #calcul somme nombre total de regles des décodeurs d'adresses
         for r in range (self.nbr_R):
             for m in range (self.nbr_M_par_routeur[r]):
                 self.Nombre_total_regles_decodeur_adresse += self.Taille_table_decodeur_adr_maitre[r][m]
+                
+                
+        self.maitre_possede_decodage_adresse_esclave = [[[[0 for s in range(self.nbr_S_par_routeur[r_esclave])] for r_esclave in range(self.nbr_R)] for m in range(self.nbr_M_par_routeur[r])] for r in range(self.nbr_R)]
+
+        self.table_maitre_decod_adr_basse = [[[["" for s in range(self.nbr_S_par_routeur[r_esclave])] for r_esclave in range(self.nbr_R)] for m in range(self.nbr_M_par_routeur[r])] for r in range(self.nbr_R)]
+        self.table_maitre_decod_adr_haute = [[[["" for s in range(self.nbr_S_par_routeur[r_esclave])] for r_esclave in range(self.nbr_R)] for m in range(self.nbr_M_par_routeur[r])] for r in range(self.nbr_R)]
+        
+        
+        ### R0 = 2 esclaves ; R1 = 2 esclaves ; R2 = 3 esclaves : R3 = 0 esclave ###
+        
+
+        self.maitre_possede_decodage_adresse_esclave[0][0][1][0] = 1
+        self.maitre_possede_decodage_adresse_esclave[0][1][0][0] = 1
+        self.maitre_possede_decodage_adresse_esclave[0][1][1][1] = 1
+        self.maitre_possede_decodage_adresse_esclave[0][2][2][1] = 1
+        self.maitre_possede_decodage_adresse_esclave[0][2][2][2] = 1
+        self.maitre_possede_decodage_adresse_esclave[0][3][0][0] = 1
+        self.maitre_possede_decodage_adresse_esclave[0][3][0][1] = 1
+        self.maitre_possede_decodage_adresse_esclave[0][3][1][0] = 1
+        self.maitre_possede_decodage_adresse_esclave[0][3][1][1] = 1
+        self.maitre_possede_decodage_adresse_esclave[1][0][1][0] = 1
+        self.maitre_possede_decodage_adresse_esclave[2][0][0][0] = 1
+        self.maitre_possede_decodage_adresse_esclave[2][1][0][1] = 1
+        self.maitre_possede_decodage_adresse_esclave[2][1][1][0] = 1
+        self.maitre_possede_decodage_adresse_esclave[2][2][1][1] = 1
+        self.maitre_possede_decodage_adresse_esclave[2][2][2][0] = 1
+        self.maitre_possede_decodage_adresse_esclave[2][2][2][1] = 1
+        self.maitre_possede_decodage_adresse_esclave[3][0][2][0] = 1
+        self.maitre_possede_decodage_adresse_esclave[3][0][2][1] = 1
+        self.maitre_possede_decodage_adresse_esclave[3][1][0][0] = 1
+        self.maitre_possede_decodage_adresse_esclave[3][1][0][1] = 1
+        
+
+        
+
+        self.table_maitre_decod_adr_basse[0][0][1][0] = "20000000"
+        self.table_maitre_decod_adr_basse[0][1][0][0] = "01000000"
+        self.table_maitre_decod_adr_basse[0][1][1][1] = "31000000"
+        self.table_maitre_decod_adr_basse[0][2][2][1] = "52000000"
+        self.table_maitre_decod_adr_basse[0][2][2][2] = "62000000"
+        self.table_maitre_decod_adr_basse[0][3][0][0] = "00000000"
+        self.table_maitre_decod_adr_basse[0][3][0][1] = "00000000"
+        self.table_maitre_decod_adr_basse[0][3][1][0] = "00000000"
+        self.table_maitre_decod_adr_basse[0][3][1][1] = "00000000"
+        self.table_maitre_decod_adr_basse[1][0][1][0] = "00333000"
+        self.table_maitre_decod_adr_basse[2][0][0][0] = "00000000"
+        self.table_maitre_decod_adr_basse[2][1][0][1] = "00000000"
+        self.table_maitre_decod_adr_basse[2][1][1][0] = "00000000"
+        self.table_maitre_decod_adr_basse[2][2][1][1] = "00300000"
+        self.table_maitre_decod_adr_basse[2][2][2][0] = "00400000"
+        self.table_maitre_decod_adr_basse[2][2][2][1] = "00500000"
+        self.table_maitre_decod_adr_basse[3][0][2][0] = "00000000"
+        self.table_maitre_decod_adr_basse[3][0][2][1] = "00000000"
+        self.table_maitre_decod_adr_basse[3][1][0][0] = "00000000"
+        self.table_maitre_decod_adr_basse[3][1][0][1] = "00100000"
+        
+        
+        
+        self.table_maitre_decod_adr_haute[0][0][1][0] = "2000FFFF"
+        self.table_maitre_decod_adr_haute[0][1][0][0] = "0100FFFF"
+        self.table_maitre_decod_adr_haute[0][1][1][1] = "3100FFFF"
+        self.table_maitre_decod_adr_haute[0][2][2][1] = "5200FFFF"
+        self.table_maitre_decod_adr_haute[0][2][2][2] = "6200FFFF"
+        self.table_maitre_decod_adr_haute[0][3][0][0] = "0000FFFF"
+        self.table_maitre_decod_adr_haute[0][3][0][1] = "0000FFFF"
+        self.table_maitre_decod_adr_haute[0][3][1][0] = "0000FFFF"
+        self.table_maitre_decod_adr_haute[0][3][1][1] = "0000FFFF"
+        self.table_maitre_decod_adr_haute[1][0][1][0] = "0033FFFF"                                            
+        self.table_maitre_decod_adr_haute[2][0][0][0] = "0000FFFF"
+        self.table_maitre_decod_adr_haute[2][1][0][1] = "0000FFFF"
+        self.table_maitre_decod_adr_haute[2][1][1][0] = "0000FFFF"                                                 
+        self.table_maitre_decod_adr_haute[2][2][1][1] = "0030FFFF"
+        self.table_maitre_decod_adr_haute[2][2][2][0] = "0040FFFF"
+        self.table_maitre_decod_adr_haute[2][2][2][1] = "0050FFFF"                    
+        self.table_maitre_decod_adr_haute[3][0][2][0] = "0000FFFF"
+        self.table_maitre_decod_adr_haute[3][0][2][1] = "0000FFFF"                                                 
+        self.table_maitre_decod_adr_haute[3][1][0][0] = "0000FFFF"
+        self.table_maitre_decod_adr_haute[3][1][0][1] = "0010FFFF"
+
+        
+        
+        # for r in range (self.nbr_R):
+            # for m in range(self.nbr_M_par_routeur[r]):
+                 # for r_esclave in range (self.nbr_R):
+                    # for s in range (self.nbr_S_par_routeur[r_esclave]):
+                        # print("Routeur %d  Maitre %d -> Routeur %d Esclave %d : %d" %(r,m,r_esclave,s+self.nbr_M_par_routeur[r_esclave],self.maitre_possede_decodage_adresse_esclave[r][m][r_esclave][s]))
+
+        # for r in range (self.nbr_R):
+            # for m in range(self.nbr_M_par_routeur[r]):
+                 # for r_esclave in range (self.nbr_R):
+                    # for s in range (self.nbr_S_par_routeur[r_esclave]):
+                        # if self.maitre_possede_decodage_adresse_esclave[r][m][r_esclave][s] == 1:
+                            # print("\n")
+                            # print("Routeur %d  Maitre %d -> Routeur %d Esclave %d : %s" %(r,m,r_esclave,s+self.nbr_M_par_routeur[r_esclave],self.table_maitre_decod_adr_basse[r][m][r_esclave][s]))
+                            # print("Routeur %d  Maitre %d -> Routeur %d Esclave %d : %s" %(r,m,r_esclave,s+self.nbr_M_par_routeur[r_esclave],self.table_maitre_decod_adr_haute[r][m][r_esclave][s]))
+                            # print("\n")
+                            
                 
         #12) LOCAL CONNEXION   
         self.Matrices_connexions_locales = [[[0 for max_maitre in range(0,self.nbr_port_routeur_max+1)] for max_esclave in range(0,self.nbr_port_routeur_max+1)] for r in range(self.nbr_R)]
@@ -1395,290 +1482,34 @@ constant ROUTINGPORT15 	: regPORTADD:= "1111";
 --This address mapping is used inside the address decoding tables.
 --for each master of each router, define the address mapping of slave interfaces that can be reached by the master 
 --for each slave -> define a BASE_ADD and a HIGH_ADD
-constant 	ROUTER0_MASTER0_address_mapping_for_ROUTER0_SLAVE4_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"00000000";
-constant 	ROUTER0_MASTER0_address_mapping_for_ROUTER0_SLAVE4_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"00FFFFFF";
-constant 	ROUTER0_MASTER0_address_mapping_for_ROUTER0_SLAVE5_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"01000000";
-constant 	ROUTER0_MASTER0_address_mapping_for_ROUTER0_SLAVE5_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"01FFFFFF";
-constant 	ROUTER0_MASTER0_address_mapping_for_ROUTER0_SLAVE6_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"02000000";
-constant 	ROUTER0_MASTER0_address_mapping_for_ROUTER0_SLAVE6_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"02FFFFFF";
-constant 	ROUTER0_MASTER0_address_mapping_for_ROUTER0_SLAVE7_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"03000000";
-constant 	ROUTER0_MASTER0_address_mapping_for_ROUTER0_SLAVE7_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"03FFFFFF";
-constant 	ROUTER0_MASTER0_address_mapping_for_ROUTER0_SLAVE8_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"04000000";
-constant 	ROUTER0_MASTER0_address_mapping_for_ROUTER0_SLAVE8_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"04FFFFFF";
-constant 	ROUTER0_MASTER0_address_mapping_for_ROUTER1_SLAVE0_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"10000000";
-constant 	ROUTER0_MASTER0_address_mapping_for_ROUTER1_SLAVE0_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"10FFFFFF";
-constant 	ROUTER0_MASTER0_address_mapping_for_ROUTER1_SLAVE1_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"11000000";
-constant 	ROUTER0_MASTER0_address_mapping_for_ROUTER1_SLAVE1_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"11FFFFFF";
-constant 	ROUTER0_MASTER0_address_mapping_for_ROUTER2_SLAVE4_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"20000000";
-constant	ROUTER0_MASTER0_address_mapping_for_ROUTER2_SLAVE4_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"20FFFFFF";
-constant 	ROUTER0_MASTER0_address_mapping_for_ROUTER5_SLAVE1_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"50000000";
-constant	ROUTER0_MASTER0_address_mapping_for_ROUTER5_SLAVE1_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"50FFFFFF";
-
-constant 	ROUTER0_MASTER1_address_mapping_for_ROUTER4_SLAVE4_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"40000000";
-constant 	ROUTER0_MASTER1_address_mapping_for_ROUTER4_SLAVE4_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"40FFFFFF";
-constant 	ROUTER0_MASTER1_address_mapping_for_ROUTER0_SLAVE5_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"01000000";
-constant 	ROUTER0_MASTER1_address_mapping_for_ROUTER0_SLAVE5_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"01FFFFFF";
-constant 	ROUTER0_MASTER1_address_mapping_for_ROUTER0_SLAVE6_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"02000000";
-constant 	ROUTER0_MASTER1_address_mapping_for_ROUTER0_SLAVE6_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"02FFFFFF";
-constant 	ROUTER0_MASTER1_address_mapping_for_ROUTER0_SLAVE7_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"03000000";
-constant 	ROUTER0_MASTER1_address_mapping_for_ROUTER0_SLAVE7_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"03FFFFFF";
-constant 	ROUTER0_MASTER1_address_mapping_for_ROUTER0_SLAVE8_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"04000000";
-constant 	ROUTER0_MASTER1_address_mapping_for_ROUTER0_SLAVE8_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"04FFFFFF";
-constant 	ROUTER0_MASTER1_address_mapping_for_ROUTER1_SLAVE0_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"10000000";
-constant 	ROUTER0_MASTER1_address_mapping_for_ROUTER1_SLAVE0_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"10FFFFFF";
-constant 	ROUTER0_MASTER1_address_mapping_for_ROUTER1_SLAVE1_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"11000000";
-constant 	ROUTER0_MASTER1_address_mapping_for_ROUTER1_SLAVE1_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"11FFFFFF";
-constant 	ROUTER0_MASTER1_address_mapping_for_ROUTER2_SLAVE4_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"20000000";
-constant	ROUTER0_MASTER1_address_mapping_for_ROUTER2_SLAVE4_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"20FFFFFF";
-
-constant 	ROUTER0_MASTER2_address_mapping_for_ROUTER4_SLAVE4_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"40000000";
-constant 	ROUTER0_MASTER2_address_mapping_for_ROUTER4_SLAVE4_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"40FFFFFF";
-constant 	ROUTER0_MASTER2_address_mapping_for_ROUTER0_SLAVE5_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"01000000";
-constant 	ROUTER0_MASTER2_address_mapping_for_ROUTER0_SLAVE5_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"01FFFFFF";
-constant 	ROUTER0_MASTER2_address_mapping_for_ROUTER0_SLAVE6_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"02000000";
-constant 	ROUTER0_MASTER2_address_mapping_for_ROUTER0_SLAVE6_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"02FFFFFF";
-constant 	ROUTER0_MASTER2_address_mapping_for_ROUTER0_SLAVE7_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"03000000";
-constant 	ROUTER0_MASTER2_address_mapping_for_ROUTER0_SLAVE7_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"03FFFFFF";
-constant 	ROUTER0_MASTER2_address_mapping_for_ROUTER0_SLAVE8_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"04000000";
-constant 	ROUTER0_MASTER2_address_mapping_for_ROUTER0_SLAVE8_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"04FFFFFF";
-constant 	ROUTER0_MASTER2_address_mapping_for_ROUTER1_SLAVE0_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"10000000";
-constant 	ROUTER0_MASTER2_address_mapping_for_ROUTER1_SLAVE0_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"10FFFFFF";
-constant 	ROUTER0_MASTER2_address_mapping_for_ROUTER1_SLAVE1_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"11000000";
-constant 	ROUTER0_MASTER2_address_mapping_for_ROUTER1_SLAVE1_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"11FFFFFF";
-constant 	ROUTER0_MASTER2_address_mapping_for_ROUTER2_SLAVE4_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"20000000";
-constant	ROUTER0_MASTER2_address_mapping_for_ROUTER2_SLAVE4_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"20FFFFFF";
-
-constant 	ROUTER0_MASTER3_address_mapping_for_ROUTER4_SLAVE6_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"42000000";
-constant 	ROUTER0_MASTER3_address_mapping_for_ROUTER4_SLAVE6_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"42FFFFFF";
-constant 	ROUTER0_MASTER3_address_mapping_for_ROUTER0_SLAVE5_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"01000000";
-constant 	ROUTER0_MASTER3_address_mapping_for_ROUTER0_SLAVE5_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"01FFFFFF";
-constant 	ROUTER0_MASTER3_address_mapping_for_ROUTER0_SLAVE6_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"02000000";
-constant 	ROUTER0_MASTER3_address_mapping_for_ROUTER0_SLAVE6_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"02FFFFFF";
-constant 	ROUTER0_MASTER3_address_mapping_for_ROUTER0_SLAVE7_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"03000000";
-constant 	ROUTER0_MASTER3_address_mapping_for_ROUTER0_SLAVE7_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"03FFFFFF";
-constant 	ROUTER0_MASTER3_address_mapping_for_ROUTER0_SLAVE8_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"04000000";
-constant 	ROUTER0_MASTER3_address_mapping_for_ROUTER0_SLAVE8_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"04FFFFFF";
-constant 	ROUTER0_MASTER3_address_mapping_for_ROUTER1_SLAVE0_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"10000000";
-constant 	ROUTER0_MASTER3_address_mapping_for_ROUTER1_SLAVE0_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"10FFFFFF";
-constant 	ROUTER0_MASTER3_address_mapping_for_ROUTER1_SLAVE1_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"11000000";
-constant 	ROUTER0_MASTER3_address_mapping_for_ROUTER1_SLAVE1_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"11FFFFFF";
-constant 	ROUTER0_MASTER3_address_mapping_for_ROUTER2_SLAVE4_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"20000000";
-constant	ROUTER0_MASTER3_address_mapping_for_ROUTER2_SLAVE4_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"20FFFFFF";
-
-constant 	ROUTER2_MASTER0_address_mapping_for_ROUTER4_SLAVE4_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"000AAA00";
-constant 	ROUTER2_MASTER0_address_mapping_for_ROUTER4_SLAVE4_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"00FFFFFF";
-constant 	ROUTER2_MASTER0_address_mapping_for_ROUTER4_SLAVE5_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"01000000";
-constant 	ROUTER2_MASTER0_address_mapping_for_ROUTER4_SLAVE5_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"01FFFFFF";
-constant 	ROUTER2_MASTER0_address_mapping_for_ROUTER4_SLAVE6_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"02000000";
-constant 	ROUTER2_MASTER0_address_mapping_for_ROUTER4_SLAVE6_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"02FFFFFF";
-constant 	ROUTER2_MASTER0_address_mapping_for_ROUTER4_SLAVE7_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"03000000";
-constant 	ROUTER2_MASTER0_address_mapping_for_ROUTER4_SLAVE7_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"03FFFFFF";
-constant 	ROUTER2_MASTER0_address_mapping_for_ROUTER0_SLAVE8_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"04000000";
-constant 	ROUTER2_MASTER0_address_mapping_for_ROUTER0_SLAVE8_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"04FFFFFF";
-constant 	ROUTER2_MASTER0_address_mapping_for_ROUTER1_SLAVE0_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"10000000";
-constant 	ROUTER2_MASTER0_address_mapping_for_ROUTER1_SLAVE0_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"10FFFFFF";
-constant 	ROUTER2_MASTER0_address_mapping_for_ROUTER1_SLAVE1_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"11000000";
-constant 	ROUTER2_MASTER0_address_mapping_for_ROUTER1_SLAVE1_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"11FFFFFF";
-constant 	ROUTER2_MASTER0_address_mapping_for_ROUTER2_SLAVE4_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"20000000";
-constant	ROUTER2_MASTER0_address_mapping_for_ROUTER2_SLAVE4_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"20FFFFFF";
-
-constant 	ROUTER2_MASTER1_address_mapping_for_ROUTER0_SLAVE4_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"00000000";
-constant 	ROUTER2_MASTER1_address_mapping_for_ROUTER0_SLAVE4_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"00FFFFFF";
-constant 	ROUTER2_MASTER1_address_mapping_for_ROUTER0_SLAVE5_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"01000000";
-constant 	ROUTER2_MASTER1_address_mapping_for_ROUTER0_SLAVE5_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"01FFFFFF";
-constant 	ROUTER2_MASTER1_address_mapping_for_ROUTER0_SLAVE6_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"02000000";
-constant 	ROUTER2_MASTER1_address_mapping_for_ROUTER0_SLAVE6_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"02FFFFFF";
-constant 	ROUTER2_MASTER1_address_mapping_for_ROUTER0_SLAVE7_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"03000000";
-constant 	ROUTER2_MASTER1_address_mapping_for_ROUTER0_SLAVE7_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"03FFFFFF";
-constant 	ROUTER2_MASTER1_address_mapping_for_ROUTER0_SLAVE8_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"04000000";
-constant 	ROUTER2_MASTER1_address_mapping_for_ROUTER0_SLAVE8_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"04FFFFFF";
-constant 	ROUTER2_MASTER1_address_mapping_for_ROUTER1_SLAVE0_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"10000000";
-constant 	ROUTER2_MASTER1_address_mapping_for_ROUTER1_SLAVE0_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"10FFFFFF";
-constant 	ROUTER2_MASTER1_address_mapping_for_ROUTER1_SLAVE1_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"11000000";
-constant 	ROUTER2_MASTER1_address_mapping_for_ROUTER1_SLAVE1_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"11FFFFFF";
-constant 	ROUTER2_MASTER1_address_mapping_for_ROUTER2_SLAVE4_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"20000000";
-constant	ROUTER2_MASTER1_address_mapping_for_ROUTER2_SLAVE4_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"20FFFFFF";
-
-constant 	ROUTER2_MASTER2_address_mapping_for_ROUTER0_SLAVE4_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"00000000";
-constant 	ROUTER2_MASTER2_address_mapping_for_ROUTER0_SLAVE4_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"00FFFFFF";
-constant 	ROUTER2_MASTER2_address_mapping_for_ROUTER0_SLAVE5_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"01000000";
-constant 	ROUTER2_MASTER2_address_mapping_for_ROUTER0_SLAVE5_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"01FFFFFF";
-constant 	ROUTER2_MASTER2_address_mapping_for_ROUTER0_SLAVE6_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"02000000";
-constant 	ROUTER2_MASTER2_address_mapping_for_ROUTER0_SLAVE6_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"02FFFFFF";
-constant 	ROUTER2_MASTER2_address_mapping_for_ROUTER0_SLAVE7_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"03000000";
-constant 	ROUTER2_MASTER2_address_mapping_for_ROUTER0_SLAVE7_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"03FFFFFF";
-constant 	ROUTER2_MASTER2_address_mapping_for_ROUTER0_SLAVE8_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"04000000";
-constant 	ROUTER2_MASTER2_address_mapping_for_ROUTER0_SLAVE8_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"04FFFFFF";
-constant 	ROUTER2_MASTER2_address_mapping_for_ROUTER1_SLAVE0_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"10000000";
-constant 	ROUTER2_MASTER2_address_mapping_for_ROUTER1_SLAVE0_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"10FFFFFF";
-constant 	ROUTER2_MASTER2_address_mapping_for_ROUTER1_SLAVE1_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"11000000";
-constant 	ROUTER2_MASTER2_address_mapping_for_ROUTER1_SLAVE1_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"11FFFFFF";
-constant 	ROUTER2_MASTER2_address_mapping_for_ROUTER2_SLAVE4_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"20000000";
-constant	ROUTER2_MASTER2_address_mapping_for_ROUTER2_SLAVE4_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"20FFFFFF";
-
-constant 	ROUTER2_MASTER3_address_mapping_for_ROUTER0_SLAVE4_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"00000000";
-constant 	ROUTER2_MASTER3_address_mapping_for_ROUTER0_SLAVE4_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"00FFFFFF";
-constant 	ROUTER2_MASTER3_address_mapping_for_ROUTER0_SLAVE5_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"01000000";
-constant 	ROUTER2_MASTER3_address_mapping_for_ROUTER0_SLAVE5_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"01FFFFFF";
-constant 	ROUTER2_MASTER3_address_mapping_for_ROUTER0_SLAVE6_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"02000000";
-constant 	ROUTER2_MASTER3_address_mapping_for_ROUTER0_SLAVE6_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"02FFFFFF";
-constant 	ROUTER2_MASTER3_address_mapping_for_ROUTER0_SLAVE7_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"03000000";
-constant 	ROUTER2_MASTER3_address_mapping_for_ROUTER0_SLAVE7_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"03FFFFFF";
-constant 	ROUTER2_MASTER3_address_mapping_for_ROUTER0_SLAVE8_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"04000000";
-constant 	ROUTER2_MASTER3_address_mapping_for_ROUTER0_SLAVE8_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"04FFFFFF";
-constant 	ROUTER2_MASTER3_address_mapping_for_ROUTER1_SLAVE0_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"10000000";
-constant 	ROUTER2_MASTER3_address_mapping_for_ROUTER1_SLAVE0_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"10FFFFFF";
-constant 	ROUTER2_MASTER3_address_mapping_for_ROUTER1_SLAVE1_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"11000000";
-constant 	ROUTER2_MASTER3_address_mapping_for_ROUTER1_SLAVE1_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"11FFFFFF";
-constant 	ROUTER2_MASTER3_address_mapping_for_ROUTER2_SLAVE4_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"20000000";
-constant	ROUTER2_MASTER3_address_mapping_for_ROUTER2_SLAVE4_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"20FFFFFF";
+'''
 
 
-constant 	ROUTER3_MASTER0_address_mapping_for_ROUTER0_SLAVE4_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"00000000";
-constant 	ROUTER3_MASTER0_address_mapping_for_ROUTER0_SLAVE4_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"00FFFFFF";
-constant 	ROUTER3_MASTER0_address_mapping_for_ROUTER0_SLAVE5_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"01000000";
-constant 	ROUTER3_MASTER0_address_mapping_for_ROUTER0_SLAVE5_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"01FFFFFF";
-constant 	ROUTER3_MASTER0_address_mapping_for_ROUTER0_SLAVE6_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"02000000";
-constant 	ROUTER3_MASTER0_address_mapping_for_ROUTER0_SLAVE6_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"02FFFFFF";
-constant 	ROUTER3_MASTER0_address_mapping_for_ROUTER0_SLAVE7_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"03000000";
-constant 	ROUTER3_MASTER0_address_mapping_for_ROUTER0_SLAVE7_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"03FFFFFF";
-constant 	ROUTER3_MASTER0_address_mapping_for_ROUTER0_SLAVE8_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"04000000";
-constant 	ROUTER3_MASTER0_address_mapping_for_ROUTER0_SLAVE8_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"04FFFFFF";
-constant 	ROUTER3_MASTER0_address_mapping_for_ROUTER1_SLAVE0_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"10000000";
-constant 	ROUTER3_MASTER0_address_mapping_for_ROUTER1_SLAVE0_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"10FFFFFF";
-constant 	ROUTER3_MASTER0_address_mapping_for_ROUTER1_SLAVE1_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"11000000";
-constant 	ROUTER3_MASTER0_address_mapping_for_ROUTER1_SLAVE1_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"11FFFFFF";
-constant 	ROUTER3_MASTER0_address_mapping_for_ROUTER2_SLAVE4_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"20000000";
-constant	ROUTER3_MASTER0_address_mapping_for_ROUTER2_SLAVE4_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"20FFFFFF";
-
-constant 	ROUTER3_MASTER1_address_mapping_for_ROUTER0_SLAVE4_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"00000000";
-constant 	ROUTER3_MASTER1_address_mapping_for_ROUTER0_SLAVE4_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"00FFFFFF";
-constant 	ROUTER3_MASTER1_address_mapping_for_ROUTER0_SLAVE5_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"01000000";
-constant 	ROUTER3_MASTER1_address_mapping_for_ROUTER0_SLAVE5_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"01FFFFFF";
-constant 	ROUTER3_MASTER1_address_mapping_for_ROUTER0_SLAVE6_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"02000000";
-constant 	ROUTER3_MASTER1_address_mapping_for_ROUTER0_SLAVE6_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"02FFFFFF";
-constant 	ROUTER3_MASTER1_address_mapping_for_ROUTER0_SLAVE7_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"03000000";
-constant 	ROUTER3_MASTER1_address_mapping_for_ROUTER0_SLAVE7_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"03FFFFFF";
-constant 	ROUTER3_MASTER1_address_mapping_for_ROUTER0_SLAVE8_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"04000000";
-constant 	ROUTER3_MASTER1_address_mapping_for_ROUTER0_SLAVE8_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"04FFFFFF";
-constant 	ROUTER3_MASTER1_address_mapping_for_ROUTER1_SLAVE0_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"10000000";
-constant 	ROUTER3_MASTER1_address_mapping_for_ROUTER1_SLAVE0_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"10FFFFFF";
-constant 	ROUTER3_MASTER1_address_mapping_for_ROUTER1_SLAVE1_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"11000000";
-constant 	ROUTER3_MASTER1_address_mapping_for_ROUTER1_SLAVE1_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"11FFFFFF";
-constant 	ROUTER3_MASTER1_address_mapping_for_ROUTER2_SLAVE4_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"20000000";
-constant	ROUTER3_MASTER1_address_mapping_for_ROUTER2_SLAVE4_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"20FFFFFF";
-
-constant 	ROUTER3_MASTER2_address_mapping_for_ROUTER0_SLAVE4_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"00000000";
-constant 	ROUTER3_MASTER2_address_mapping_for_ROUTER0_SLAVE4_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"00FFFFFF";
-constant 	ROUTER3_MASTER2_address_mapping_for_ROUTER0_SLAVE5_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"01000000";
-constant 	ROUTER3_MASTER2_address_mapping_for_ROUTER0_SLAVE5_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"01FFFFFF";
-constant 	ROUTER3_MASTER2_address_mapping_for_ROUTER0_SLAVE6_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"02000000";
-constant 	ROUTER3_MASTER2_address_mapping_for_ROUTER0_SLAVE6_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"02FFFFFF";
-constant 	ROUTER3_MASTER2_address_mapping_for_ROUTER0_SLAVE7_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"03000000";
-constant 	ROUTER3_MASTER2_address_mapping_for_ROUTER0_SLAVE7_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"03FFFFFF";
-constant 	ROUTER3_MASTER2_address_mapping_for_ROUTER0_SLAVE8_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"04000000";
-constant 	ROUTER3_MASTER2_address_mapping_for_ROUTER0_SLAVE8_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"04FFFFFF";
-constant 	ROUTER3_MASTER2_address_mapping_for_ROUTER1_SLAVE0_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"10000000";
-constant 	ROUTER3_MASTER2_address_mapping_for_ROUTER1_SLAVE0_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"10FFFFFF";
-constant 	ROUTER3_MASTER2_address_mapping_for_ROUTER1_SLAVE1_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"11000000";
-constant 	ROUTER3_MASTER2_address_mapping_for_ROUTER1_SLAVE1_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"11FFFFFF";
-constant 	ROUTER3_MASTER2_address_mapping_for_ROUTER2_SLAVE4_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"20000000";
-constant	ROUTER3_MASTER2_address_mapping_for_ROUTER2_SLAVE4_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"20FFFFFF";
-
-
-constant 	ROUTER4_MASTER0_address_mapping_for_ROUTER0_SLAVE4_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"00000000";
-constant 	ROUTER4_MASTER0_address_mapping_for_ROUTER0_SLAVE4_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"00FFFFFF";
-constant 	ROUTER4_MASTER0_address_mapping_for_ROUTER0_SLAVE5_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"01000000";
-constant 	ROUTER4_MASTER0_address_mapping_for_ROUTER0_SLAVE5_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"01FFFFFF";
-constant 	ROUTER4_MASTER0_address_mapping_for_ROUTER0_SLAVE6_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"02000000";
-constant 	ROUTER4_MASTER0_address_mapping_for_ROUTER0_SLAVE6_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"02FFFFFF";
-constant 	ROUTER4_MASTER0_address_mapping_for_ROUTER0_SLAVE7_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"03000000";
-constant 	ROUTER4_MASTER0_address_mapping_for_ROUTER0_SLAVE7_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"03FFFFFF";
-constant 	ROUTER4_MASTER0_address_mapping_for_ROUTER0_SLAVE8_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"04000000";
-constant 	ROUTER4_MASTER0_address_mapping_for_ROUTER0_SLAVE8_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"04FFFFFF";
-constant 	ROUTER4_MASTER0_address_mapping_for_ROUTER1_SLAVE0_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"10000000";
-constant 	ROUTER4_MASTER0_address_mapping_for_ROUTER1_SLAVE0_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"10FFFFFF";
-constant 	ROUTER4_MASTER0_address_mapping_for_ROUTER1_SLAVE1_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"11000000";
-constant 	ROUTER4_MASTER0_address_mapping_for_ROUTER1_SLAVE1_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"11FFFFFF";
-constant 	ROUTER4_MASTER0_address_mapping_for_ROUTER2_SLAVE4_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"20000000";
-constant	ROUTER4_MASTER0_address_mapping_for_ROUTER2_SLAVE4_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"20FFFFFF";
-
-constant 	ROUTER4_MASTER1_address_mapping_for_ROUTER0_SLAVE4_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"00000000";
-constant 	ROUTER4_MASTER1_address_mapping_for_ROUTER0_SLAVE4_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"00FFFFFF";
-constant 	ROUTER4_MASTER1_address_mapping_for_ROUTER0_SLAVE5_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"01000000";
-constant 	ROUTER4_MASTER1_address_mapping_for_ROUTER0_SLAVE5_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"01FFFFFF";
-constant 	ROUTER4_MASTER1_address_mapping_for_ROUTER0_SLAVE6_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"02000000";
-constant 	ROUTER4_MASTER1_address_mapping_for_ROUTER0_SLAVE6_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"02FFFFFF";
-constant 	ROUTER4_MASTER1_address_mapping_for_ROUTER0_SLAVE7_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"03000000";
-constant 	ROUTER4_MASTER1_address_mapping_for_ROUTER0_SLAVE7_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"03FFFFFF";
-constant 	ROUTER4_MASTER1_address_mapping_for_ROUTER0_SLAVE8_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"04000000";
-constant 	ROUTER4_MASTER1_address_mapping_for_ROUTER0_SLAVE8_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"04FFFFFF";
-constant 	ROUTER4_MASTER1_address_mapping_for_ROUTER1_SLAVE0_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"10000000";
-constant 	ROUTER4_MASTER1_address_mapping_for_ROUTER1_SLAVE0_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"10FFFFFF";
-constant 	ROUTER4_MASTER1_address_mapping_for_ROUTER1_SLAVE1_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"11000000";
-constant 	ROUTER4_MASTER1_address_mapping_for_ROUTER1_SLAVE1_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"11FFFFFF";
-constant 	ROUTER4_MASTER1_address_mapping_for_ROUTER2_SLAVE4_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"20000000";
-constant	ROUTER4_MASTER1_address_mapping_for_ROUTER2_SLAVE4_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"20FFFFFF";
-
-constant 	ROUTER4_MASTER2_address_mapping_for_ROUTER0_SLAVE4_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"00000000";
-constant 	ROUTER4_MASTER2_address_mapping_for_ROUTER0_SLAVE4_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"00FFFFFF";
-constant 	ROUTER4_MASTER2_address_mapping_for_ROUTER0_SLAVE5_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"01000000";
-constant 	ROUTER4_MASTER2_address_mapping_for_ROUTER0_SLAVE5_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"01FFFFFF";
-constant 	ROUTER4_MASTER2_address_mapping_for_ROUTER0_SLAVE6_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"02000000";
-constant 	ROUTER4_MASTER2_address_mapping_for_ROUTER0_SLAVE6_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"02FFFFFF";
-constant 	ROUTER4_MASTER2_address_mapping_for_ROUTER0_SLAVE7_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"03000000";
-constant 	ROUTER4_MASTER2_address_mapping_for_ROUTER0_SLAVE7_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"03FFFFFF";
-constant 	ROUTER4_MASTER2_address_mapping_for_ROUTER0_SLAVE8_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"04000000";
-constant 	ROUTER4_MASTER2_address_mapping_for_ROUTER0_SLAVE8_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"04FFFFFF";
-constant 	ROUTER4_MASTER2_address_mapping_for_ROUTER1_SLAVE0_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"10000000";
-constant 	ROUTER4_MASTER2_address_mapping_for_ROUTER1_SLAVE0_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"10FFFFFF";
-constant 	ROUTER4_MASTER2_address_mapping_for_ROUTER1_SLAVE1_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"11000000";
-constant 	ROUTER4_MASTER2_address_mapping_for_ROUTER1_SLAVE1_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"11FFFFFF";
-constant 	ROUTER4_MASTER2_address_mapping_for_ROUTER2_SLAVE4_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"20000000";
-constant	ROUTER4_MASTER2_address_mapping_for_ROUTER2_SLAVE4_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"20FFFFFF";
-
-constant 	ROUTER4_MASTER3_address_mapping_for_ROUTER0_SLAVE4_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"00000000";
-constant 	ROUTER4_MASTER3_address_mapping_for_ROUTER0_SLAVE4_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"00FFFFFF";
-constant 	ROUTER4_MASTER3_address_mapping_for_ROUTER0_SLAVE5_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"01000000";
-constant 	ROUTER4_MASTER3_address_mapping_for_ROUTER0_SLAVE5_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"01FFFFFF";
-constant 	ROUTER4_MASTER3_address_mapping_for_ROUTER0_SLAVE6_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"02000000";
-constant 	ROUTER4_MASTER3_address_mapping_for_ROUTER0_SLAVE6_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"02FFFFFF";
-constant 	ROUTER4_MASTER3_address_mapping_for_ROUTER0_SLAVE7_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"03000000";
-constant 	ROUTER4_MASTER3_address_mapping_for_ROUTER0_SLAVE7_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"03FFFFFF";
-constant 	ROUTER4_MASTER3_address_mapping_for_ROUTER0_SLAVE8_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"04000000";
-constant 	ROUTER4_MASTER3_address_mapping_for_ROUTER0_SLAVE8_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"04FFFFFF";
-constant 	ROUTER4_MASTER3_address_mapping_for_ROUTER1_SLAVE0_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"10000000";
-constant 	ROUTER4_MASTER3_address_mapping_for_ROUTER1_SLAVE0_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"10FFFFFF";
-constant 	ROUTER4_MASTER3_address_mapping_for_ROUTER1_SLAVE1_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"11000000";
-constant 	ROUTER4_MASTER3_address_mapping_for_ROUTER1_SLAVE1_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"11FFFFFF";
-constant 	ROUTER4_MASTER3_address_mapping_for_ROUTER2_SLAVE4_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"20000000";
-constant	ROUTER4_MASTER3_address_mapping_for_ROUTER2_SLAVE4_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"20FFFFFF";
-
-
-constant 	ROUTER5_MASTER0_address_mapping_for_ROUTER1_SLAVE0_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"10000000";
-constant 	ROUTER5_MASTER0_address_mapping_for_ROUTER1_SLAVE0_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"10FFFFFF";
-constant 	ROUTER5_MASTER0_address_mapping_for_ROUTER1_SLAVE1_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"11000000";
-constant 	ROUTER5_MASTER0_address_mapping_for_ROUTER1_SLAVE1_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"11FFFFFF";
-constant 	ROUTER5_MASTER0_address_mapping_for_ROUTER2_SLAVE4_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"20000000";
-constant 	ROUTER5_MASTER0_address_mapping_for_ROUTER2_SLAVE4_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"20FFFFFF";
-constant 	ROUTER5_MASTER0_address_mapping_for_ROUTER4_SLAVE4_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"40000000";
-constant 	ROUTER5_MASTER0_address_mapping_for_ROUTER4_SLAVE4_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"40FFFFFF";
-constant 	ROUTER5_MASTER0_address_mapping_for_ROUTER4_SLAVE5_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"41000000";
-constant 	ROUTER5_MASTER0_address_mapping_for_ROUTER4_SLAVE5_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"41FFFFFF";
-constant 	ROUTER5_MASTER0_address_mapping_for_ROUTER4_SLAVE6_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"42000000";
-constant 	ROUTER5_MASTER0_address_mapping_for_ROUTER4_SLAVE6_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"42FFFFFF";
-constant 	ROUTER5_MASTER0_address_mapping_for_ROUTER4_SLAVE7_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"43000000";
-constant 	ROUTER5_MASTER0_address_mapping_for_ROUTER4_SLAVE7_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"43FFFFFF";
-constant 	ROUTER5_MASTER0_address_mapping_for_ROUTER5_SLAVE1_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"50000000";
-constant	ROUTER5_MASTER0_address_mapping_for_ROUTER5_SLAVE1_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"50FFFFFF";
-constant 	ROUTER5_MASTER0_address_mapping_for_ROUTER0_SLAVE4_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"00000000";
-constant	ROUTER5_MASTER0_address_mapping_for_ROUTER0_SLAVE4_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"00FFFFFF";
+# constant 	ROUTER0_MASTER0_address_mapping_for_ROUTER0_SLAVE4_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"00000000";
+# constant 	ROUTER0_MASTER0_address_mapping_for_ROUTER0_SLAVE4_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"00FFFFFF";
+# constant 	ROUTER0_MASTER0_address_mapping_for_ROUTER0_SLAVE5_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"01000000";
+# constant 	ROUTER0_MASTER0_address_mapping_for_ROUTER0_SLAVE5_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"01FFFFFF";
 
 
         
-        '''
+        
         fw= open(outputdir + "/noc_config_configurable_part_6.vhd", 'w')
         fw.write("%s" %ch)
+        
+        for r in range(self.nbr_R):
+            for m in range(self.nbr_M_par_routeur[r]):
+                for r_esclave in range(self.nbr_R):
+                    for s in range(self.nbr_S_par_routeur[r_esclave]):
+                        if self.maitre_possede_decodage_adresse_esclave[r][m][r_esclave][s] == 1:
+                            fw.write("""constant 	ROUTER%d_MASTER%d_address_mapping_for_ROUTER%d_SLAVE%d_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"%s";\n""" %(r, m, r_esclave, s+self.nbr_M_par_routeur[r_esclave], self.table_maitre_decod_adr_basse[r][m][r_esclave][s]))
+                            fw.write("""constant 	ROUTER%d_MASTER%d_address_mapping_for_ROUTER%d_SLAVE%d_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"%s";\n""" %(r, m, r_esclave, s+self.nbr_M_par_routeur[r_esclave], self.table_maitre_decod_adr_haute[r][m][r_esclave][s]))
+            s           
+        # self.maitre_possede_decodage_adresse_esclave = [[[[0 for s in range(self.nbr_S_par_routeur[r_esclave])] for r_esclave in range(self.nbr_R)] for m in range(self.nbr_M_par_routeur[r])] for r in range(self.nbr_R)]
+
+        # self.table_maitre_decod_adr_basse = [[[["" for s in range(self.nbr_S_par_routeur[r_esclave])] for r_esclave in range(self.nbr_R)] for m in range(self.nbr_M_par_routeur[r])] for r in range(self.nbr_R)]
+        # self.table_maitre_decod_adr_haute = [[[["" for s in range(self.nbr_S_par_routeur[r_esclave])] for r_esclave in range(self.nbr_R)] for m in range(self.nbr_M_par_routeur[r])] for r in range(self.nbr_R)]
+        
+        
         fw.close()
         
         
@@ -1767,324 +1598,58 @@ constant from_ROUTER5_to_ROUTER4_destination_port : regPORTADD:= ROUTINGPORT2;
 -- constant ROUTERi_MASTERj_ADDRESS_DECODER_TABLE : router0_master0_record_address_decod_table:=(
 -- |    destination slave   |   destination slave 	    |   		   Routing table 				  | slave destination |   
 -- |	   base address	    | 	   high address         |	 	    local port noc address		  	  |      address      |
-constant ROUTER0_MASTER0_ADDRESS_DECODER_TABLE : router0_master0_record_address_decod_table:=(
-	(ROUTER0_MASTER0_address_mapping_for_ROUTER0_SLAVE4_BASE_ADD, ROUTER0_MASTER0_address_mapping_for_ROUTER0_SLAVE4_HIGH_ADD, SLAVE4, ROUTER0 & SLAVE4),	
-	(ROUTER0_MASTER0_address_mapping_for_ROUTER0_SLAVE5_BASE_ADD, ROUTER0_MASTER0_address_mapping_for_ROUTER0_SLAVE5_HIGH_ADD, SLAVE5, ROUTER0 & SLAVE5),	
-	(ROUTER0_MASTER0_address_mapping_for_ROUTER0_SLAVE6_BASE_ADD, ROUTER0_MASTER0_address_mapping_for_ROUTER0_SLAVE6_HIGH_ADD, SLAVE6, ROUTER0 & SLAVE6),	
-	(ROUTER0_MASTER0_address_mapping_for_ROUTER0_SLAVE7_BASE_ADD, ROUTER0_MASTER0_address_mapping_for_ROUTER0_SLAVE7_HIGH_ADD, SLAVE7, ROUTER0 & SLAVE7),	
-	(ROUTER0_MASTER0_address_mapping_for_ROUTER0_SLAVE8_BASE_ADD, ROUTER0_MASTER0_address_mapping_for_ROUTER0_SLAVE8_HIGH_ADD, SLAVE8, ROUTER0 & SLAVE8),	
-	(ROUTER0_MASTER0_address_mapping_for_ROUTER1_SLAVE0_BASE_ADD, ROUTER0_MASTER0_address_mapping_for_ROUTER1_SLAVE0_HIGH_ADD, from_ROUTER0_to_ROUTER1_destination_port, ROUTER1 & SLAVE0),	
-	(ROUTER0_MASTER0_address_mapping_for_ROUTER1_SLAVE1_BASE_ADD, ROUTER0_MASTER0_address_mapping_for_ROUTER1_SLAVE1_HIGH_ADD, from_ROUTER0_to_ROUTER1_destination_port, ROUTER1 & SLAVE1),
-	(ROUTER0_MASTER0_address_mapping_for_ROUTER2_SLAVE4_BASE_ADD, ROUTER0_MASTER0_address_mapping_for_ROUTER2_SLAVE4_HIGH_ADD, from_ROUTER0_to_ROUTER2_destination_port, ROUTER2 & SLAVE4),
-	(ROUTER0_MASTER0_address_mapping_for_ROUTER5_SLAVE1_BASE_ADD, ROUTER0_MASTER0_address_mapping_for_ROUTER5_SLAVE1_HIGH_ADD, from_ROUTER0_to_ROUTER5_destination_port, ROUTER5 & SLAVE1)
-	);
+'''
+# constant ROUTER0_MASTER0_ADDRESS_DECODER_TABLE : router0_master0_record_address_decod_table:=(
+	# (ROUTER0_MASTER0_address_mapping_for_ROUTER0_SLAVE4_BASE_ADD, ROUTER0_MASTER0_address_mapping_for_ROUTER0_SLAVE4_HIGH_ADD, SLAVE4, ROUTER0 & SLAVE4),	
+	# (ROUTER0_MASTER0_address_mapping_for_ROUTER0_SLAVE5_BASE_ADD, ROUTER0_MASTER0_address_mapping_for_ROUTER0_SLAVE5_HIGH_ADD, SLAVE5, ROUTER0 & SLAVE5),	
+	# (ROUTER0_MASTER0_address_mapping_for_ROUTER0_SLAVE6_BASE_ADD, ROUTER0_MASTER0_address_mapping_for_ROUTER0_SLAVE6_HIGH_ADD, SLAVE6, ROUTER0 & SLAVE6),	
+	# (ROUTER0_MASTER0_address_mapping_for_ROUTER0_SLAVE7_BASE_ADD, ROUTER0_MASTER0_address_mapping_for_ROUTER0_SLAVE7_HIGH_ADD, SLAVE7, ROUTER0 & SLAVE7),	
+	# (ROUTER0_MASTER0_address_mapping_for_ROUTER0_SLAVE8_BASE_ADD, ROUTER0_MASTER0_address_mapping_for_ROUTER0_SLAVE8_HIGH_ADD, SLAVE8, ROUTER0 & SLAVE8),	
+	# (ROUTER0_MASTER0_address_mapping_for_ROUTER1_SLAVE0_BASE_ADD, ROUTER0_MASTER0_address_mapping_for_ROUTER1_SLAVE0_HIGH_ADD, from_ROUTER0_to_ROUTER1_destination_port, ROUTER1 & SLAVE0),	
+	# (ROUTER0_MASTER0_address_mapping_for_ROUTER1_SLAVE1_BASE_ADD, ROUTER0_MASTER0_address_mapping_for_ROUTER1_SLAVE1_HIGH_ADD, from_ROUTER0_to_ROUTER1_destination_port, ROUTER1 & SLAVE1),
+	# (ROUTER0_MASTER0_address_mapping_for_ROUTER2_SLAVE4_BASE_ADD, ROUTER0_MASTER0_address_mapping_for_ROUTER2_SLAVE4_HIGH_ADD, from_ROUTER0_to_ROUTER2_destination_port, ROUTER2 & SLAVE4),
+	# (ROUTER0_MASTER0_address_mapping_for_ROUTER5_SLAVE1_BASE_ADD, ROUTER0_MASTER0_address_mapping_for_ROUTER5_SLAVE1_HIGH_ADD, from_ROUTER0_to_ROUTER5_destination_port, ROUTER5 & SLAVE1)
+	# );
 	
-constant ROUTER0_MASTER1_ADDRESS_DECODER_TABLE : router0_master1_record_address_decod_table:=(
-	(ROUTER0_MASTER1_address_mapping_for_ROUTER4_SLAVE4_BASE_ADD, ROUTER0_MASTER1_address_mapping_for_ROUTER4_SLAVE4_HIGH_ADD, from_ROUTER0_to_ROUTER4_destination_port, ROUTER4 & SLAVE4),	
-	(ROUTER0_MASTER1_address_mapping_for_ROUTER0_SLAVE5_BASE_ADD, ROUTER0_MASTER1_address_mapping_for_ROUTER0_SLAVE5_HIGH_ADD, SLAVE5, ROUTER0 & SLAVE5),	
-	(ROUTER0_MASTER1_address_mapping_for_ROUTER0_SLAVE6_BASE_ADD, ROUTER0_MASTER1_address_mapping_for_ROUTER0_SLAVE6_HIGH_ADD, SLAVE6, ROUTER0 & SLAVE6),	
-	(ROUTER0_MASTER1_address_mapping_for_ROUTER0_SLAVE7_BASE_ADD, ROUTER0_MASTER1_address_mapping_for_ROUTER0_SLAVE7_HIGH_ADD, SLAVE7, ROUTER0 & SLAVE7),	
-	(ROUTER0_MASTER1_address_mapping_for_ROUTER0_SLAVE8_BASE_ADD, ROUTER0_MASTER1_address_mapping_for_ROUTER0_SLAVE8_HIGH_ADD, SLAVE8, ROUTER0 & SLAVE8),	
-	(ROUTER0_MASTER1_address_mapping_for_ROUTER1_SLAVE0_BASE_ADD, ROUTER0_MASTER1_address_mapping_for_ROUTER1_SLAVE0_HIGH_ADD, from_ROUTER0_to_ROUTER1_destination_port, ROUTER1 & SLAVE0),	
-	(ROUTER0_MASTER1_address_mapping_for_ROUTER1_SLAVE1_BASE_ADD, ROUTER0_MASTER1_address_mapping_for_ROUTER1_SLAVE1_HIGH_ADD, from_ROUTER0_to_ROUTER1_destination_port, ROUTER1 & SLAVE1),
-	(ROUTER0_MASTER1_address_mapping_for_ROUTER2_SLAVE4_BASE_ADD, ROUTER0_MASTER1_address_mapping_for_ROUTER2_SLAVE4_HIGH_ADD, from_ROUTER0_to_ROUTER2_destination_port, ROUTER2 & SLAVE4)
-	);
+# constant ROUTER0_MASTER1_ADDRESS_DECODER_TABLE : router0_master1_record_address_decod_table:=(
+	# (ROUTER0_MASTER1_address_mapping_for_ROUTER4_SLAVE4_BASE_ADD, ROUTER0_MASTER1_address_mapping_for_ROUTER4_SLAVE4_HIGH_ADD, from_ROUTER0_to_ROUTER4_destination_port, ROUTER4 & SLAVE4),	
+	# (ROUTER0_MASTER1_address_mapping_for_ROUTER0_SLAVE5_BASE_ADD, ROUTER0_MASTER1_address_mapping_for_ROUTER0_SLAVE5_HIGH_ADD, SLAVE5, ROUTER0 & SLAVE5),	
+	# (ROUTER0_MASTER1_address_mapping_for_ROUTER0_SLAVE6_BASE_ADD, ROUTER0_MASTER1_address_mapping_for_ROUTER0_SLAVE6_HIGH_ADD, SLAVE6, ROUTER0 & SLAVE6),	
+	# (ROUTER0_MASTER1_address_mapping_for_ROUTER0_SLAVE7_BASE_ADD, ROUTER0_MASTER1_address_mapping_for_ROUTER0_SLAVE7_HIGH_ADD, SLAVE7, ROUTER0 & SLAVE7),	
+	# (ROUTER0_MASTER1_address_mapping_for_ROUTER0_SLAVE8_BASE_ADD, ROUTER0_MASTER1_address_mapping_for_ROUTER0_SLAVE8_HIGH_ADD, SLAVE8, ROUTER0 & SLAVE8),	
+	# (ROUTER0_MASTER1_address_mapping_for_ROUTER1_SLAVE0_BASE_ADD, ROUTER0_MASTER1_address_mapping_for_ROUTER1_SLAVE0_HIGH_ADD, from_ROUTER0_to_ROUTER1_destination_port, ROUTER1 & SLAVE0),	
+	# (ROUTER0_MASTER1_address_mapping_for_ROUTER1_SLAVE1_BASE_ADD, ROUTER0_MASTER1_address_mapping_for_ROUTER1_SLAVE1_HIGH_ADD, from_ROUTER0_to_ROUTER1_destination_port, ROUTER1 & SLAVE1),
+	# (ROUTER0_MASTER1_address_mapping_for_ROUTER2_SLAVE4_BASE_ADD, ROUTER0_MASTER1_address_mapping_for_ROUTER2_SLAVE4_HIGH_ADD, from_ROUTER0_to_ROUTER2_destination_port, ROUTER2 & SLAVE4)
+	# );
 
-constant ROUTER0_MASTER2_ADDRESS_DECODER_TABLE : router0_master2_record_address_decod_table:=(
-	(ROUTER0_MASTER2_address_mapping_for_ROUTER4_SLAVE4_BASE_ADD, ROUTER0_MASTER2_address_mapping_for_ROUTER4_SLAVE4_HIGH_ADD, from_ROUTER0_to_ROUTER4_destination_port, ROUTER4 & SLAVE4),	
-	(ROUTER0_MASTER2_address_mapping_for_ROUTER0_SLAVE5_BASE_ADD, ROUTER0_MASTER2_address_mapping_for_ROUTER0_SLAVE5_HIGH_ADD, SLAVE5, ROUTER0 & SLAVE5),	
-	(ROUTER0_MASTER2_address_mapping_for_ROUTER0_SLAVE6_BASE_ADD, ROUTER0_MASTER2_address_mapping_for_ROUTER0_SLAVE6_HIGH_ADD, SLAVE6, ROUTER0 & SLAVE6),	
-	(ROUTER0_MASTER2_address_mapping_for_ROUTER0_SLAVE7_BASE_ADD, ROUTER0_MASTER2_address_mapping_for_ROUTER0_SLAVE7_HIGH_ADD, SLAVE7, ROUTER0 & SLAVE7),	
-	(ROUTER0_MASTER2_address_mapping_for_ROUTER0_SLAVE8_BASE_ADD, ROUTER0_MASTER2_address_mapping_for_ROUTER0_SLAVE8_HIGH_ADD, SLAVE8, ROUTER0 & SLAVE8),	
-	(ROUTER0_MASTER2_address_mapping_for_ROUTER1_SLAVE0_BASE_ADD, ROUTER0_MASTER2_address_mapping_for_ROUTER1_SLAVE0_HIGH_ADD, from_ROUTER0_to_ROUTER1_destination_port, ROUTER1 & SLAVE0),	
-	(ROUTER0_MASTER2_address_mapping_for_ROUTER1_SLAVE1_BASE_ADD, ROUTER0_MASTER2_address_mapping_for_ROUTER1_SLAVE1_HIGH_ADD, from_ROUTER0_to_ROUTER1_destination_port, ROUTER1 & SLAVE1),
-	(ROUTER0_MASTER2_address_mapping_for_ROUTER2_SLAVE4_BASE_ADD, ROUTER0_MASTER2_address_mapping_for_ROUTER2_SLAVE4_HIGH_ADD, from_ROUTER0_to_ROUTER2_destination_port, ROUTER2 & SLAVE4)
-	);
+	# (ROUTER5_MASTER0_address_mapping_for_ROUTER4_SLAVE7_BASE_ADD, ROUTER5_MASTER0_address_mapping_for_ROUTER4_SLAVE7_HIGH_ADD, from_ROUTER5_to_ROUTER4_destination_port, ROUTER4 & SLAVE7),
+	# (ROUTER5_MASTER0_address_mapping_for_ROUTER5_SLAVE1_BASE_ADD, ROUTER5_MASTER0_address_mapping_for_ROUTER5_SLAVE1_HIGH_ADD, SLAVE4, ROUTER5 & SLAVE4),
+	# (ROUTER5_MASTER0_address_mapping_for_ROUTER0_SLAVE4_BASE_ADD, ROUTER5_MASTER0_address_mapping_for_ROUTER0_SLAVE4_HIGH_ADD, from_ROUTER5_to_ROUTER0_destination_port, ROUTER0 & SLAVE4)
+	# );
 	
-constant ROUTER0_MASTER3_ADDRESS_DECODER_TABLE : router0_master3_record_address_decod_table:=(
-	(ROUTER0_MASTER3_address_mapping_for_ROUTER4_SLAVE6_BASE_ADD, ROUTER0_MASTER3_address_mapping_for_ROUTER4_SLAVE6_HIGH_ADD, from_ROUTER0_to_ROUTER4_destination_port, ROUTER4 & SLAVE4),	
-	(ROUTER0_MASTER3_address_mapping_for_ROUTER0_SLAVE5_BASE_ADD, ROUTER0_MASTER3_address_mapping_for_ROUTER0_SLAVE5_HIGH_ADD, SLAVE5, ROUTER0 & SLAVE5),	
-	(ROUTER0_MASTER3_address_mapping_for_ROUTER0_SLAVE6_BASE_ADD, ROUTER0_MASTER3_address_mapping_for_ROUTER0_SLAVE6_HIGH_ADD, SLAVE6, ROUTER0 & SLAVE6),	
-	(ROUTER0_MASTER3_address_mapping_for_ROUTER0_SLAVE7_BASE_ADD, ROUTER0_MASTER3_address_mapping_for_ROUTER0_SLAVE7_HIGH_ADD, SLAVE7, ROUTER0 & SLAVE7),	
-	(ROUTER0_MASTER3_address_mapping_for_ROUTER0_SLAVE8_BASE_ADD, ROUTER0_MASTER3_address_mapping_for_ROUTER0_SLAVE8_HIGH_ADD, SLAVE8, ROUTER0 & SLAVE8),	
-	(ROUTER0_MASTER3_address_mapping_for_ROUTER1_SLAVE0_BASE_ADD, ROUTER0_MASTER3_address_mapping_for_ROUTER1_SLAVE0_HIGH_ADD, from_ROUTER0_to_ROUTER1_destination_port, ROUTER1 & SLAVE0),	
-	(ROUTER0_MASTER3_address_mapping_for_ROUTER1_SLAVE1_BASE_ADD, ROUTER0_MASTER3_address_mapping_for_ROUTER1_SLAVE1_HIGH_ADD, from_ROUTER0_to_ROUTER1_destination_port, ROUTER1 & SLAVE1),
-	(ROUTER0_MASTER3_address_mapping_for_ROUTER2_SLAVE4_BASE_ADD, ROUTER0_MASTER3_address_mapping_for_ROUTER2_SLAVE4_HIGH_ADD, from_ROUTER0_to_ROUTER2_destination_port, ROUTER2 & SLAVE4)
-	);
+	
 
-constant ROUTER2_MASTER0_ADDRESS_DECODER_TABLE : router2_master0_record_address_decod_table:=(
-	(ROUTER2_MASTER0_address_mapping_for_ROUTER4_SLAVE4_BASE_ADD, ROUTER2_MASTER0_address_mapping_for_ROUTER4_SLAVE4_HIGH_ADD, from_ROUTER2_to_ROUTER4_destination_port, ROUTER4 & SLAVE4),	
-	(ROUTER2_MASTER0_address_mapping_for_ROUTER4_SLAVE5_BASE_ADD, ROUTER2_MASTER0_address_mapping_for_ROUTER4_SLAVE5_HIGH_ADD, from_ROUTER2_to_ROUTER4_destination_port, ROUTER4 & SLAVE5),	
-	(ROUTER2_MASTER0_address_mapping_for_ROUTER4_SLAVE6_BASE_ADD, ROUTER2_MASTER0_address_mapping_for_ROUTER4_SLAVE6_HIGH_ADD, from_ROUTER2_to_ROUTER4_destination_port, ROUTER4 & SLAVE6),	
-	(ROUTER2_MASTER0_address_mapping_for_ROUTER4_SLAVE7_BASE_ADD, ROUTER2_MASTER0_address_mapping_for_ROUTER4_SLAVE7_HIGH_ADD, from_ROUTER2_to_ROUTER4_destination_port, ROUTER4 & SLAVE7),	
-	(ROUTER2_MASTER0_address_mapping_for_ROUTER0_SLAVE8_BASE_ADD, ROUTER2_MASTER0_address_mapping_for_ROUTER0_SLAVE8_HIGH_ADD, from_ROUTER2_to_ROUTER0_destination_port, ROUTER0 & SLAVE8),	
-	(ROUTER2_MASTER0_address_mapping_for_ROUTER1_SLAVE0_BASE_ADD, ROUTER2_MASTER0_address_mapping_for_ROUTER1_SLAVE0_HIGH_ADD, from_ROUTER2_to_ROUTER1_destination_port, ROUTER1 & SLAVE0),	
-	(ROUTER2_MASTER0_address_mapping_for_ROUTER1_SLAVE1_BASE_ADD, ROUTER2_MASTER0_address_mapping_for_ROUTER1_SLAVE1_HIGH_ADD, from_ROUTER2_to_ROUTER1_destination_port, ROUTER1 & SLAVE1),
-	(ROUTER2_MASTER0_address_mapping_for_ROUTER2_SLAVE4_BASE_ADD, ROUTER2_MASTER0_address_mapping_for_ROUTER2_SLAVE4_HIGH_ADD, SLAVE4, ROUTER2 & SLAVE4)
-	);
-	
-constant ROUTER2_MASTER1_ADDRESS_DECODER_TABLE : router2_master1_record_address_decod_table:=(
-	(ROUTER2_MASTER1_address_mapping_for_ROUTER0_SLAVE4_BASE_ADD, ROUTER2_MASTER1_address_mapping_for_ROUTER0_SLAVE4_HIGH_ADD, from_ROUTER2_to_ROUTER0_destination_port, ROUTER0 & SLAVE4),	
-	(ROUTER2_MASTER1_address_mapping_for_ROUTER0_SLAVE5_BASE_ADD, ROUTER2_MASTER1_address_mapping_for_ROUTER0_SLAVE5_HIGH_ADD, from_ROUTER2_to_ROUTER0_destination_port, ROUTER0 & SLAVE5),	
-	(ROUTER2_MASTER1_address_mapping_for_ROUTER0_SLAVE6_BASE_ADD, ROUTER2_MASTER1_address_mapping_for_ROUTER0_SLAVE6_HIGH_ADD, from_ROUTER2_to_ROUTER0_destination_port, ROUTER0 & SLAVE6),	
-	(ROUTER2_MASTER1_address_mapping_for_ROUTER0_SLAVE7_BASE_ADD, ROUTER2_MASTER1_address_mapping_for_ROUTER0_SLAVE7_HIGH_ADD, from_ROUTER2_to_ROUTER0_destination_port, ROUTER0 & SLAVE7),	
-	(ROUTER2_MASTER1_address_mapping_for_ROUTER0_SLAVE8_BASE_ADD, ROUTER2_MASTER1_address_mapping_for_ROUTER0_SLAVE8_HIGH_ADD, from_ROUTER2_to_ROUTER0_destination_port, ROUTER0 & SLAVE8),	
-	(ROUTER2_MASTER1_address_mapping_for_ROUTER1_SLAVE0_BASE_ADD, ROUTER2_MASTER1_address_mapping_for_ROUTER1_SLAVE0_HIGH_ADD, from_ROUTER2_to_ROUTER1_destination_port, ROUTER1 & SLAVE0),	
-	(ROUTER2_MASTER1_address_mapping_for_ROUTER1_SLAVE1_BASE_ADD, ROUTER2_MASTER1_address_mapping_for_ROUTER1_SLAVE1_HIGH_ADD, from_ROUTER2_to_ROUTER1_destination_port, ROUTER1 & SLAVE1),
-	(ROUTER2_MASTER1_address_mapping_for_ROUTER2_SLAVE4_BASE_ADD, ROUTER2_MASTER1_address_mapping_for_ROUTER2_SLAVE4_HIGH_ADD, SLAVE4, ROUTER2 & SLAVE4)
-	);
-
-constant ROUTER2_MASTER2_ADDRESS_DECODER_TABLE : router2_master2_record_address_decod_table:=(
-	(ROUTER2_MASTER2_address_mapping_for_ROUTER0_SLAVE4_BASE_ADD, ROUTER2_MASTER2_address_mapping_for_ROUTER0_SLAVE4_HIGH_ADD, from_ROUTER2_to_ROUTER0_destination_port, ROUTER0 & SLAVE4),	
-	(ROUTER2_MASTER2_address_mapping_for_ROUTER0_SLAVE5_BASE_ADD, ROUTER2_MASTER2_address_mapping_for_ROUTER0_SLAVE5_HIGH_ADD, from_ROUTER2_to_ROUTER0_destination_port, ROUTER0 & SLAVE5),	
-	(ROUTER2_MASTER2_address_mapping_for_ROUTER0_SLAVE6_BASE_ADD, ROUTER2_MASTER2_address_mapping_for_ROUTER0_SLAVE6_HIGH_ADD, from_ROUTER2_to_ROUTER0_destination_port, ROUTER0 & SLAVE6),	
-	(ROUTER2_MASTER2_address_mapping_for_ROUTER0_SLAVE7_BASE_ADD, ROUTER2_MASTER2_address_mapping_for_ROUTER0_SLAVE7_HIGH_ADD, from_ROUTER2_to_ROUTER0_destination_port, ROUTER0 & SLAVE7),	
-	(ROUTER2_MASTER2_address_mapping_for_ROUTER0_SLAVE8_BASE_ADD, ROUTER2_MASTER2_address_mapping_for_ROUTER0_SLAVE8_HIGH_ADD, from_ROUTER2_to_ROUTER0_destination_port, ROUTER0 & SLAVE8),	
-	(ROUTER2_MASTER2_address_mapping_for_ROUTER1_SLAVE0_BASE_ADD, ROUTER2_MASTER2_address_mapping_for_ROUTER1_SLAVE0_HIGH_ADD, from_ROUTER2_to_ROUTER1_destination_port, ROUTER1 & SLAVE0),	
-	(ROUTER2_MASTER2_address_mapping_for_ROUTER1_SLAVE1_BASE_ADD, ROUTER2_MASTER2_address_mapping_for_ROUTER1_SLAVE1_HIGH_ADD, from_ROUTER2_to_ROUTER1_destination_port, ROUTER1 & SLAVE1),
-	(ROUTER2_MASTER2_address_mapping_for_ROUTER2_SLAVE4_BASE_ADD, ROUTER2_MASTER2_address_mapping_for_ROUTER2_SLAVE4_HIGH_ADD, SLAVE4, ROUTER2 & SLAVE4)
-	);
-	
-constant ROUTER2_MASTER3_ADDRESS_DECODER_TABLE : router2_master3_record_address_decod_table:=(
-	(ROUTER2_MASTER3_address_mapping_for_ROUTER0_SLAVE4_BASE_ADD, ROUTER2_MASTER3_address_mapping_for_ROUTER0_SLAVE4_HIGH_ADD, from_ROUTER2_to_ROUTER0_destination_port, ROUTER0 & SLAVE4),	
-	(ROUTER2_MASTER3_address_mapping_for_ROUTER0_SLAVE5_BASE_ADD, ROUTER2_MASTER3_address_mapping_for_ROUTER0_SLAVE5_HIGH_ADD, from_ROUTER2_to_ROUTER0_destination_port, ROUTER0 & SLAVE5),	
-	(ROUTER2_MASTER3_address_mapping_for_ROUTER0_SLAVE6_BASE_ADD, ROUTER2_MASTER3_address_mapping_for_ROUTER0_SLAVE6_HIGH_ADD, from_ROUTER2_to_ROUTER0_destination_port, ROUTER0 & SLAVE6),	
-	(ROUTER2_MASTER3_address_mapping_for_ROUTER0_SLAVE7_BASE_ADD, ROUTER2_MASTER3_address_mapping_for_ROUTER0_SLAVE7_HIGH_ADD, from_ROUTER2_to_ROUTER0_destination_port, ROUTER0 & SLAVE7),	
-	(ROUTER2_MASTER3_address_mapping_for_ROUTER0_SLAVE8_BASE_ADD, ROUTER2_MASTER3_address_mapping_for_ROUTER0_SLAVE8_HIGH_ADD, from_ROUTER2_to_ROUTER0_destination_port, ROUTER0 & SLAVE8),	
-	(ROUTER2_MASTER3_address_mapping_for_ROUTER1_SLAVE0_BASE_ADD, ROUTER2_MASTER3_address_mapping_for_ROUTER1_SLAVE0_HIGH_ADD, from_ROUTER2_to_ROUTER1_destination_port, ROUTER1 & SLAVE0),	
-	(ROUTER2_MASTER3_address_mapping_for_ROUTER1_SLAVE1_BASE_ADD, ROUTER2_MASTER3_address_mapping_for_ROUTER1_SLAVE1_HIGH_ADD, from_ROUTER2_to_ROUTER1_destination_port, ROUTER1 & SLAVE1),
-	(ROUTER2_MASTER3_address_mapping_for_ROUTER2_SLAVE4_BASE_ADD, ROUTER2_MASTER3_address_mapping_for_ROUTER2_SLAVE4_HIGH_ADD, SLAVE4, ROUTER2 & SLAVE4)
-	);
-	
-constant ROUTER3_MASTER0_ADDRESS_DECODER_TABLE : router3_master0_record_address_decod_table:=(
-	(ROUTER3_MASTER0_address_mapping_for_ROUTER0_SLAVE4_BASE_ADD, ROUTER3_MASTER0_address_mapping_for_ROUTER0_SLAVE4_HIGH_ADD, from_ROUTER3_to_ROUTER0_destination_port, ROUTER0 & SLAVE4),	
-	(ROUTER3_MASTER0_address_mapping_for_ROUTER0_SLAVE5_BASE_ADD, ROUTER3_MASTER0_address_mapping_for_ROUTER0_SLAVE5_HIGH_ADD, from_ROUTER3_to_ROUTER0_destination_port, ROUTER0 & SLAVE5),	
-	(ROUTER3_MASTER0_address_mapping_for_ROUTER0_SLAVE6_BASE_ADD, ROUTER3_MASTER0_address_mapping_for_ROUTER0_SLAVE6_HIGH_ADD, from_ROUTER3_to_ROUTER0_destination_port, ROUTER0 & SLAVE6),	
-	(ROUTER3_MASTER0_address_mapping_for_ROUTER0_SLAVE7_BASE_ADD, ROUTER3_MASTER0_address_mapping_for_ROUTER0_SLAVE7_HIGH_ADD, from_ROUTER3_to_ROUTER0_destination_port, ROUTER0 & SLAVE7),	
-	(ROUTER3_MASTER0_address_mapping_for_ROUTER0_SLAVE8_BASE_ADD, ROUTER3_MASTER0_address_mapping_for_ROUTER0_SLAVE8_HIGH_ADD, from_ROUTER3_to_ROUTER0_destination_port, ROUTER0 & SLAVE8),	
-	(ROUTER3_MASTER0_address_mapping_for_ROUTER1_SLAVE0_BASE_ADD, ROUTER3_MASTER0_address_mapping_for_ROUTER1_SLAVE0_HIGH_ADD, from_ROUTER3_to_ROUTER1_destination_port, ROUTER1 & SLAVE0),	
-	(ROUTER3_MASTER0_address_mapping_for_ROUTER1_SLAVE1_BASE_ADD, ROUTER3_MASTER0_address_mapping_for_ROUTER1_SLAVE1_HIGH_ADD, from_ROUTER3_to_ROUTER1_destination_port, ROUTER1 & SLAVE1),
-	(ROUTER3_MASTER0_address_mapping_for_ROUTER2_SLAVE4_BASE_ADD, ROUTER3_MASTER0_address_mapping_for_ROUTER2_SLAVE4_HIGH_ADD, from_ROUTER3_to_ROUTER2_destination_port, ROUTER2 & SLAVE4)
-	);
-	
-constant ROUTER3_MASTER1_ADDRESS_DECODER_TABLE : router3_master1_record_address_decod_table:=(
-	(ROUTER3_MASTER1_address_mapping_for_ROUTER0_SLAVE4_BASE_ADD, ROUTER3_MASTER1_address_mapping_for_ROUTER0_SLAVE4_HIGH_ADD, from_ROUTER3_to_ROUTER0_destination_port, ROUTER0 & SLAVE4),	
-	(ROUTER3_MASTER1_address_mapping_for_ROUTER0_SLAVE5_BASE_ADD, ROUTER3_MASTER1_address_mapping_for_ROUTER0_SLAVE5_HIGH_ADD, from_ROUTER3_to_ROUTER0_destination_port, ROUTER0 & SLAVE5),	
-	(ROUTER3_MASTER1_address_mapping_for_ROUTER0_SLAVE6_BASE_ADD, ROUTER3_MASTER1_address_mapping_for_ROUTER0_SLAVE6_HIGH_ADD, from_ROUTER3_to_ROUTER0_destination_port, ROUTER0 & SLAVE6),	
-	(ROUTER3_MASTER1_address_mapping_for_ROUTER0_SLAVE7_BASE_ADD, ROUTER3_MASTER1_address_mapping_for_ROUTER0_SLAVE7_HIGH_ADD, from_ROUTER3_to_ROUTER0_destination_port, ROUTER0 & SLAVE7),	
-	(ROUTER3_MASTER1_address_mapping_for_ROUTER0_SLAVE8_BASE_ADD, ROUTER3_MASTER1_address_mapping_for_ROUTER0_SLAVE8_HIGH_ADD, from_ROUTER3_to_ROUTER0_destination_port, ROUTER0 & SLAVE8),	
-	(ROUTER3_MASTER1_address_mapping_for_ROUTER1_SLAVE0_BASE_ADD, ROUTER3_MASTER1_address_mapping_for_ROUTER1_SLAVE0_HIGH_ADD, from_ROUTER3_to_ROUTER1_destination_port, ROUTER1 & SLAVE0),	
-	(ROUTER3_MASTER1_address_mapping_for_ROUTER1_SLAVE1_BASE_ADD, ROUTER3_MASTER1_address_mapping_for_ROUTER1_SLAVE1_HIGH_ADD, from_ROUTER3_to_ROUTER1_destination_port, ROUTER1 & SLAVE1),
-	(ROUTER3_MASTER1_address_mapping_for_ROUTER2_SLAVE4_BASE_ADD, ROUTER3_MASTER1_address_mapping_for_ROUTER2_SLAVE4_HIGH_ADD, from_ROUTER3_to_ROUTER2_destination_port, ROUTER2 & SLAVE4)
-	);
-
-constant ROUTER3_MASTER2_ADDRESS_DECODER_TABLE : router3_master2_record_address_decod_table:=(
-	(ROUTER3_MASTER2_address_mapping_for_ROUTER0_SLAVE4_BASE_ADD, ROUTER3_MASTER2_address_mapping_for_ROUTER0_SLAVE4_HIGH_ADD, from_ROUTER3_to_ROUTER0_destination_port, ROUTER0 & SLAVE4),	
-	(ROUTER3_MASTER2_address_mapping_for_ROUTER0_SLAVE5_BASE_ADD, ROUTER3_MASTER2_address_mapping_for_ROUTER0_SLAVE5_HIGH_ADD, from_ROUTER3_to_ROUTER0_destination_port, ROUTER0 & SLAVE5),	
-	(ROUTER3_MASTER2_address_mapping_for_ROUTER0_SLAVE6_BASE_ADD, ROUTER3_MASTER2_address_mapping_for_ROUTER0_SLAVE6_HIGH_ADD, from_ROUTER3_to_ROUTER0_destination_port, ROUTER0 & SLAVE6),	
-	(ROUTER3_MASTER2_address_mapping_for_ROUTER0_SLAVE7_BASE_ADD, ROUTER3_MASTER2_address_mapping_for_ROUTER0_SLAVE7_HIGH_ADD, from_ROUTER3_to_ROUTER0_destination_port, ROUTER0 & SLAVE7),	
-	(ROUTER3_MASTER2_address_mapping_for_ROUTER0_SLAVE8_BASE_ADD, ROUTER3_MASTER2_address_mapping_for_ROUTER0_SLAVE8_HIGH_ADD, from_ROUTER3_to_ROUTER0_destination_port, ROUTER0 & SLAVE8),	
-	(ROUTER3_MASTER2_address_mapping_for_ROUTER1_SLAVE0_BASE_ADD, ROUTER3_MASTER2_address_mapping_for_ROUTER1_SLAVE0_HIGH_ADD, from_ROUTER3_to_ROUTER1_destination_port, ROUTER1 & SLAVE0),	
-	(ROUTER3_MASTER2_address_mapping_for_ROUTER1_SLAVE1_BASE_ADD, ROUTER3_MASTER2_address_mapping_for_ROUTER1_SLAVE1_HIGH_ADD, from_ROUTER3_to_ROUTER1_destination_port, ROUTER1 & SLAVE1),
-	(ROUTER3_MASTER2_address_mapping_for_ROUTER2_SLAVE4_BASE_ADD, ROUTER3_MASTER2_address_mapping_for_ROUTER2_SLAVE4_HIGH_ADD, from_ROUTER3_to_ROUTER2_destination_port, ROUTER2 & SLAVE4)
-	);
-	
-	
-constant ROUTER4_MASTER0_ADDRESS_DECODER_TABLE : router4_master0_record_address_decod_table:=(
-	(ROUTER4_MASTER0_address_mapping_for_ROUTER0_SLAVE4_BASE_ADD, ROUTER4_MASTER0_address_mapping_for_ROUTER0_SLAVE4_HIGH_ADD, from_ROUTER4_to_ROUTER0_destination_port, ROUTER0 & SLAVE4),	
-	(ROUTER4_MASTER0_address_mapping_for_ROUTER0_SLAVE5_BASE_ADD, ROUTER4_MASTER0_address_mapping_for_ROUTER0_SLAVE5_HIGH_ADD, from_ROUTER4_to_ROUTER0_destination_port, ROUTER0 & SLAVE5),	
-	(ROUTER4_MASTER0_address_mapping_for_ROUTER0_SLAVE6_BASE_ADD, ROUTER4_MASTER0_address_mapping_for_ROUTER0_SLAVE6_HIGH_ADD, from_ROUTER4_to_ROUTER0_destination_port, ROUTER0 & SLAVE6),	
-	(ROUTER4_MASTER0_address_mapping_for_ROUTER0_SLAVE7_BASE_ADD, ROUTER4_MASTER0_address_mapping_for_ROUTER0_SLAVE7_HIGH_ADD, from_ROUTER4_to_ROUTER0_destination_port, ROUTER0 & SLAVE7),	
-	(ROUTER4_MASTER0_address_mapping_for_ROUTER0_SLAVE8_BASE_ADD, ROUTER4_MASTER0_address_mapping_for_ROUTER0_SLAVE8_HIGH_ADD, from_ROUTER4_to_ROUTER0_destination_port, ROUTER0 & SLAVE8),	
-	(ROUTER4_MASTER0_address_mapping_for_ROUTER1_SLAVE0_BASE_ADD, ROUTER4_MASTER0_address_mapping_for_ROUTER1_SLAVE0_HIGH_ADD, from_ROUTER4_to_ROUTER1_destination_port, ROUTER1 & SLAVE0),	
-	(ROUTER4_MASTER0_address_mapping_for_ROUTER1_SLAVE1_BASE_ADD, ROUTER4_MASTER0_address_mapping_for_ROUTER1_SLAVE1_HIGH_ADD, from_ROUTER4_to_ROUTER1_destination_port, ROUTER1 & SLAVE1),
-	(ROUTER4_MASTER0_address_mapping_for_ROUTER2_SLAVE4_BASE_ADD, ROUTER4_MASTER0_address_mapping_for_ROUTER2_SLAVE4_HIGH_ADD, from_ROUTER4_to_ROUTER2_destination_port, ROUTER2 & SLAVE4)
-	);
-	
-constant ROUTER4_MASTER1_ADDRESS_DECODER_TABLE : router4_master1_record_address_decod_table:=(
-	(ROUTER4_MASTER1_address_mapping_for_ROUTER0_SLAVE4_BASE_ADD, ROUTER4_MASTER1_address_mapping_for_ROUTER0_SLAVE4_HIGH_ADD, from_ROUTER4_to_ROUTER0_destination_port, ROUTER0 & SLAVE4),	
-	(ROUTER4_MASTER1_address_mapping_for_ROUTER0_SLAVE5_BASE_ADD, ROUTER4_MASTER1_address_mapping_for_ROUTER0_SLAVE5_HIGH_ADD, from_ROUTER4_to_ROUTER0_destination_port, ROUTER0 & SLAVE5),	
-	(ROUTER4_MASTER1_address_mapping_for_ROUTER0_SLAVE6_BASE_ADD, ROUTER4_MASTER1_address_mapping_for_ROUTER0_SLAVE6_HIGH_ADD, from_ROUTER4_to_ROUTER0_destination_port, ROUTER0 & SLAVE6),	
-	(ROUTER4_MASTER1_address_mapping_for_ROUTER0_SLAVE7_BASE_ADD, ROUTER4_MASTER1_address_mapping_for_ROUTER0_SLAVE7_HIGH_ADD, from_ROUTER4_to_ROUTER0_destination_port, ROUTER0 & SLAVE7),	
-	(ROUTER4_MASTER1_address_mapping_for_ROUTER0_SLAVE8_BASE_ADD, ROUTER4_MASTER1_address_mapping_for_ROUTER0_SLAVE8_HIGH_ADD, from_ROUTER4_to_ROUTER0_destination_port, ROUTER0 & SLAVE8),	
-	(ROUTER4_MASTER1_address_mapping_for_ROUTER1_SLAVE0_BASE_ADD, ROUTER4_MASTER1_address_mapping_for_ROUTER1_SLAVE0_HIGH_ADD, from_ROUTER4_to_ROUTER1_destination_port, ROUTER1 & SLAVE0),	
-	(ROUTER4_MASTER1_address_mapping_for_ROUTER1_SLAVE1_BASE_ADD, ROUTER4_MASTER1_address_mapping_for_ROUTER1_SLAVE1_HIGH_ADD, from_ROUTER4_to_ROUTER1_destination_port, ROUTER1 & SLAVE1),
-	(ROUTER4_MASTER1_address_mapping_for_ROUTER2_SLAVE4_BASE_ADD, ROUTER4_MASTER1_address_mapping_for_ROUTER2_SLAVE4_HIGH_ADD, from_ROUTER4_to_ROUTER2_destination_port, ROUTER2 & SLAVE4)
-	);
-
-constant ROUTER4_MASTER2_ADDRESS_DECODER_TABLE : router4_master2_record_address_decod_table:=(
-	(ROUTER4_MASTER2_address_mapping_for_ROUTER0_SLAVE4_BASE_ADD, ROUTER4_MASTER2_address_mapping_for_ROUTER0_SLAVE4_HIGH_ADD, from_ROUTER4_to_ROUTER0_destination_port, ROUTER0 & SLAVE4),	
-	(ROUTER4_MASTER2_address_mapping_for_ROUTER0_SLAVE5_BASE_ADD, ROUTER4_MASTER2_address_mapping_for_ROUTER0_SLAVE5_HIGH_ADD, from_ROUTER4_to_ROUTER0_destination_port, ROUTER0 & SLAVE5),	
-	(ROUTER4_MASTER2_address_mapping_for_ROUTER0_SLAVE6_BASE_ADD, ROUTER4_MASTER2_address_mapping_for_ROUTER0_SLAVE6_HIGH_ADD, from_ROUTER4_to_ROUTER0_destination_port, ROUTER0 & SLAVE6),	
-	(ROUTER4_MASTER2_address_mapping_for_ROUTER0_SLAVE7_BASE_ADD, ROUTER4_MASTER2_address_mapping_for_ROUTER0_SLAVE7_HIGH_ADD, from_ROUTER4_to_ROUTER0_destination_port, ROUTER0 & SLAVE7),	
-	(ROUTER4_MASTER2_address_mapping_for_ROUTER0_SLAVE8_BASE_ADD, ROUTER4_MASTER2_address_mapping_for_ROUTER0_SLAVE8_HIGH_ADD, from_ROUTER4_to_ROUTER0_destination_port, ROUTER0 & SLAVE8),	
-	(ROUTER4_MASTER2_address_mapping_for_ROUTER1_SLAVE0_BASE_ADD, ROUTER4_MASTER2_address_mapping_for_ROUTER1_SLAVE0_HIGH_ADD, from_ROUTER4_to_ROUTER1_destination_port, ROUTER1 & SLAVE0),	
-	(ROUTER4_MASTER2_address_mapping_for_ROUTER1_SLAVE1_BASE_ADD, ROUTER4_MASTER2_address_mapping_for_ROUTER1_SLAVE1_HIGH_ADD, from_ROUTER4_to_ROUTER1_destination_port, ROUTER1 & SLAVE1),
-	(ROUTER4_MASTER2_address_mapping_for_ROUTER2_SLAVE4_BASE_ADD, ROUTER4_MASTER2_address_mapping_for_ROUTER2_SLAVE4_HIGH_ADD, from_ROUTER4_to_ROUTER2_destination_port, ROUTER2 & SLAVE4)
-	);
-	
-constant ROUTER4_MASTER3_ADDRESS_DECODER_TABLE : router4_master3_record_address_decod_table:=(
-	(ROUTER4_MASTER3_address_mapping_for_ROUTER0_SLAVE4_BASE_ADD, ROUTER4_MASTER3_address_mapping_for_ROUTER0_SLAVE4_HIGH_ADD, from_ROUTER4_to_ROUTER0_destination_port, ROUTER0 & SLAVE4),	
-	(ROUTER4_MASTER3_address_mapping_for_ROUTER0_SLAVE5_BASE_ADD, ROUTER4_MASTER3_address_mapping_for_ROUTER0_SLAVE5_HIGH_ADD, from_ROUTER4_to_ROUTER0_destination_port, ROUTER0 & SLAVE5),	
-	(ROUTER4_MASTER3_address_mapping_for_ROUTER0_SLAVE6_BASE_ADD, ROUTER4_MASTER3_address_mapping_for_ROUTER0_SLAVE6_HIGH_ADD, from_ROUTER4_to_ROUTER0_destination_port, ROUTER0 & SLAVE6),	
-	(ROUTER4_MASTER3_address_mapping_for_ROUTER0_SLAVE7_BASE_ADD, ROUTER4_MASTER3_address_mapping_for_ROUTER0_SLAVE7_HIGH_ADD, from_ROUTER4_to_ROUTER0_destination_port, ROUTER0 & SLAVE7),	
-	(ROUTER4_MASTER3_address_mapping_for_ROUTER0_SLAVE8_BASE_ADD, ROUTER4_MASTER3_address_mapping_for_ROUTER0_SLAVE8_HIGH_ADD, from_ROUTER4_to_ROUTER0_destination_port, ROUTER0 & SLAVE8),	
-	(ROUTER4_MASTER3_address_mapping_for_ROUTER1_SLAVE0_BASE_ADD, ROUTER4_MASTER3_address_mapping_for_ROUTER1_SLAVE0_HIGH_ADD, from_ROUTER4_to_ROUTER1_destination_port, ROUTER1 & SLAVE0),	
-	(ROUTER4_MASTER3_address_mapping_for_ROUTER1_SLAVE1_BASE_ADD, ROUTER4_MASTER3_address_mapping_for_ROUTER1_SLAVE1_HIGH_ADD, from_ROUTER4_to_ROUTER1_destination_port, ROUTER1 & SLAVE1),
-	(ROUTER4_MASTER3_address_mapping_for_ROUTER2_SLAVE4_BASE_ADD, ROUTER4_MASTER3_address_mapping_for_ROUTER2_SLAVE4_HIGH_ADD, from_ROUTER4_to_ROUTER2_destination_port, ROUTER2 & SLAVE4)
-	);
-	
-constant ROUTER5_MASTER0_ADDRESS_DECODER_TABLE : router5_master0_record_address_decod_table:=(
-	(ROUTER5_MASTER0_address_mapping_for_ROUTER1_SLAVE0_BASE_ADD, ROUTER5_MASTER0_address_mapping_for_ROUTER1_SLAVE0_HIGH_ADD, from_ROUTER5_to_ROUTER1_destination_port, ROUTER1 & SLAVE0),	
-	(ROUTER5_MASTER0_address_mapping_for_ROUTER1_SLAVE1_BASE_ADD, ROUTER5_MASTER0_address_mapping_for_ROUTER1_SLAVE1_HIGH_ADD, from_ROUTER5_to_ROUTER1_destination_port, ROUTER1 & SLAVE1),	
-	(ROUTER5_MASTER0_address_mapping_for_ROUTER2_SLAVE4_BASE_ADD, ROUTER5_MASTER0_address_mapping_for_ROUTER2_SLAVE4_HIGH_ADD, from_ROUTER5_to_ROUTER2_destination_port, ROUTER2 & SLAVE4),	
-	(ROUTER5_MASTER0_address_mapping_for_ROUTER4_SLAVE4_BASE_ADD, ROUTER5_MASTER0_address_mapping_for_ROUTER4_SLAVE4_HIGH_ADD, from_ROUTER5_to_ROUTER4_destination_port, ROUTER4 & SLAVE4),	
-	(ROUTER5_MASTER0_address_mapping_for_ROUTER4_SLAVE5_BASE_ADD, ROUTER5_MASTER0_address_mapping_for_ROUTER4_SLAVE5_HIGH_ADD, from_ROUTER5_to_ROUTER4_destination_port, ROUTER4 & SLAVE5),	
-	(ROUTER5_MASTER0_address_mapping_for_ROUTER4_SLAVE6_BASE_ADD, ROUTER5_MASTER0_address_mapping_for_ROUTER4_SLAVE6_HIGH_ADD, from_ROUTER5_to_ROUTER4_destination_port, ROUTER4 & SLAVE6),
-	(ROUTER5_MASTER0_address_mapping_for_ROUTER4_SLAVE7_BASE_ADD, ROUTER5_MASTER0_address_mapping_for_ROUTER4_SLAVE7_HIGH_ADD, from_ROUTER5_to_ROUTER4_destination_port, ROUTER4 & SLAVE7),
-	(ROUTER5_MASTER0_address_mapping_for_ROUTER5_SLAVE1_BASE_ADD, ROUTER5_MASTER0_address_mapping_for_ROUTER5_SLAVE1_HIGH_ADD, SLAVE4, ROUTER5 & SLAVE4),
-	(ROUTER5_MASTER0_address_mapping_for_ROUTER0_SLAVE4_BASE_ADD, ROUTER5_MASTER0_address_mapping_for_ROUTER0_SLAVE4_HIGH_ADD, from_ROUTER5_to_ROUTER0_destination_port, ROUTER0 & SLAVE4)
-	);
-	
-	
--- => AGGREGATING ARRAY <= --
---aggregates all master address decoder rules : starting from ROUTER0 - MASTER0 - RULES0 => first increment RULE number, then increment MASTER number, and finally increment ROUTER number
---concantenate all the rules with a "&"
-constant ALL_MASTER_ADDRESS_DECODER_TABLES : unconstrained_array_record_address_decod_table:=(
-	ROUTER0_MASTER0_ADDRESS_DECODER_TABLE(0) &
-	ROUTER0_MASTER0_ADDRESS_DECODER_TABLE(1) &
-	ROUTER0_MASTER0_ADDRESS_DECODER_TABLE(2) &
-	ROUTER0_MASTER0_ADDRESS_DECODER_TABLE(3) &
-	ROUTER0_MASTER0_ADDRESS_DECODER_TABLE(4) &
-	ROUTER0_MASTER0_ADDRESS_DECODER_TABLE(5) &
-	ROUTER0_MASTER0_ADDRESS_DECODER_TABLE(6) &
-	ROUTER0_MASTER0_ADDRESS_DECODER_TABLE(7) &
-	ROUTER0_MASTER0_ADDRESS_DECODER_TABLE(8) &
-	ROUTER0_MASTER1_ADDRESS_DECODER_TABLE(0) &
-	ROUTER0_MASTER1_ADDRESS_DECODER_TABLE(1) &
-	ROUTER0_MASTER1_ADDRESS_DECODER_TABLE(2) &
-	ROUTER0_MASTER1_ADDRESS_DECODER_TABLE(3) &
-	ROUTER0_MASTER1_ADDRESS_DECODER_TABLE(4) &
-	ROUTER0_MASTER1_ADDRESS_DECODER_TABLE(5) &
-	ROUTER0_MASTER1_ADDRESS_DECODER_TABLE(6) &
-	ROUTER0_MASTER1_ADDRESS_DECODER_TABLE(7) &
-	ROUTER0_MASTER2_ADDRESS_DECODER_TABLE(0) &
-	ROUTER0_MASTER2_ADDRESS_DECODER_TABLE(1) &
-	ROUTER0_MASTER2_ADDRESS_DECODER_TABLE(2) &
-	ROUTER0_MASTER2_ADDRESS_DECODER_TABLE(3) &
-	ROUTER0_MASTER2_ADDRESS_DECODER_TABLE(4) &
-	ROUTER0_MASTER2_ADDRESS_DECODER_TABLE(5) &
-	ROUTER0_MASTER2_ADDRESS_DECODER_TABLE(6) &
-	ROUTER0_MASTER2_ADDRESS_DECODER_TABLE(7) &
-	ROUTER0_MASTER3_ADDRESS_DECODER_TABLE(0) &
-	ROUTER0_MASTER3_ADDRESS_DECODER_TABLE(1) &
-	ROUTER0_MASTER3_ADDRESS_DECODER_TABLE(2) &
-	ROUTER0_MASTER3_ADDRESS_DECODER_TABLE(3) &
-	ROUTER0_MASTER3_ADDRESS_DECODER_TABLE(4) &
-	ROUTER0_MASTER3_ADDRESS_DECODER_TABLE(5) &
-	ROUTER0_MASTER3_ADDRESS_DECODER_TABLE(6) &
-	ROUTER0_MASTER3_ADDRESS_DECODER_TABLE(7) &
-	ROUTER2_MASTER0_ADDRESS_DECODER_TABLE(0) &
-	ROUTER2_MASTER0_ADDRESS_DECODER_TABLE(1) &
-	ROUTER2_MASTER0_ADDRESS_DECODER_TABLE(2) &
-	ROUTER2_MASTER0_ADDRESS_DECODER_TABLE(3) &
-	ROUTER2_MASTER0_ADDRESS_DECODER_TABLE(4) &
-	ROUTER2_MASTER0_ADDRESS_DECODER_TABLE(5) &
-	ROUTER2_MASTER0_ADDRESS_DECODER_TABLE(6) &
-	ROUTER2_MASTER0_ADDRESS_DECODER_TABLE(7) &
-	ROUTER2_MASTER1_ADDRESS_DECODER_TABLE(0) &
-	ROUTER2_MASTER1_ADDRESS_DECODER_TABLE(1) &
-	ROUTER2_MASTER1_ADDRESS_DECODER_TABLE(2) &
-	ROUTER2_MASTER1_ADDRESS_DECODER_TABLE(3) &
-	ROUTER2_MASTER1_ADDRESS_DECODER_TABLE(4) &
-	ROUTER2_MASTER1_ADDRESS_DECODER_TABLE(5) &
-	ROUTER2_MASTER1_ADDRESS_DECODER_TABLE(6) &
-	ROUTER2_MASTER1_ADDRESS_DECODER_TABLE(7) &
-	ROUTER2_MASTER2_ADDRESS_DECODER_TABLE(0) &
-	ROUTER2_MASTER2_ADDRESS_DECODER_TABLE(1) &
-	ROUTER2_MASTER2_ADDRESS_DECODER_TABLE(2) &
-	ROUTER2_MASTER2_ADDRESS_DECODER_TABLE(3) &
-	ROUTER2_MASTER2_ADDRESS_DECODER_TABLE(4) &
-	ROUTER2_MASTER2_ADDRESS_DECODER_TABLE(5) &
-	ROUTER2_MASTER2_ADDRESS_DECODER_TABLE(6) &
-	ROUTER2_MASTER2_ADDRESS_DECODER_TABLE(7) &
-	ROUTER2_MASTER3_ADDRESS_DECODER_TABLE(0) &
-	ROUTER2_MASTER3_ADDRESS_DECODER_TABLE(1) &
-	ROUTER2_MASTER3_ADDRESS_DECODER_TABLE(2) &
-	ROUTER2_MASTER3_ADDRESS_DECODER_TABLE(3) &
-	ROUTER2_MASTER3_ADDRESS_DECODER_TABLE(4) &
-	ROUTER2_MASTER3_ADDRESS_DECODER_TABLE(5) &
-	ROUTER2_MASTER3_ADDRESS_DECODER_TABLE(6) &
-	ROUTER2_MASTER3_ADDRESS_DECODER_TABLE(7) &
-	ROUTER3_MASTER0_ADDRESS_DECODER_TABLE(0) &
-	ROUTER3_MASTER0_ADDRESS_DECODER_TABLE(1) &
-	ROUTER3_MASTER0_ADDRESS_DECODER_TABLE(2) &
-	ROUTER3_MASTER0_ADDRESS_DECODER_TABLE(3) &
-	ROUTER3_MASTER0_ADDRESS_DECODER_TABLE(4) &
-	ROUTER3_MASTER0_ADDRESS_DECODER_TABLE(5) &
-	ROUTER3_MASTER0_ADDRESS_DECODER_TABLE(6) &
-	ROUTER3_MASTER0_ADDRESS_DECODER_TABLE(7) &
-	ROUTER3_MASTER1_ADDRESS_DECODER_TABLE(0) &
-	ROUTER3_MASTER1_ADDRESS_DECODER_TABLE(1) &
-	ROUTER3_MASTER1_ADDRESS_DECODER_TABLE(2) &
-	ROUTER3_MASTER1_ADDRESS_DECODER_TABLE(3) &
-	ROUTER3_MASTER1_ADDRESS_DECODER_TABLE(4) &
-	ROUTER3_MASTER1_ADDRESS_DECODER_TABLE(5) &
-	ROUTER3_MASTER1_ADDRESS_DECODER_TABLE(6) &
-	ROUTER3_MASTER1_ADDRESS_DECODER_TABLE(7) &
-	ROUTER3_MASTER2_ADDRESS_DECODER_TABLE(0) &
-	ROUTER3_MASTER2_ADDRESS_DECODER_TABLE(1) &
-	ROUTER3_MASTER2_ADDRESS_DECODER_TABLE(2) &
-	ROUTER3_MASTER2_ADDRESS_DECODER_TABLE(3) &
-	ROUTER3_MASTER2_ADDRESS_DECODER_TABLE(4) &
-	ROUTER3_MASTER2_ADDRESS_DECODER_TABLE(5) &
-	ROUTER3_MASTER2_ADDRESS_DECODER_TABLE(6) &
-	ROUTER3_MASTER2_ADDRESS_DECODER_TABLE(7) &
-	ROUTER4_MASTER0_ADDRESS_DECODER_TABLE(0) &
-	ROUTER4_MASTER0_ADDRESS_DECODER_TABLE(1) &
-	ROUTER4_MASTER0_ADDRESS_DECODER_TABLE(2) &
-	ROUTER4_MASTER0_ADDRESS_DECODER_TABLE(3) &
-	ROUTER4_MASTER0_ADDRESS_DECODER_TABLE(4) &
-	ROUTER4_MASTER0_ADDRESS_DECODER_TABLE(5) &
-	ROUTER4_MASTER0_ADDRESS_DECODER_TABLE(6) &
-	ROUTER4_MASTER0_ADDRESS_DECODER_TABLE(7) &
-	ROUTER4_MASTER1_ADDRESS_DECODER_TABLE(0) &
-	ROUTER4_MASTER1_ADDRESS_DECODER_TABLE(1) &
-	ROUTER4_MASTER1_ADDRESS_DECODER_TABLE(2) &
-	ROUTER4_MASTER1_ADDRESS_DECODER_TABLE(3) &
-	ROUTER4_MASTER1_ADDRESS_DECODER_TABLE(4) &
-	ROUTER4_MASTER1_ADDRESS_DECODER_TABLE(5) &
-	ROUTER4_MASTER1_ADDRESS_DECODER_TABLE(6) &
-	ROUTER4_MASTER1_ADDRESS_DECODER_TABLE(7) &
-	ROUTER4_MASTER2_ADDRESS_DECODER_TABLE(0) &
-	ROUTER4_MASTER2_ADDRESS_DECODER_TABLE(1) &
-	ROUTER4_MASTER2_ADDRESS_DECODER_TABLE(2) &
-	ROUTER4_MASTER2_ADDRESS_DECODER_TABLE(3) &
-	ROUTER4_MASTER2_ADDRESS_DECODER_TABLE(4) &
-	ROUTER4_MASTER2_ADDRESS_DECODER_TABLE(5) &
-	ROUTER4_MASTER2_ADDRESS_DECODER_TABLE(6) &
-	ROUTER4_MASTER2_ADDRESS_DECODER_TABLE(7) &
-	ROUTER4_MASTER3_ADDRESS_DECODER_TABLE(0) &
-	ROUTER4_MASTER3_ADDRESS_DECODER_TABLE(1) &
-	ROUTER4_MASTER3_ADDRESS_DECODER_TABLE(2) &
-	ROUTER4_MASTER3_ADDRESS_DECODER_TABLE(3) &
-	ROUTER4_MASTER3_ADDRESS_DECODER_TABLE(4) &
-	ROUTER4_MASTER3_ADDRESS_DECODER_TABLE(5) &
-	ROUTER4_MASTER3_ADDRESS_DECODER_TABLE(6) &
-	ROUTER4_MASTER3_ADDRESS_DECODER_TABLE(7) &
-	ROUTER5_MASTER0_ADDRESS_DECODER_TABLE(0) &
-	ROUTER5_MASTER0_ADDRESS_DECODER_TABLE(1) &
-	ROUTER5_MASTER0_ADDRESS_DECODER_TABLE(2) &
-	ROUTER5_MASTER0_ADDRESS_DECODER_TABLE(3) &
-	ROUTER5_MASTER0_ADDRESS_DECODER_TABLE(4) &
-	ROUTER5_MASTER0_ADDRESS_DECODER_TABLE(5) &
-	ROUTER5_MASTER0_ADDRESS_DECODER_TABLE(6) &
-	ROUTER5_MASTER0_ADDRESS_DECODER_TABLE(7) &
-	ROUTER5_MASTER0_ADDRESS_DECODER_TABLE(8)
-	); 
-        '''
+ 
         fw= open(outputdir + "/noc_config_configurable_part_9.vhd", 'w')
         fw.write("%s" %ch)
+        
+        
+        
+        fw.write("-- => AGGREGATING ARRAY <= --\n")
+        fw.write("--aggregates all master address decoder rules : starting from ROUTER0 - MASTER0 - RULES0 => first increment RULE number, then increment MASTER number, and finally increment ROUTER number\n")
+        fw.write("--concantenate all the rules with a &\n")
+        fw.write("constant ALL_MASTER_ADDRESS_DECODER_TABLES : unconstrained_array_record_address_decod_table:=(\n")
+        
+        for r in range(self.nbr_R):
+            for m in range(self.nbr_M_par_routeur[r]):
+                for t in range(self.Taille_table_decodeur_adr_maitre[r][m]):
+                    fw.write("ROUTER%d_MASTER%d_ADDRESS_DECODER_TABLE(%d)"%(r,m,t))
+
+                    if (r == self.nbr_R-1) and   (m == self.nbr_M_par_routeur[r]-1) and (t==self.Taille_table_decodeur_adr_maitre[r][m]-1) :
+                        fw.write("\n );\n")
+                    else:
+                        fw.write(" &\n")
+                
         fw.close()
 		
 		
@@ -2103,13 +1668,6 @@ constant ALL_MASTER_ADDRESS_DECODER_TABLES : unconstrained_array_record_address_
 --MASTER_DECOD_TABLE_SIZE = number of address decoding rule in the current master address decoder table
 constant ADD_DECODER_PARAMETER_MX :  matrix_add_decoder_parameter :=(
 '''
-# ((0,9), 	(9,8), 		(17,8), 	(25,8), 	(0,0), 		(0,0), 		(0,0), 		(0,0), 	(0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0)), 	-- ROUTER 0
-# ((0,0), 	(0,0), 		(0,0), 		(0,0), 		(0,0), 		(0,0), 		(0,0), 		(0,0), 	(0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0)),	-- ROUTER 1
-# ((33,8), 	(41,8),		(49,8), 	(57,8), 	(0,0), 		(0,0), 		(0,0), 		(0,0), 	(0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0)),	-- ROUTER 2
-# ((65,8), 	(73,8),	 	(81,8), 	(0,0), 		(0,0), 		(0,0), 		(0,0), 		(0,0), 	(0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0)),	-- ROUTER 3
-# ((89,8), 	(97,8),	 	(105,8), 	(113,8), 	(0,0), 		(0,0), 		(0,0), 		(0,0), 	(0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0)),	-- ROUTER 4
-# ((121,9), 	(0,0), 		(0,0), 		(0,0), 		(0,0), 		(0,0), 		(0,0), 		(0,0), 	(0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0))    -- ROUTER 5
-# );
 
         taille_table_decodeur_adresse_maitre_cumulees = 0
         
@@ -2123,6 +1681,7 @@ constant ADD_DECODER_PARAMETER_MX :  matrix_add_decoder_parameter :=(
                 if m != (self.nbr_M_par_routeur[r]-1):
                     fw.write(",")
             
+            #si il n'y pas 15 interfaces maitre au routeur, remplir le reste de (0,0),
             for o in range (15-self.nbr_M_par_routeur[r]):
                 fw.write(" (0,0)")
                 if (o != 15-self.nbr_M_par_routeur[r]-1):
@@ -2307,12 +1866,12 @@ end noc_address_pack;
         self.generate_configurable_part_2()
         self.generate_configurable_part_3()
         self.generate_configurable_part_4()
-        self.generate_configurable_part_5()
+        # self.generate_configurable_part_5()
         self.generate_configurable_part_6()
         self.generate_configurable_part_7()
         self.generate_configurable_part_8()
         self.generate_configurable_part_9()
-        self.generate_configurable_part_10()
+        # self.generate_configurable_part_10()
         self.generate_configurable_part_11()
         self.generate_configurable_part_12()
         self.generate_end_of_file_with_function()
