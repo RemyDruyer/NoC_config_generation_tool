@@ -538,6 +538,44 @@ class MainInterface(Frame):
                     self.Interfaces_paquets_routeur[r][index_int_paquet] = 3
                     index_int_paquet += 1
                     
+                    
+        #5) ADD DECODER TABLE SIZE
+        self.Taille_table_decodeur_adr_maitre = [[0 for m in range(self.nbr_M_par_routeur[r])] for r in range (self.nbr_R)]
+        
+        
+        #Routeur 0 : 4 Maitres
+        self.Taille_table_decodeur_adr_maitre[0][0] = 1
+        self.Taille_table_decodeur_adr_maitre[0][1] = 2
+        self.Taille_table_decodeur_adr_maitre[0][2] = 2
+        self.Taille_table_decodeur_adr_maitre[0][3] = 4
+        #Routeur 1 : 1 Maitre
+        self.Taille_table_decodeur_adr_maitre[1][0] = 3
+        #Routeur 2 : 15 Maitre
+        self.Taille_table_decodeur_adr_maitre[2][0] = 1
+        self.Taille_table_decodeur_adr_maitre[2][1] = 2
+        self.Taille_table_decodeur_adr_maitre[2][2] = 3
+        self.Taille_table_decodeur_adr_maitre[2][3] = 4
+        self.Taille_table_decodeur_adr_maitre[2][4] = 5
+        self.Taille_table_decodeur_adr_maitre[2][5] = 6
+        self.Taille_table_decodeur_adr_maitre[2][6] = 7
+        self.Taille_table_decodeur_adr_maitre[2][7] = 8
+        self.Taille_table_decodeur_adr_maitre[2][8] = 9
+        self.Taille_table_decodeur_adr_maitre[2][9] = 10
+        self.Taille_table_decodeur_adr_maitre[2][10] = 11
+        self.Taille_table_decodeur_adr_maitre[2][11] = 12
+        self.Taille_table_decodeur_adr_maitre[2][12] = 13
+        self.Taille_table_decodeur_adr_maitre[2][13] = 14
+        self.Taille_table_decodeur_adr_maitre[2][14] = 15
+        #Routeur 3 : 2 Maitre
+        self.Taille_table_decodeur_adr_maitre[3][0] = 2
+        self.Taille_table_decodeur_adr_maitre[3][1] = 3
+        
+        self.Nombre_total_regles_decodeur_adresse = 0
+        
+        for r in range (self.nbr_R):
+            for m in range (self.nbr_M_par_routeur[r]):
+                self.Nombre_total_regles_decodeur_adresse += self.Taille_table_decodeur_adr_maitre[r][m]
+                
         #12) LOCAL CONNEXION   
         self.Matrices_connexions_locales = [[[0 for max_maitre in range(0,self.nbr_port_routeur_max+1)] for max_esclave in range(0,self.nbr_port_routeur_max+1)] for r in range(self.nbr_R)]
         
@@ -549,10 +587,7 @@ class MainInterface(Frame):
         outputdir = "./Noc0__"
         if not os.path.exists(outputdir):
             os.makedirs(outputdir)
-        
-        
-                    
-                    
+               
                 
         
     def Chargement_sauvegarde_exemple(self):
@@ -1213,6 +1248,7 @@ constant ROUTINGPORT15 	: regPORTADD:= "1111";
         for r in range(self.nbr_R-1):
             fw.write("%d," %self.rang_nbr_S[r])
         fw.write("%d);" %self.rang_nbr_S[self.nbr_R-1])
+        fw.write("\n\n")
         fw.close()
 
 
@@ -1328,41 +1364,27 @@ constant ROUTINGPORT15 	: regPORTADD:= "1111";
         
     # Génération VHDL : ------ 5) ADDRESS DECODER TABLE SIZES  ------
     def generate_configurable_part_5(self):
-        outputdir = "./Noc0__"
+        outputdir = "./Noc0__"  
 
         ch='''
 ------ 5) ADDRESS DECODER TABLE SIZES  ------
 --define the size of each address decoding table of each master of each router (in the number of rules that it contain)
-constant ROUTER0_MASTER0_ADD_DECOD_TABLE_SIZE 	: integer := 9;
-constant ROUTER0_MASTER1_ADD_DECOD_TABLE_SIZE 	: integer := 8;
-constant ROUTER0_MASTER2_ADD_DECOD_TABLE_SIZE 	: integer := 8;
-constant ROUTER0_MASTER3_ADD_DECOD_TABLE_SIZE 	: integer := 8;
-																				
-constant ROUTER2_MASTER0_ADD_DECOD_TABLE_SIZE 	: integer := 8;
-constant ROUTER2_MASTER1_ADD_DECOD_TABLE_SIZE 	: integer := 8;
-constant ROUTER2_MASTER2_ADD_DECOD_TABLE_SIZE 	: integer := 8;
-constant ROUTER2_MASTER3_ADD_DECOD_TABLE_SIZE 	: integer := 8;
-																				
-constant ROUTER3_MASTER0_ADD_DECOD_TABLE_SIZE 	: integer := 8;
-constant ROUTER3_MASTER1_ADD_DECOD_TABLE_SIZE 	: integer := 8;
-constant ROUTER3_MASTER2_ADD_DECOD_TABLE_SIZE 	: integer := 8;
-																				
-constant ROUTER4_MASTER0_ADD_DECOD_TABLE_SIZE 	: integer := 8;
-constant ROUTER4_MASTER1_ADD_DECOD_TABLE_SIZE 	: integer := 8;
-constant ROUTER4_MASTER2_ADD_DECOD_TABLE_SIZE 	: integer := 8;
-constant ROUTER4_MASTER3_ADD_DECOD_TABLE_SIZE 	: integer := 8;
-																				
-constant ROUTER5_MASTER0_ADD_DECOD_TABLE_SIZE 	: integer := 9;
+'''
 
---define the total number of address decoding rules (for all the masters)
-constant TOTAL_ADDRESS_DECOD_SIZE 				: integer := 130;
-
-	
-        '''
-        fw= open(outputdir + "/noc_config_configurable_part_4.vhd", 'w')
+        fw= open(outputdir + "/noc_config_configurable_part_5.vhd", 'w')
         fw.write("%s" %ch)
+        
+        for r in range (self.nbr_R):
+            for m in range (self.nbr_M_par_routeur[r]):
+                fw.write("constant ROUTER%d_MASTER%d_ADD_DECOD_TABLE_SIZE 	: integer := %d;\n" %(r,m,self.Taille_table_decodeur_adr_maitre[r][m]))
+                if (m==self.nbr_M_par_routeur[r]-1):
+                    fw.write("\n")
+        
+        fw.write(" --define the total number of address decoding rules (for all the masters)\n")
+        fw.write("constant TOTAL_ADDRESS_DECOD_SIZE 				: integer := %d\n\n" % self.Nombre_total_regles_decodeur_adresse)
+        
         fw.close()
-		
+
 
     # Génération VHDL : ------ 6) SLAVE ADDRESS MAPPING (32-bits) ------
     def generate_configurable_part_6(self):
@@ -1727,6 +1749,8 @@ constant from_ROUTER5_to_ROUTER4_destination_port : regPORTADD:= ROUTINGPORT2;
         for r in range(0,self.nbr_R):
             for m in range (0, self.nbr_M_par_routeur[r]):
                 fw.write("type router%d_master%d_record_address_decod_table is array (0 to ROUTER%d_MASTER%d_ADD_DECOD_TABLE_SIZE-1) of record_master_interface_address_decode_routing_table;\n" %(r,m,r,m))
+                if (m == self.nbr_M_par_routeur[r]-1):
+                    fw.write("\n")
         fw.write("type unconstrained_array_record_address_decod_table is array (natural range <>) of record_master_interface_address_decode_routing_table;\n")
         fw.close()
         
@@ -2078,19 +2102,39 @@ constant ALL_MASTER_ADDRESS_DECODER_TABLES : unconstrained_array_record_address_
 --MASTER_TABLE_RANK_NB = rank of the address decoding rule in the total number of rules (it is equal to the cumulated number of rules in the previous master address decoders)
 --MASTER_DECOD_TABLE_SIZE = number of address decoding rule in the current master address decoder table
 constant ADD_DECODER_PARAMETER_MX :  matrix_add_decoder_parameter :=(
-((0,9), 	(9,8), 		(17,8), 	(25,8), 	(0,0), 		(0,0), 		(0,0), 		(0,0), 	(0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0)), 	-- ROUTER 0
-((0,0), 	(0,0), 		(0,0), 		(0,0), 		(0,0), 		(0,0), 		(0,0), 		(0,0), 	(0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0)),	-- ROUTER 1
-((33,8), 	(41,8),		(49,8), 	(57,8), 	(0,0), 		(0,0), 		(0,0), 		(0,0), 	(0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0)),	-- ROUTER 2
-((65,8), 	(73,8),	 	(81,8), 	(0,0), 		(0,0), 		(0,0), 		(0,0), 		(0,0), 	(0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0)),	-- ROUTER 3
-((89,8), 	(97,8),	 	(105,8), 	(113,8), 	(0,0), 		(0,0), 		(0,0), 		(0,0), 	(0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0)),	-- ROUTER 4
-((121,9), 	(0,0), 		(0,0), 		(0,0), 		(0,0), 		(0,0), 		(0,0), 		(0,0), 	(0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0))    -- ROUTER 5
-);
---MASTER	MASTER		MASTER		MASTER		MASTER		MASTER		MASTER		MASTER	MASTER...
---0			1			2			3			4			5			6			7		8		9	   10	  11    12     13      14   
+'''
+# ((0,9), 	(9,8), 		(17,8), 	(25,8), 	(0,0), 		(0,0), 		(0,0), 		(0,0), 	(0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0)), 	-- ROUTER 0
+# ((0,0), 	(0,0), 		(0,0), 		(0,0), 		(0,0), 		(0,0), 		(0,0), 		(0,0), 	(0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0)),	-- ROUTER 1
+# ((33,8), 	(41,8),		(49,8), 	(57,8), 	(0,0), 		(0,0), 		(0,0), 		(0,0), 	(0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0)),	-- ROUTER 2
+# ((65,8), 	(73,8),	 	(81,8), 	(0,0), 		(0,0), 		(0,0), 		(0,0), 		(0,0), 	(0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0)),	-- ROUTER 3
+# ((89,8), 	(97,8),	 	(105,8), 	(113,8), 	(0,0), 		(0,0), 		(0,0), 		(0,0), 	(0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0)),	-- ROUTER 4
+# ((121,9), 	(0,0), 		(0,0), 		(0,0), 		(0,0), 		(0,0), 		(0,0), 		(0,0), 	(0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0))    -- ROUTER 5
+# );
 
-        '''
+        taille_table_decodeur_adresse_maitre_cumulees = 0
+        
         fw= open(outputdir + "/noc_config_configurable_part_10.vhd", 'w')
         fw.write("%s" %ch)
+        for r in range (self.nbr_R):
+            fw.write("  (")
+            for m in range (self.nbr_M_par_routeur[r]):
+                fw.write(" (%d,%d)" %(taille_table_decodeur_adresse_maitre_cumulees,self.Taille_table_decodeur_adr_maitre[r][m]))
+                taille_table_decodeur_adresse_maitre_cumulees += self.Taille_table_decodeur_adr_maitre[r][m]
+                if m != (self.nbr_M_par_routeur[r]-1):
+                    fw.write(",")
+            
+            for o in range (15-self.nbr_M_par_routeur[r]):
+                fw.write(" (0,0)")
+                if (o != 15-self.nbr_M_par_routeur[r]-1):
+                    fw.write(",")
+                    
+            if (r == self.nbr_R-1):
+                fw.write(")); -- ROUTER %d\n" %r)
+            else:
+                fw.write("), -- ROUTER %d\n" %r)
+            
+        fw.write("--MASTER	MASTER		MASTER		MASTER		MASTER		MASTER		MASTER		MASTER	MASTER...\n")
+        fw.write("--0			1			2			3			4			5			6			7		8		9	   10	  11    12     13      14\n")
         fw.close()
 		
  # Génération VHDL : ------ 11) ROUTING TABLE  -------
@@ -2108,9 +2152,9 @@ constant ADD_DECODER_PARAMETER_MX :  matrix_add_decoder_parameter :=(
 
         fw= open(outputdir + "/noc_config_configurable_part_11.vhd", 'w')
         fw.write("%s" %ch)
-        for r in range (0, self.nbr_R):
+        for r in range (self.nbr_R):
             fw.write("\n constant ROUTER%d_ROUTING_TABLE : routing_table_array:=( \n" %r)
-            for r_dest in range (0, self.nbr_R):
+            for r_dest in range (self.nbr_R):
                 #Pour la dernière de la table de routage du dernier routeur
                 if r==self.nbr_R-1 and r_dest==(self.nbr_R-2):
                     fw.write("      (ROUTER%d, from_ROUTER%d_to_ROUTER%d_destination_port));\n" %(r_dest,r,r_dest))
@@ -2126,7 +2170,7 @@ constant ADD_DECODER_PARAMETER_MX :  matrix_add_decoder_parameter :=(
         for r in range (0,self.nbr_R-1):
             fw.write("      ROUTER%d_ROUTING_TABLE,\n" %r)
         fw.write("      ROUTER%d_ROUTING_TABLE\n" %(self.nbr_R-1))
-        fw.write(" );\n")
+        fw.write(" );\n\n")
         fw.close()
 
     
@@ -2214,8 +2258,6 @@ constant ADD_DECODER_PARAMETER_MX :  matrix_add_decoder_parameter :=(
         fw.close()
 
 
-
-	
     def generate_end_of_file_with_function(self):
         outputdir = "./Noc0__"
         if not os.path.exists(outputdir):
@@ -2265,7 +2307,7 @@ end noc_address_pack;
         self.generate_configurable_part_2()
         self.generate_configurable_part_3()
         self.generate_configurable_part_4()
-        #self.generate_configurable_part2_5()
+        self.generate_configurable_part_5()
         self.generate_configurable_part_6()
         self.generate_configurable_part_7()
         self.generate_configurable_part_8()
