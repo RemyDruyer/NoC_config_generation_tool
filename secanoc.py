@@ -152,7 +152,7 @@ class MainInterface(Frame):
         self.liste_Cases_Connexions_Routeurs = list()
         self.nb_routeur_precedente_generation = 0
         #Paramètres fixes du NoC
-        self.nbr_port_max_routeur = 16
+        self.nbr_port_routeur_max = 16
         #Variables globales de paramètrage du NoC
         self.nbr_R = 0
         self.nbr_M_par_routeur = []
@@ -163,12 +163,11 @@ class MainInterface(Frame):
         self.somme_tot_nbr_RP = 0
         self.rang_nbr_M = []
         self.rang_nbr_S = []
-        # self.type_interface_par_routeur[[]]
+        self.nbr_interface_routeur = []
         self.type_interface_par_routeur = []
         self.type_interface_par_routeur.append([])
         self.Connexions_paquet_maitre   = []
         self.Connexions_paquet_esclave  = []
-
         
         self.flag_tout_connecter = 0
         
@@ -240,50 +239,11 @@ class MainInterface(Frame):
         self.bouton_generation_vhdl = Button(self, text="Generation \n du VHDL", command= self.on_buttonGenerate_clicked, state=DISABLED)
         self.bouton_generation_vhdl.grid(row= 4, column=5, sticky=NSEW)
         
-        
+ 
         self.bouton_chargement_save_exemple = Button(self, text="Chargement Save", command=self.Chargement_sauvegarde_exemple)
         self.bouton_chargement_save_exemple.grid(row=2, column=3, padx=2, pady=2)
             
-    def Chargement_sauvegarde_exemple(self):
-        CHARGED_FROM_SAVE_nbr_routeur = 4
-        CHARGED_FROM_SAVE_nbr_M_par_routeur = [0,4,2,0]
-        CHARGED_FROM_SAVE_nbr_S_par_routeur = [0,2,0,3]
-        CHARGED_FROM_SAVE_connexions_routeurs = [[0,1,0,1],[1,0,1,0],[0,1,0,0],[1,0,0,0]]
-        CHARGED_FROM_SAVE_connexions_locales = [[[0]], [[1,1],[0,0],[1,0],[0,1]], [[0]], [[0]]]
-        CHARGED_FROM_SAVE_connexions_paquets = [[0],[0,0,1,0,0,1],[0,1],[1,0,0]]
-        
-        #chargement du nbr de routeur
-        self.EntryNbrRouteur.delete(0,END)
-        self.EntryNbrRouteur.insert(0,CHARGED_FROM_SAVE_nbr_routeur)
-        ##Bouton de génération de la matrice
-        self.run_action()
-  
-        #chargement des connexions entre les routeurs (self.nbr_R initisalité dans run_action() donc utilisable)
-        for ligne in range (0,self.nbr_R):
-            for colonne in range (0,self.nbr_R):
-                if CHARGED_FROM_SAVE_connexions_routeurs[ligne][colonne] == 1:
-                    self.liste_Cases_Connexions_Routeur[ligne][colonne]["background"]="orange"
-        
-        #chargement du nombre d'interface/maitre esclave par routeur
-        for r in range(self.nbr_R):
-            self.liste_EntryNbrMaitre[r].delete(0,END)
-            self.liste_EntryNbrMaitre[r].insert(0,CHARGED_FROM_SAVE_nbr_M_par_routeur[r])
-            self.liste_EntryNbrEsclave[r].delete(0,END)
-            self.liste_EntryNbrEsclave[r].insert(0,CHARGED_FROM_SAVE_nbr_S_par_routeur[r])
-            
-        ##Bouton sauvegarde principaux paramètres routeurs
-        self.bouton_sauvegarde_param_connex_routeur_action()
 
-        #chargement des connexions locales
-        for r in range(self.nbr_R):
-            for m in range(self.nbr_M_par_routeur[r]):
-                for s in range(self.nbr_S_par_routeur[r]):
-                    self.Connexions_locales[r][m][s].set(value=CHARGED_FROM_SAVE_connexions_locales[r][m][s])
-        
-        #chargement des connexions paquets
-        for r in range(self.nbr_R):
-            for m_s in range(self.nbr_M_par_routeur[r]+self.nbr_S_par_routeur[r]):
-                self.Connexions_paquets[r][m_s].set(value=CHARGED_FROM_SAVE_connexions_paquets[r][m_s])
         
             
         # Action du bouton "RUN/Generation de la matrice de connexions des routeurs"
@@ -507,8 +467,8 @@ class MainInterface(Frame):
         self.bouton_generation_vhdl.config(state=NORMAL)
         
         #Nombre d'interface Maitre et Esclave par routeur
-        self.nbr_M_par_routeur = [0 for i in range(0,self.nbr_R)]
-        self.nbr_S_par_routeur = [0 for i in range(0,self.nbr_R)]      
+        self.nbr_M_par_routeur = [0 for i in range(self.nbr_R)]
+        self.nbr_S_par_routeur = [0 for i in range(self.nbr_R)]      
         for r in range(self.nbr_R):
             self.nbr_M_par_routeur[r] = int(self.liste_EntryNbrMaitre[r].get())
             self.nbr_S_par_routeur[r] = int(self.liste_EntryNbrEsclave[r].get())
@@ -520,7 +480,7 @@ class MainInterface(Frame):
             
         #Nombre de port de routage par routeur et nombre total de port de routage(une connexion entre deux routeurs = 2 ports de routage -> 1 par routeur)
         #pour chaque routeur
-        self.nbr_RP_par_routeur = [0 for i in range(0,self.nbr_R)]
+        self.nbr_RP_par_routeur = [0 for i in range(self.nbr_R)]
         for ligne in range (0,self.nbr_R):
             for colonne in range (0,self.nbr_R):
                 #on ne prend que la partie au dessus/à droite de la diagonale pour générer compter les connexions et éviter de créer des doubles
@@ -543,11 +503,83 @@ class MainInterface(Frame):
             var_somme_rang_nbr_M += self.nbr_M_par_routeur[r-1]
             self.rang_nbr_S[r] = self.nbr_S_par_routeur[r-1] + var_somme_rang_nbr_S
             var_somme_rang_nbr_S += self.nbr_S_par_routeur[r-1]
-                        
+               
+               
+               
+        self.nbr_interface_routeur = [0 for i in range(self.nbr_R)]
+               
         self.Connexions_locales = [[[ IntVar() for s in range (self.nbr_S_par_routeur[r])] for m in range (self.nbr_M_par_routeur[r])] for r in range (self.nbr_R)]
-        self.Connexions_paquets = [[IntVar() for m_s in range(self.nbr_M_par_routeur[r]+self.nbr_S_par_routeur[r])] for r in range(self.nbr_R)]
-        
+        self.Connexions_paquets = [[ IntVar() for m_s in range(self.nbr_M_par_routeur[r]+self.nbr_S_par_routeur[r])] for r in range(self.nbr_R)]
 
+        #interface paquet des ports de routages
+        self.Interfaces_paquets_routeur = [[0 for port_routeur in range(self.nbr_port_routeur_max)] for r in range(self.nbr_R)]
+        
+        #identifie le type d'interface paquet de chaque port de chaque routeur
+        #par défaut toutes les interfaces maîtres, esclaves et port de routage possèdent une interface paquet
+        #1 = maitre ; 2 = esclave ; 3 = port de routage ; 0 = aucune interface paquet
+        for r in range(self.nbr_R):
+            index_int_paquet = 0
+            for m in range(self.nbr_M_par_routeur[r]):
+                self.Interfaces_paquets_routeur[r][index_int_paquet] = 1
+                index_int_paquet += 1
+                
+            for s in range(self.nbr_S_par_routeur[r]):
+                self.Interfaces_paquets_routeur[r][index_int_paquet] = 2
+                index_int_paquet += 1
+                
+            for colonne in range(self.nbr_R):
+                if self.liste_Cases_Connexions_Routeur[r][colonne]["background"]=="orange":
+                    self.Interfaces_paquets_routeur[r][index_int_paquet] = 3
+                    index_int_paquet += 1
+                
+        # for r in range(self.nbr_R):
+            # print("\nRouteur %d : " %r)
+            # for nbr_port in range(self.nbr_port_routeur_max):
+                # print("%d" %self.Interfaces_paquets_routeur[r][nbr_port])
+                
+        
+        
+    def Chargement_sauvegarde_exemple(self):
+        CHARGED_FROM_SAVE_nbr_routeur = 4
+        CHARGED_FROM_SAVE_nbr_M_par_routeur = [0,4,2,0]
+        CHARGED_FROM_SAVE_nbr_S_par_routeur = [0,2,0,3]
+        CHARGED_FROM_SAVE_connexions_routeurs = [[0,1,0,1],[1,0,1,0],[0,1,0,0],[1,0,0,0]]
+        CHARGED_FROM_SAVE_connexions_locales = [[[0]], [[1,1],[0,0],[1,0],[0,1]], [[0]], [[0]]]
+        CHARGED_FROM_SAVE_connexions_paquets = [[0],[0,0,1,0,0,1],[0,1],[1,0,0]]
+        
+        #chargement du nbr de routeur
+        self.EntryNbrRouteur.delete(0,END)
+        self.EntryNbrRouteur.insert(0,CHARGED_FROM_SAVE_nbr_routeur)
+        ##Bouton de génération de la matrice
+        self.run_action()
+  
+        #chargement des connexions entre les routeurs (self.nbr_R initisalité dans run_action() donc utilisable)
+        for ligne in range (0,self.nbr_R):
+            for colonne in range (0,self.nbr_R):
+                if CHARGED_FROM_SAVE_connexions_routeurs[ligne][colonne] == 1:
+                    self.liste_Cases_Connexions_Routeur[ligne][colonne]["background"]="orange"
+        
+        #chargement du nombre d'interface/maitre esclave par routeur
+        for r in range(self.nbr_R):
+            self.liste_EntryNbrMaitre[r].delete(0,END)
+            self.liste_EntryNbrMaitre[r].insert(0,CHARGED_FROM_SAVE_nbr_M_par_routeur[r])
+            self.liste_EntryNbrEsclave[r].delete(0,END)
+            self.liste_EntryNbrEsclave[r].insert(0,CHARGED_FROM_SAVE_nbr_S_par_routeur[r])
+            
+        ##Bouton sauvegarde principaux paramètres routeurs
+        self.bouton_sauvegarde_param_connex_routeur_action()
+
+        #chargement des connexions locales
+        for r in range(self.nbr_R):
+            for m in range(self.nbr_M_par_routeur[r]):
+                for s in range(self.nbr_S_par_routeur[r]):
+                    self.Connexions_locales[r][m][s].set(value=CHARGED_FROM_SAVE_connexions_locales[r][m][s])
+        
+        #chargement des connexions paquets
+        for r in range(self.nbr_R):
+            for m_s in range(self.nbr_M_par_routeur[r]+self.nbr_S_par_routeur[r]):
+                self.Connexions_paquets[r][m_s].set(value=CHARGED_FROM_SAVE_connexions_paquets[r][m_s])
+                
 
     def checkbouton_moniteur_securite_action(self):
         if self.flag_checkbouton_moniteur_securite == 0:
@@ -791,6 +823,7 @@ class MainInterface(Frame):
          
         Button(Fenetre_ConnexionPaquet, text="Tout connecter/deconnecter", width=22, command= _Bouton_ToutConnecter_CoPaquet_action, pady=5).grid(row=2, column=0)
         Button(Fenetre_ConnexionPaquet, text="Ok", width=22, command=lambda:Fenetre_ConnexionPaquet.destroy(), pady=5).grid(row=3, column=0)
+            
             
             
     # Action bouton Generation code VHDL
@@ -1158,72 +1191,75 @@ constant ROUTINGPORT15 	: regPORTADD:= "1111";
 -- b) If the current router does not have any MASTER/SLAVE the value must be '0' (MASTER for MASTER_RANK and SLAVE for SLAVE_RANK)
 -- c) The value for the next router is equal to the current value plus the number of MASTER/SLAVE in the current router (cumulated sum of all the precedent MASTER/SLAVE)'''
 
-
-
         fw= open(outputdir + "/noc_config_configurable_part_2.vhd", 'w')
         fw.write("%s" %ch)
         fw.write("\nconstant MASTER_RANK : master_rank_in_vector := (")
-        for r in range(0, self.nbr_R-1):
+        for r in range(self.nbr_R-1):
             fw.write("%d," %self.rang_nbr_M[r])
         fw.write("%d);" %self.rang_nbr_M[self.nbr_R-1])
         
         fw.write("\nconstant SLAVE_RANK : slave_rank_in_vector := (")
-        for r in range(0, self.nbr_R-1):
+        for r in range(self.nbr_R-1):
             fw.write("%d," %self.rang_nbr_S[r])
         fw.write("%d);" %self.rang_nbr_S[self.nbr_R-1])
         fw.close()
 
-        
-   
+
 
     # Génération VHDL : ------ 3) ROUTER CONNEXIONS (topology)------
     def generate_configurable_part_3(self):
         outputdir = "./Noc0__"
-        # if not os.path.exists(outputdir):
-        
+        if not os.path.exists(outputdir):
+            os.makedirs(outputdir)
 
             
-        # ch='''
-# ------ 3) ROUTER CONNEXIONS (topology)------
-# --define a record for each connexion between routers
-# --wgeb two routers are connected : only one ROUTER_CONNEXION constant must be defined
-# --4 values to define for each connexion:
-# -- 1) SOURCE_ROUTER					
-# -- 2) SOURCE_ROUTING_PORT				
-# -- 3) DESTINATION_ROUTER				
-# -- 4) DESTINATION_ROUTING_PORT'''
+        ch='''
+------ 3) ROUTER CONNEXIONS (topology)------
+--define a record for each connexion between routers
+--wgeb two routers are connected : only one ROUTER_CONNEXION constant must be defined
+--4 values to define for each connexion:
+-- 1) SOURCE_ROUTER					
+-- 2) SOURCE_ROUTING_PORT				
+-- 3) DESTINATION_ROUTER				
+-- 4) DESTINATION_ROUTING_PORT'''
            
-        # fw= open(outputdir + "/noc_config_configurable_part_3.vhd", 'w')
-        # fw.write("%s" %ch)
-        # fw.write("\n")
-        # #index du nombre total de connexion entre les routeurs
-        # var_num_connexion = 0
-        # #pour chaque routeur
-        # for ligne in range (0,self.nbr_R):
-            # for colonne in range (0,self.nbr_R):
-                # #on ne prend que la partie au dessus/à droite de la diagonale pour générer compter les connexions et éviter de créer des doubles
-                # if colonne > ligne:
-                    # #si la case est orange et donc qu'une connexion existe
-                    # if self.liste_Cases_Connexions_Routeur[ligne][colonne]["background"]=="orange":
-                        # #ecrire la connexion correspondante avec comme paramètre dans l'ordre : 1) N° de la connexion courante (en partant de 0) ; 2) Adresse du routeur en Y ; 3) Adresse du port de routage du routeur en Y ; 4) Adresse du routeur en X ; 5) N° du port de routage du routeur en X
-                        # fw.write("constant ROUTER_CONNEXION_%d : record_router_connexion :=(%d,%d,%d,%d);" %(var_num_connexion, ligne, self.nbr_interface_routeur[ligne] , colonne, self.nbr_interface_routeur[colonne]))
-                        # fw.write("\n")
-                        # #incrémentation de l'index du nombre de connexion
-                        # var_num_connexion += 1
-                        # #incrémentation de l'index du prochain port de routage potentiel utilisé dans une connexion pour le routeur source et le routeur destination de la connexion venant d'être écrite
-                        # self.nbr_interface_routeur[ligne] += 1
-                        # self.nbr_interface_routeur[colonne] += 1
+        fw= open(outputdir + "/noc_config_configurable_part_3.vhd", 'w')
+        fw.write("%s" %ch)
+        fw.write("\n")
+        #index du nombre total de connexion entre les routeurs
         
-        # #écriture du tableau d'aggregation des connexions routeurs
-        # fw.write("\n-- => AGGREGATING ARRAY <= --\n")
-        # fw.write("constant ALL_ROUTER_CONNEXIONS : array_all_router_connexion:=(\n")
-        # #ecriture de toutes les ROUTER_CONNEXION jusqu'à l'avant dernière avec une virgule à la fin
-        # for i in range ((self.somme_tot_nbr_RP/2)-1):
-            # fw.write("      ROUTER_CONNEXION_%d,\n" %i)
-        # #ecriture de la dernière ROUTER_CONNEXION sans virgule à la fin
-        # fw.write("      ROUTER_CONNEXION_%d\n" %((self.somme_tot_nbr_RP/2)-1))
-        # fw.write(");\n")
-        # fw.close()
+        #comptage de toutes les interfaces maitre & esclaves de chaque routeur
+        for r in range (self.nbr_R):
+            self.nbr_interface_routeur[r] = self.nbr_M_par_routeur[r] + self.nbr_S_par_routeur[r]
+        
+        i_num_connexion = 0
+        #pour chaque routeur
+        for ligne in range (self.nbr_R):
+            for colonne in range (self.nbr_R):
+                #on ne prend que la partie au dessus/à droite de la diagonale pour générer compter les connexions et éviter de créer des doubles
+                if colonne > ligne:
+                    #si la case est orange et donc qu'une connexion existe
+                    if self.liste_Cases_Connexions_Routeur[ligne][colonne]["background"]=="orange":
+                        #ecrire la connexion correspondante avec comme paramètre dans l'ordre : 1) N° de la connexion courante (en partant de 0) ; 2) Adresse du routeur en Y ; 3) Adresse du port de routage du routeur en Y ; 4) Adresse du routeur en X ; 5) N° du port de routage du routeur en X
+                        fw.write("constant ROUTER_CONNEXION_%d : record_router_connexion :=(%d,%d,%d,%d);" %(i_num_connexion, ligne, self.nbr_interface_routeur[ligne] , colonne, self.nbr_interface_routeur[colonne]))
+                        fw.write("\n")
+                        #incrémentation de l'index du nombre de connexion
+                        i_num_connexion += 1
+                        #incrémentation de l'index du prochain port de routage potentiel utilisé dans une connexion pour le routeur source et le routeur destination de la connexion venant d'être écrite
+                        self.nbr_interface_routeur[ligne] += 1
+                        self.nbr_interface_routeur[colonne] += 1
+
+        
+        #écriture du tableau d'aggregation des connexions routeurs
+        fw.write("\n-- => AGGREGATING ARRAY <= --\n")
+        fw.write("constant ALL_ROUTER_CONNEXIONS : array_all_router_connexion:=(\n")
+        #ecriture de toutes les ROUTER_CONNEXION jusqu'à l'avant dernière avec une virgule à la fin
+        for i in range (i_num_connexion-1):
+            fw.write("      ROUTER_CONNEXION_%d,\n" %i)
+        #ecriture de la dernière ROUTER_CONNEXION sans virgule à la fin
+        fw.write("      ROUTER_CONNEXION_%d\n" % (i_num_connexion-1))
+        fw.write(");\n")
+        fw.close()
         
     # Génération VHDL : ------ 4) PACKET INTERFACE DECLARATION ------
     def generate_configurable_part_4(self):
@@ -1278,6 +1314,32 @@ constant ROUTINGPORT15 	: regPORTADD:= "1111";
             # fw.write("	    R%d_PACKET_INTERFACE_PORT_ADD,\n" %r)
         # fw.write("	    R%d_PACKET_INTERFACE_PORT_ADD\n" %(self.nbr_R-1))
         # fw.write(");\n")
+        
+        
+                # #identifie le type d'interface paquet de chaque port de chaque routeur
+        # #par défaut toutes les interfaces maîtres, esclaves et port de routage possèdent une interface paquet
+        # #1 = maitre ; 2 = esclave ; 3 = port de routage ; 0 = aucune interface paquet
+        # for r in range(self.nbr_R):
+            # index_int_paquet = 0
+            # for m in range(self.nbr_M_par_routeur[r]):
+                # self.Interfaces_paquets_routeur[r][index_int_paquet] = 1
+                # index_int_paquet += 1
+                
+            # for s in range(self.nbr_S_par_routeur[r]):
+                # self.Interfaces_paquets_routeur[r][index_int_paquet] = 2
+                # index_int_paquet += 1
+                
+            # for colonne in range(self.nbr_R):
+                # if self.liste_Cases_Connexions_Routeur[r][colonne]["background"]=="orange":
+                    # self.Interfaces_paquets_routeur[r][index_int_paquet] = 3
+                    # index_int_paquet += 1
+                
+        for r in range(self.nbr_R):
+            print("\nRouteur %d : " %r)
+            for nbr_port in range(self.nbr_port_routeur_max):
+                print("%d" %self.Interfaces_paquets_routeur[r][nbr_port])
+                
+                
         fw.close()
         
     # Génération VHDL : ------ 5) ADDRESS DECODER TABLE SIZES  ------
