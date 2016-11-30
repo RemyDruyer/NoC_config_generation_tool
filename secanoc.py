@@ -170,8 +170,9 @@ class MainInterface(Frame):
         self.Connexions_paquet_esclave  = []
         self.IntVar_checkBouton_Connexions_Locales = IntVar()
         self.IntVar_checkBouton_Connexions_Paquets = IntVar()
-        
         self.flag_tout_connecter = 0
+        
+
         
         # Espace Menu Barre
         # Creation de la menu barre
@@ -509,15 +510,16 @@ class MainInterface(Frame):
             var_somme_rang_nbr_S += self.nbr_S_par_routeur[r-1]
                
                
-               
+        #variable utilisée pour la génération : 3) CONNEXION
         self.nbr_interface_routeur = [0 for i in range(self.nbr_R)]
-               
+        #Connexions paquets & locales
         self.Connexions_locales = [[[ IntVar(value=1) for s in range (self.nbr_S_par_routeur[r])] for m in range (self.nbr_M_par_routeur[r])] for r in range (self.nbr_R)]
         self.Connexions_paquets = [[ IntVar(value=1) for m_s in range(self.nbr_M_par_routeur[r]+self.nbr_S_par_routeur[r])] for r in range(self.nbr_R)]
 
         #interface paquet des ports de routages
         self.Interfaces_paquets_routeur = [[0 for port_routeur in range(self.nbr_port_routeur_max)] for r in range(self.nbr_R)]
         
+        #4) PACKET INTERFACE
         #identifie le type d'interface paquet de chaque port de chaque routeur
         #par défaut toutes les interfaces maîtres, esclaves et port de routage possèdent une interface paquet
         #1 = maitre ; 2 = esclave ; 3 = port de routage ; 0 = aucune interface paquet
@@ -535,8 +537,23 @@ class MainInterface(Frame):
                 if self.liste_Cases_Connexions_Routeur[r][colonne]["background"]=="orange":
                     self.Interfaces_paquets_routeur[r][index_int_paquet] = 3
                     index_int_paquet += 1
+                    
+        #12) LOCAL CONNEXION   
+        self.Matrices_connexions_locales = [[[0 for max_maitre in range(0,self.nbr_port_routeur_max+1)] for max_esclave in range(0,self.nbr_port_routeur_max+1)] for r in range(self.nbr_R)]
+        
+        
+        
+        
+    # Generation VHDL : ----- GLOBAL CONSTANTS -----
+    def generate_configurable_part_0(self):
+        outputdir = "./Noc0__"
+        if not os.path.exists(outputdir):
+            os.makedirs(outputdir)
+        
+        
+                    
+                    
                 
-
         
     def Chargement_sauvegarde_exemple(self):
         CHARGED_FROM_SAVE_nbr_routeur = 4
@@ -618,53 +635,49 @@ class MainInterface(Frame):
     #Méthode pour gérer le paramètrage des connexions locales
     def FenetreSecondaire_ConnexionLocale(self):
 
-        def _CheckButt_ToutConnecter_CoLocale_action():
+        def _Bouton_ToutConnecter_Local_action():
             #tout connecter
-            if self.Intvar_CheckFenetreLocale_tout_connecter.get()==1:
+            if self.flag_tout_connecter_local==0:
                 for i in range(len(CheckButt_Connexions_locales)):
                     CheckButt_Connexions_locales[i].select()
+                self.flag_tout_connecter_local = 1
             #tout déconnecter
             else:
                 for i in range(len(CheckButt_Connexions_locales)):
                     CheckButt_Connexions_locales[i].deselect()
-     
+                self.flag_tout_connecter_local = 0
+                
+                
         def _on_buttonsave_clicked():
             print("Configuration des connexions locales")    
             self.quit()
 
-        # Main méthode : FenetreSecondaire_ConnexionLocale #
+        #Main méthode : FenetreSecondaire_ConnexionLocale #
         #popup
         Fenetre_ConnexionLocale = Toplevel(fenetre_tk)
         #Frame avec une barre verticale de défilement dans le popup
         self.frame = VerticalScrolledFrame(Fenetre_ConnexionLocale)
         self.frame.grid(row=0, column=0,sticky=N)
         
-        Cases_Routeurs   = []
-        Cases_Maitres    = []
-        Cases_Esclaves   = []
-        CheckButt_Connexions_locales = []
-        self.Intvar_CheckFenetreLocale_tout_connecter= IntVar(value=1)
-        
-        Label_Espace   = Label(self.frame.interior, text="", width=6)
-        Label_Routeurs  = Label(self.frame.interior, text="Routeur  ")
-        Label_Maitres   = Label(self.frame.interior, text="Maitre   ")
-        Label_Esclaves  = Label(self.frame.interior, text="Esclave  ")
-        Label_Connexions_locales = Label(self.frame.interior, text="Connexion")
+        Cases_Routeurs                  = []
+        Cases_Maitres                   = []
+        Cases_Esclaves                  = []
+        CheckButt_Connexions_locales    = []
+        self.flag_tout_connecter_local  = 1
+        Label_Espace   = Label(self.frame.interior, text="", width=6).grid(row=0, column=1)
+        Label_Routeurs  = Label(self.frame.interior, text="Routeur").grid(row=0, column=2)
+        Label_Maitres   = Label(self.frame.interior, text="Maitre").grid(row=0, column=3)
+        Label_Esclaves  = Label(self.frame.interior, text="Esclave").grid(row=0, column=4)
+        Label_Connexions_locales = Label(self.frame.interior, text="Connexion").grid(row=0, column=5)
         
         #Placement des cases pour Maitre X(fois) Esclave pour chaque routeur 
         for r in range(self.nbr_R):
             for m in range(self.nbr_M_par_routeur[r]):
                 for s in range(self.nbr_S_par_routeur[r]):
-                    Cases_Routeurs  .append(Button(self.frame.interior, text=str(r), state=DISABLED, width=7))
-                    Cases_Maitres   .append(Button(self.frame.interior, text=str(m), state=DISABLED, width=7))
-                    Cases_Esclaves  .append(Button(self.frame.interior, text=str(s+self.nbr_M_par_routeur[r]), state=DISABLED, width=7))
+                    Cases_Routeurs  .append(Button(self.frame.interior, text="R" + str(r), state=DISABLED, width=10))
+                    Cases_Maitres   .append(Button(self.frame.interior, text="M" + str(m), state=DISABLED, width=10))
+                    Cases_Esclaves  .append(Button(self.frame.interior, text="E" + str(s+self.nbr_M_par_routeur[r]), state=DISABLED, width=10))
                     CheckButt_Connexions_locales.append(Checkbutton(self.frame.interior, variable=self.Connexions_locales[r][m][s]))
-        
-        #Placement des labels en rang 0 dans l'interior frame de VerticalScrolledFrame
-        Label_Espace.grid(row=0, column=1)
-        Label_Routeurs.grid(row=0, column=2)
-        Label_Maitres.grid(row=0, column=3)
-        Label_Esclaves.grid(row=0, column=4)
         
         for i in range(len(Cases_Routeurs)):
             Cases_Routeurs[i]  .grid(row=i+1, column=2)
@@ -672,31 +685,30 @@ class MainInterface(Frame):
             Cases_Esclaves[i]  .grid(row=i+1, column=4)
             CheckButt_Connexions_locales[i].grid(row=i+1, column=5)
             
-        Checkbutton(Fenetre_ConnexionLocale, text="Tout connecter/deconnecter", command=_CheckButt_ToutConnecter_CoLocale_action, variable = self.Intvar_CheckFenetreLocale_tout_connecter).grid(row=1, column=0, pady=5)
+        Button(Fenetre_ConnexionLocale, text="Tout connecter/deconnecter", width=22, command=_Bouton_ToutConnecter_Local_action).grid(row=1, column=0, pady=5)
         Button(Fenetre_ConnexionLocale, text="Ok", width=22, command=lambda:Fenetre_ConnexionLocale.destroy()).grid(row=2, column=0, pady=5)
-
-
-
 
         
     #methode pour gerer la fenêtre des connexions en paquets
     def FenetreSecondaire_ConnexionPaquet(self):
        
-        def _CheckButt_ToutConnecter_CoPaquet_action():
+        def _Bouton_ToutConnecter_Paquet_action():
 
             #tout connecter
-            if self.Intvar_CheckFenetrePaquet_tout_connecter.get()==1:
+            if self.flag_bouton_tout_connecter_paquet==1:
                 for i in range(len(CheckButt_Connexions_paquet_maitre)):
                     CheckButt_Connexions_paquet_maitre[i].select()
                 for i in range(len(CheckButt_Connexions_paquet_esclave)):
                     CheckButt_Connexions_paquet_esclave[i].select()
+                self.flag_bouton_tout_connecter_paquet=0
+                
             #tout déconnecter
             else:
                 for i in range(len(CheckButt_Connexions_paquet_maitre)):
                     CheckButt_Connexions_paquet_maitre[i].deselect()
                 for i in range(len(CheckButt_Connexions_paquet_esclave)):
                     CheckButt_Connexions_paquet_esclave[i].deselect()
-
+                self.flag_bouton_tout_connecter_paquet=1
                 
 
         # Main méthode : FenetreSecondaire_ConnexionPaquet #
@@ -710,7 +722,7 @@ class MainInterface(Frame):
         Cases_esclaves_connexion_paquet                = []
         CheckButt_Connexions_paquet_maitre             = []
         CheckButt_Connexions_paquet_esclave            = []
-        self.Intvar_CheckFenetrePaquet_tout_connecter  = IntVar(value=1)
+        self.flag_bouton_tout_connecter_paquet  = 1
         
         
         #déclaration des labels
@@ -755,7 +767,7 @@ class MainInterface(Frame):
             Cases_esclaves_connexion_paquet[i-len(Cases_maitres_connexion_paquet)].grid(row=i-len(Cases_maitres_connexion_paquet)+1, column=5)
             CheckButt_Connexions_paquet_esclave[i-len(Cases_maitres_connexion_paquet)].grid(row=i-len(Cases_maitres_connexion_paquet)+1, column=6)
          
-        Checkbutton(Fenetre_ConnexionPaquet, text="Tout connecter/deconnecter", command= _CheckButt_ToutConnecter_CoPaquet_action, pady=5, variable = self.Intvar_CheckFenetrePaquet_tout_connecter).grid(row=2, column=0)
+        Button(Fenetre_ConnexionPaquet, text="Tout connecter/deconnecter", width=22, command= _Bouton_ToutConnecter_Paquet_action, pady=5).grid(row=2, column=0)
         Button(Fenetre_ConnexionPaquet, text="Ok", width=22, command=lambda:Fenetre_ConnexionPaquet.destroy(), pady=5).grid(row=3, column=0)
             
 
@@ -2120,69 +2132,89 @@ constant ADD_DECODER_PARAMETER_MX :  matrix_add_decoder_parameter :=(
     
     
  # Génération VHDL : ------ 12) LOCAL CONNEXIONS MATRIX ------ 
-    def generate_configurable_part_12_1(self):
+    def generate_configurable_part_12(self):
         outputdir = "./Noc0__"
-      
-        ch='''
         
-        '''
-        fw= open(outputdir + "/noc_config_configurable_part_12_1.vhd", 'w')
+        fw= open(outputdir + "/noc_config_configurable_part_12.vhd", 'w')
         fw.write("------ 12) LOCAL CONNEXIONS MATRIX ------ \n")
+        
+        #variable pour calcul de : single_slave, slave_rank, single_master & master_rank
+        nbr_esclave_connecte_au_maitre = [[0 for m in range(self.nbr_M_par_routeur[r])] for r in range(self.nbr_R)]
+        nbr_maitre_connecte_a_esclave = [[0 for s in range(self.nbr_S_par_routeur[r])] for r in range(self.nbr_R)]
+        
+        rang_dernier_esclave_connecte_au_maitre = [[0 for m in range(self.nbr_M_par_routeur[r])] for r in range(self.nbr_R)]
+        rang_dernier_maitre_connecte_a_esclave = [[0 for s in range(self.nbr_S_par_routeur[r])] for r in range(self.nbr_R)]
+
+        #Initilisation des matrices "self.Matrices_connexions_locales" à partir des connexions "self.Connexions_locales"
+        #Attention les esclaves dans "self.Connexions_locales[r][m][s]" sont comptés à partir de 0 alors que dans "self.Matrices_connexions_locales" 
+        #ils sont comptés à partir du n° du dernier maitre du routeur "self.nbr_M_par_routeur[r]"
         for r in range(self.nbr_R):
-            fw.write('constant ROUTER%d_LOCAL_MX    : local_connexion_matrix :=(           \n ' %r)
-            fw.write('\n')
-            fw.write(' (0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0), -- slave 0 Mij (0:14),Single_master,LOCAL_MASTER_RANK \n')
-            fw.write(" (0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0), -- slave 1                                            \n")                                         
-            fw.write(" (0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0), -- slave 2                                            \n")
-            fw.write(" (0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0), -- slave 3                                            \n")
-            fw.write(" (0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0), -- slave 4                                            \n")
-            fw.write(" (0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0), -- slave 5                                            \n")
-            fw.write(" (0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0), -- slave 6                                            \n")
-            fw.write(" (0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0), -- slave 7                                            \n")
-            fw.write(" (0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0), -- slave 8                                            \n")
-            fw.write(" (0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0), -- slave 9                                            \n")
-            fw.write(" (0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0), -- slave 10                                           \n")
-            fw.write(" (0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0), -- slave 11                                           \n")
-            fw.write(" (0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0), -- slave 12                                           \n")
-            fw.write(" (0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0), -- slave 13                                           \n")
-            fw.write(" (0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0), -- slave 14                                           \n")
-            fw.write(" (0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0), -- single_slave                                       \n")
-            fw.write(" (0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0));-- slave rank                                         \n")
-            fw.write("--m m m m m m m m m m m m m m m s m                                                          \n")
-            fw.write("--a a a a a a a a a a a a a a a i r                                                          \n")
-            fw.write("--s s s s s s s s s s s s s s s n a                                                          \n")
-            fw.write("--t t t t t t t t t t t t t t t g n                                                          \n")
-            fw.write("--e e e e e e e e e e e e e e e l k                                                          \n")
-            fw.write("--r r r r r r r r r r r r r r r e                                                            \n")
-            fw.write("--0 1 2 3 4 5 6 7 8 9 1 1 1 1 1 m                                                            \n")                                           
-            fw.write("--                    0 1 2 3 4                                                              \n")
-            fw.write('\n')
-            fw.write('\n')
-            fw.write('\n')
+            for m in range(self.nbr_M_par_routeur[r]):
+                for s in range(self.nbr_S_par_routeur[r]):
+                    if self.Connexions_locales[r][m][s].get() == 1 :
+                        self.Matrices_connexions_locales[r][s+self.nbr_M_par_routeur[r]][m] = 1
+                        nbr_esclave_connecte_au_maitre[r][m] += 1
+                        rang_dernier_esclave_connecte_au_maitre[r][m] = s + self.nbr_M_par_routeur[r]
+                        nbr_maitre_connecte_a_esclave[r][s] += 1
+                        rang_dernier_maitre_connecte_a_esclave[r][s] = m
+                    else:
+                        self.Matrices_connexions_locales[r][s+self.nbr_M_par_routeur[r]][m] = 0
+                          
+        #placement résultats des variables : single_slave, slave_rank, single_master & master_rank dans Matrices_connexions_locales au rang 15 et 16        
+        for r in range(self.nbr_R):
+            for m in range(self.nbr_M_par_routeur[r]):
+                if nbr_esclave_connecte_au_maitre[r][m] == 1 :
+                    self.Matrices_connexions_locales[r][15][m] = 1
+                    self.Matrices_connexions_locales[r][16][m] = rang_dernier_esclave_connecte_au_maitre[r][m]
+                    
+            for s in range(self.nbr_S_par_routeur[r]):
+                if nbr_maitre_connecte_a_esclave[r][s] == 1 :
+                    self.Matrices_connexions_locales[r][s+self.nbr_M_par_routeur[r]][15] = 1
+                    self.Matrices_connexions_locales[r][s+self.nbr_M_par_routeur[r]][16] = rang_dernier_maitre_connecte_a_esclave[r][s]
+                    
+                    
+        #ecriture d'une matrice de connexion locale par routeur à partir de "self.Matrices_connexions_locales"
+        for r in range(self.nbr_R):      
+            fw.write('constant ROUTER%d_LOCAL_MX    : local_connexion_matrix :=(\n' %r)
+            for s in range(self.nbr_port_routeur_max+1):
+                fw.write("      (")
+                for m in range(self.nbr_port_routeur_max+1):
+                    if (m == self.nbr_port_routeur_max):
+                        fw.write("%d" %self.Matrices_connexions_locales[r][s][m])
+                    else:
+                        fw.write("%d," %self.Matrices_connexions_locales[r][s][m])
+                        
+                if (s == self.nbr_port_routeur_max-1): #avant dernière ligne = single slave
+                    fw.write("), --single_slave\n")
+                elif (s == self.nbr_port_routeur_max):  #dernière ligne =  slave rank
+                    fw.write("));--slave_rank\n")
+                else:                                 #autre lignes (normales)  
+                    fw.write("),-- slave%d\n" %s)   
+                
+            fw.write("     --m m m m m m m m m m m m m m m s m                                                          \n")
+            fw.write("     --a a a a a a a a a a a a a a a i r                                                          \n")
+            fw.write("     --s s s s s s s s s s s s s s s n a                                                          \n")
+            fw.write("     --t t t t t t t t t t t t t t t g n                                                          \n")
+            fw.write("     --e e e e e e e e e e e e e e e l k                                                          \n")
+            fw.write("     --r r r r r r r r r r r r r r r e                                                            \n")
+            fw.write("     --0 1 2 3 4 5 6 7 8 9 1 1 1 1 1 m                                                            \n")                                           
+            fw.write("     --                    0 1 2 3 4                                                              \n")
+            fw.write("\n") 
+            fw.write("\n") 
+        
+        
+        fw.write("-- => AGGREGATING ARRAY <= --\n")
+        fw.write("constant ALL_ROUTER_LOCAL_MATRIX : array_all_local_connexion_matrix:=(\n")
+        for r in range(self.nbr_R):     
+            fw.write("      ROUTER%d_LOCAL_MX" %r)
+            if (r==self.nbr_R-1):
+                fw.write("\n);\n")
+            else:
+                fw.write(",\n")
         fw.close()
 
 
-    def generate_configurable_part_12_2(self):
-        outputdir = "./Noc0__"
-        if not os.path.exists(outputdir):
-            os.makedirs(outputdir)
 
-        ch='''
-
--- => AGGREGATING ARRAY <= --
-constant ALL_ROUTER_LOCAL_MATRIX : array_all_local_connexion_matrix:=(
-	ROUTER0_LOCAL_MX,
-	ROUTER1_LOCAL_MX,
-	ROUTER2_LOCAL_MX,
-	ROUTER3_LOCAL_MX,
-	ROUTER4_LOCAL_MX,
-	ROUTER5_LOCAL_MX
-);
-    '''
-        fw= open(outputdir + "/noc_config_configurable_part_12_2.vhd", 'w')
-        fw.write("%s" %ch)
-        fw.close()
-	
 	
     def generate_end_of_file_with_function(self):
         outputdir = "./Noc0__"
@@ -2226,7 +2258,7 @@ end noc_address_pack;
         outputdir = "./Noc0__"
         if not os.path.exists(outputdir):
             os.makedirs(outputdir)
-        generated_files=["/noc_config_configurable_part_0.vhd","/noc_config_fixed_part.vhd","/noc_config_configurable_part_1.vhd","/noc_config_configurable_part_2.vhd","/noc_config_configurable_part_3.vhd","/noc_config_configurable_part_4.vhd","/noc_config_configurable_part_5.vhd","/noc_config_configurable_part_6.vhd","/noc_config_configurable_part_7.vhd","/noc_config_configurable_part_8.vhd","/noc_config_configurable_part_9.vhd","/noc_config_configurable_part_10.vhd","/noc_config_configurable_part_11.vhd","/noc_config_configurable_part_12_1.vhd","/noc_config_configurable_part_12_2.vhd","/noc_config_end_of_file_with_function.vhd"]
+        generated_files=["/noc_config_configurable_part_0.vhd","/noc_config_fixed_part.vhd","/noc_config_configurable_part_1.vhd","/noc_config_configurable_part_2.vhd","/noc_config_configurable_part_3.vhd","/noc_config_configurable_part_4.vhd","/noc_config_configurable_part_5.vhd","/noc_config_configurable_part_6.vhd","/noc_config_configurable_part_7.vhd","/noc_config_configurable_part_8.vhd","/noc_config_configurable_part_9.vhd","/noc_config_configurable_part_10.vhd","/noc_config_configurable_part_11.vhd","/noc_config_configurable_part_12.vhd","/noc_config_end_of_file_with_function.vhd"]
         self.generate_configurable_part_0()
         self.generate_fixed_part()
         self.generate_configurable_part_1()
@@ -2240,8 +2272,7 @@ end noc_address_pack;
         self.generate_configurable_part_9()
         self.generate_configurable_part_10()
         self.generate_configurable_part_11()
-        self.generate_configurable_part_12_1()
-        self.generate_configurable_part_12_2()
+        self.generate_configurable_part_12()
         self.generate_end_of_file_with_function()
         for i in range(len(generated_files)):
             if not os.path.exists(outputdir+generated_files[i]):
@@ -2290,10 +2321,7 @@ end noc_address_pack;
                 with open(outputdir + "/noc_config_configurable_part_11.vhd") as old_file:
                     for line in old_file:   
                         new_file.write(line)
-                with open(outputdir + "/noc_config_configurable_part_12_1.vhd") as old_file:
-                    for line in old_file:   
-                        new_file.write(line)
-                with open(outputdir + "/noc_config_configurable_part_12_2.vhd") as old_file:
+                with open(outputdir + "/noc_config_configurable_part_12.vhd") as old_file:
                     for line in old_file:   
                         new_file.write(line)
                 with open(outputdir + "/noc_config_end_of_file_with_function.vhd") as old_file:
@@ -2313,8 +2341,7 @@ end noc_address_pack;
             os.remove(outputdir + "/noc_config_configurable_part_9.vhd")
             os.remove(outputdir + "/noc_config_configurable_part_10.vhd")
             os.remove(outputdir + "/noc_config_configurable_part_11.vhd")
-            os.remove(outputdir + "/noc_config_configurable_part_12_1.vhd")
-            os.remove(outputdir + "/noc_config_configurable_part_12_2.vhd")
+            os.remove(outputdir + "/noc_config_configurable_part_12.vhd")
             os.remove(outputdir + "/noc_config_end_of_file_with_function.vhd")
 
 
