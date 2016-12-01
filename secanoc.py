@@ -96,10 +96,9 @@ class ScrollableTable(Frame):
         # CANVAS LEFT : axe vertical de numerotation des routeurs
         #affecte par la barre de defilement verticale
         #Ubuntu
-        self.Canvas_left = Canvas(self.Canvas_principal , width = 80, height = 520, highlightthickness=0, yscrollcommand = self.VerticalScrollBar.set)
+	self.Canvas_left = Canvas(self.Canvas_principal , width = 108, height = 520, highlightthickness=0, yscrollcommand = self.VerticalScrollBar.set)
         #Windows
-        #self.Canvas_left = Canvas(self.Canvas_principal , width = 108, height = 520, highlightthickness=0, yscrollcommand = self.VerticalScrollBar.set)
-	self.Canvas_left = Canvas(self.Canvas_principal , width = 80, height = 520, highlightthickness=0, yscrollcommand = self.VerticalScrollBar.set)
+	#self.Canvas_left = Canvas(self.Canvas_principal , width = 80, height = 520, highlightthickness=0, yscrollcommand = self.VerticalScrollBar.set)
         self.Canvas_left.grid(row=2, column=1, sticky=NW)
         self.Canvas_left.grid_propagate(False)
         
