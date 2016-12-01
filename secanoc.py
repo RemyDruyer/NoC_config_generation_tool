@@ -29,7 +29,7 @@ class VerticalScrolledFrame(Frame):
         vscrollbar = Scrollbar(self, orient=VERTICAL)
         vscrollbar.pack(fill=Y, side=RIGHT, expand=FALSE)
         
-        LabelCanvas = Canvas(self, bd=0, highlightthickness=0, width = 200, height = 40)
+        LabelCanvas = Canvas(self, bd=0, highlightthickness=0, width = 200, height = 20)
         LabelCanvas.pack(side=TOP, fill=BOTH, expand=TRUE)
         
         canvas = Canvas(self, bd=0, highlightthickness=0, width = 200, height = 500, yscrollcommand=vscrollbar.set)
@@ -305,9 +305,9 @@ class MainInterface(Frame):
             ligne = 2
 
             #config ubuntu
-            self.Case_Label_top_matrice =  Button(self.Scrollable_Table.Canvas_top_interior_Frame, borderwidth=2, text = "Connecte a routeur", height = 1, background = "gainsboro", width = self.nbr_R*3+10 ,padx = (self.nbr_R-1)*8)
+            # self.Case_Label_top_matrice =  Button(self.Scrollable_Table.Canvas_top_interior_Frame, borderwidth=2, text = "Connecte a routeur", height = 1, background = "gainsboro", width = self.nbr_R*3+10 ,padx = (self.nbr_R-1)*8)
             #config windows
-            #self.Case_Label_top_matrice =  Button(self.Scrollable_Table.Canvas_top_interior_Frame, borderwidth=2, text = "Connecte a routeur", height = 1, background = "gainsboro", width = self.nbr_R ,padx = (self.nbr_R-1)*8)
+            self.Case_Label_top_matrice =  Button(self.Scrollable_Table.Canvas_top_interior_Frame, borderwidth=2, text = "Connecte a routeur", height = 1, background = "gainsboro", width = self.nbr_R ,padx = (self.nbr_R-1)*8)
 
             self.Case_Label_top_matrice.grid(row= ligne, column=self.nbr_R+self.offset_grid_colonne, sticky=N+W+S)
              
@@ -578,8 +578,8 @@ class MainInterface(Frame):
                 
         self.maitre_possede_decodage_adresse_esclave = [[[[0 for s in range(self.nbr_S_par_routeur[r_esclave])] for r_esclave in range(self.nbr_R)] for m in range(self.nbr_M_par_routeur[r])] for r in range(self.nbr_R)]
 
-        self.table_maitre_decod_adr_basse = [[[["" for s in range(self.nbr_S_par_routeur[r_esclave])] for r_esclave in range(self.nbr_R)] for m in range(self.nbr_M_par_routeur[r])] for r in range(self.nbr_R)]
-        self.table_maitre_decod_adr_haute = [[[["" for s in range(self.nbr_S_par_routeur[r_esclave])] for r_esclave in range(self.nbr_R)] for m in range(self.nbr_M_par_routeur[r])] for r in range(self.nbr_R)]
+        self.interface_maitre_adresse_basse_decodage_esclave = [[[["" for s in range(self.nbr_S_par_routeur[r_esclave])] for r_esclave in range(self.nbr_R)] for m in range(self.nbr_M_par_routeur[r])] for r in range(self.nbr_R)]
+        self.interface_maitre_adresse_haute_decodage_esclave = [[[["" for s in range(self.nbr_S_par_routeur[r_esclave])] for r_esclave in range(self.nbr_R)] for m in range(self.nbr_M_par_routeur[r])] for r in range(self.nbr_R)]
         
         
         ### R0 = 2 esclaves ; R1 = 2 esclaves ; R2 = 3 esclaves : R3 = 0 esclave ###
@@ -609,49 +609,49 @@ class MainInterface(Frame):
 
         
 
-        self.table_maitre_decod_adr_basse[0][0][1][0] = "20000000"
-        self.table_maitre_decod_adr_basse[0][1][0][0] = "01000000"
-        self.table_maitre_decod_adr_basse[0][1][1][1] = "31000000"
-        self.table_maitre_decod_adr_basse[0][2][2][1] = "52000000"
-        self.table_maitre_decod_adr_basse[0][2][2][2] = "62000000"
-        self.table_maitre_decod_adr_basse[0][3][0][0] = "00000000"
-        self.table_maitre_decod_adr_basse[0][3][0][1] = "00000000"
-        self.table_maitre_decod_adr_basse[0][3][1][0] = "00000000"
-        self.table_maitre_decod_adr_basse[0][3][1][1] = "00000000"
-        self.table_maitre_decod_adr_basse[1][0][1][0] = "00333000"
-        self.table_maitre_decod_adr_basse[2][0][0][0] = "00000000"
-        self.table_maitre_decod_adr_basse[2][1][0][1] = "00000000"
-        self.table_maitre_decod_adr_basse[2][1][1][0] = "00000000"
-        self.table_maitre_decod_adr_basse[2][2][1][1] = "00300000"
-        self.table_maitre_decod_adr_basse[2][2][2][0] = "00400000"
-        self.table_maitre_decod_adr_basse[2][2][2][1] = "00500000"
-        self.table_maitre_decod_adr_basse[3][0][2][0] = "00000000"
-        self.table_maitre_decod_adr_basse[3][0][2][1] = "00000000"
-        self.table_maitre_decod_adr_basse[3][1][0][0] = "00000000"
-        self.table_maitre_decod_adr_basse[3][1][0][1] = "00100000"
+        self.interface_maitre_adresse_basse_decodage_esclave[0][0][1][0] = "20000000"
+        self.interface_maitre_adresse_basse_decodage_esclave[0][1][0][0] = "01000000"
+        self.interface_maitre_adresse_basse_decodage_esclave[0][1][1][1] = "31000000"
+        self.interface_maitre_adresse_basse_decodage_esclave[0][2][2][1] = "52000000"
+        self.interface_maitre_adresse_basse_decodage_esclave[0][2][2][2] = "62000000"
+        self.interface_maitre_adresse_basse_decodage_esclave[0][3][0][0] = "00000000"
+        self.interface_maitre_adresse_basse_decodage_esclave[0][3][0][1] = "00000000"
+        self.interface_maitre_adresse_basse_decodage_esclave[0][3][1][0] = "00000000"
+        self.interface_maitre_adresse_basse_decodage_esclave[0][3][1][1] = "00000000"
+        self.interface_maitre_adresse_basse_decodage_esclave[1][0][1][0] = "00333000"
+        self.interface_maitre_adresse_basse_decodage_esclave[2][0][0][0] = "00000000"
+        self.interface_maitre_adresse_basse_decodage_esclave[2][1][0][1] = "00000000"
+        self.interface_maitre_adresse_basse_decodage_esclave[2][1][1][0] = "00000000"
+        self.interface_maitre_adresse_basse_decodage_esclave[2][2][1][1] = "00300000"
+        self.interface_maitre_adresse_basse_decodage_esclave[2][2][2][0] = "00400000"
+        self.interface_maitre_adresse_basse_decodage_esclave[2][2][2][1] = "00500000"
+        self.interface_maitre_adresse_basse_decodage_esclave[3][0][2][0] = "00000000"
+        self.interface_maitre_adresse_basse_decodage_esclave[3][0][2][1] = "00000000"
+        self.interface_maitre_adresse_basse_decodage_esclave[3][1][0][0] = "00000000"
+        self.interface_maitre_adresse_basse_decodage_esclave[3][1][0][1] = "00100000"
         
         
         
-        self.table_maitre_decod_adr_haute[0][0][1][0] = "2000FFFF"
-        self.table_maitre_decod_adr_haute[0][1][0][0] = "0100FFFF"
-        self.table_maitre_decod_adr_haute[0][1][1][1] = "3100FFFF"
-        self.table_maitre_decod_adr_haute[0][2][2][1] = "5200FFFF"
-        self.table_maitre_decod_adr_haute[0][2][2][2] = "6200FFFF"
-        self.table_maitre_decod_adr_haute[0][3][0][0] = "0000FFFF"
-        self.table_maitre_decod_adr_haute[0][3][0][1] = "0000FFFF"
-        self.table_maitre_decod_adr_haute[0][3][1][0] = "0000FFFF"
-        self.table_maitre_decod_adr_haute[0][3][1][1] = "0000FFFF"
-        self.table_maitre_decod_adr_haute[1][0][1][0] = "0033FFFF"                                            
-        self.table_maitre_decod_adr_haute[2][0][0][0] = "0000FFFF"
-        self.table_maitre_decod_adr_haute[2][1][0][1] = "0000FFFF"
-        self.table_maitre_decod_adr_haute[2][1][1][0] = "0000FFFF"                                                 
-        self.table_maitre_decod_adr_haute[2][2][1][1] = "0030FFFF"
-        self.table_maitre_decod_adr_haute[2][2][2][0] = "0040FFFF"
-        self.table_maitre_decod_adr_haute[2][2][2][1] = "0050FFFF"                    
-        self.table_maitre_decod_adr_haute[3][0][2][0] = "0000FFFF"
-        self.table_maitre_decod_adr_haute[3][0][2][1] = "0000FFFF"                                                 
-        self.table_maitre_decod_adr_haute[3][1][0][0] = "0000FFFF"
-        self.table_maitre_decod_adr_haute[3][1][0][1] = "0010FFFF"
+        self.interface_maitre_adresse_haute_decodage_esclave[0][0][1][0] = "2000FFFF"
+        self.interface_maitre_adresse_haute_decodage_esclave[0][1][0][0] = "0100FFFF"
+        self.interface_maitre_adresse_haute_decodage_esclave[0][1][1][1] = "3100FFFF"
+        self.interface_maitre_adresse_haute_decodage_esclave[0][2][2][1] = "5200FFFF"
+        self.interface_maitre_adresse_haute_decodage_esclave[0][2][2][2] = "6200FFFF"
+        self.interface_maitre_adresse_haute_decodage_esclave[0][3][0][0] = "0000FFFF"
+        self.interface_maitre_adresse_haute_decodage_esclave[0][3][0][1] = "0000FFFF"
+        self.interface_maitre_adresse_haute_decodage_esclave[0][3][1][0] = "0000FFFF"
+        self.interface_maitre_adresse_haute_decodage_esclave[0][3][1][1] = "0000FFFF"
+        self.interface_maitre_adresse_haute_decodage_esclave[1][0][1][0] = "0033FFFF"                                            
+        self.interface_maitre_adresse_haute_decodage_esclave[2][0][0][0] = "0000FFFF"
+        self.interface_maitre_adresse_haute_decodage_esclave[2][1][0][1] = "0000FFFF"
+        self.interface_maitre_adresse_haute_decodage_esclave[2][1][1][0] = "0000FFFF"                                                 
+        self.interface_maitre_adresse_haute_decodage_esclave[2][2][1][1] = "0030FFFF"
+        self.interface_maitre_adresse_haute_decodage_esclave[2][2][2][0] = "0040FFFF"
+        self.interface_maitre_adresse_haute_decodage_esclave[2][2][2][1] = "0050FFFF"                    
+        self.interface_maitre_adresse_haute_decodage_esclave[3][0][2][0] = "0000FFFF"
+        self.interface_maitre_adresse_haute_decodage_esclave[3][0][2][1] = "0000FFFF"                                                 
+        self.interface_maitre_adresse_haute_decodage_esclave[3][1][0][0] = "0000FFFF"
+        self.interface_maitre_adresse_haute_decodage_esclave[3][1][0][1] = "0010FFFF"
 
         
         
@@ -668,7 +668,7 @@ class MainInterface(Frame):
                         # if self.maitre_possede_decodage_adresse_esclave[r][m][r_esclave][s] == 1:
                             # print("\n")
                             # print("Routeur %d  Maitre %d -> Routeur %d Esclave %d : %s" %(r,m,r_esclave,s+self.nbr_M_par_routeur[r_esclave],self.table_maitre_decod_adr_basse[r][m][r_esclave][s]))
-                            # print("Routeur %d  Maitre %d -> Routeur %d Esclave %d : %s" %(r,m,r_esclave,s+self.nbr_M_par_routeur[r_esclave],self.table_maitre_decod_adr_haute[r][m][r_esclave][s]))
+                            # print("Routeur %d  Maitre %d -> Routeur %d Esclave %d : %s" %(r,m,r_esclave,s+self.nbr_M_par_routeur[r_esclave],self.interface_maitre_adresse_haute_decodage_esclave[r][m][r_esclave][s]))
                             # print("\n")
                             
         #12) LOCAL CONNEXION   
@@ -866,24 +866,24 @@ class MainInterface(Frame):
         
         #déclaration & positionnement des labels dans "Label_interior" de la "VerticalScrolledFrame"
         Label_Routeur_co_maitre = Label(self.frame.Label_interior, text="Routeur", width=7, justify = CENTER).grid(row=0, column=0)
-        Label_Routeur_co_esclave = Label(self.frame.Label_interior, text="Routeur", width=7, justify = CENTER).grid(row=0, column=3)
+        Label_Routeur_co_esclave = Label(self.frame.Label_interior, text="Routeur", width=8, justify = CENTER).grid(row=0, column=3)
         Label_Interface_maitre = Label(self.frame.Label_interior, text="Interface", width=7, justify = CENTER).grid(row=0, column=1)
-        Label_Interface_esclave = Label(self.frame.Label_interior, text="Interface", width=7, justify = CENTER).grid(row=0, column=4)
-        Label_Connexion_co_maitre = Label(self.frame.Label_interior, text="Connexion \n paquet", width=10, justify = CENTER).grid(row=0, column=2)
-        Label_Connexion_co_esclave = Label(self.frame.Label_interior, text="Connexion \n paquet", width=10, justify = CENTER).grid(row=0, column=5)
+        Label_Interface_esclave = Label(self.frame.Label_interior, text="Interface", width=8, justify = CENTER).grid(row=0, column=4)
+        Label_Connexion_co_maitre = Label(self.frame.Label_interior, text="Connexion paquet", width=15, justify = CENTER).grid(row=0, column=2)
+        Label_Connexion_co_esclave = Label(self.frame.Label_interior, text="Connexion paquet", width=15, justify = CENTER).grid(row=0, column=5)
 
        #déclaration des cases maitres
         for r in range(self.nbr_R):
             for m in range(self.nbr_M_par_routeur[r]):
                 Cases_num_routeur_co_maitre.append(Button(self.frame.interior, text=str(r), state=DISABLED, width=7))
                 Cases_maitres_connexion_paquet.append(Button(self.frame.interior, text=str(m)+" (Maitre)", state=DISABLED, width=8))
-                CheckButt_Connexions_paquet_maitre.append(Checkbutton(self.frame.interior, variable=self.Connexions_paquets[r][m], width = 5))
+                CheckButt_Connexions_paquet_maitre.append(Checkbutton(self.frame.interior, variable=self.Connexions_paquets[r][m], width = 10))
         #déclaration des cases esclaves
         for r in range(self.nbr_R):
             for s in range(self.nbr_M_par_routeur[r],self.nbr_M_par_routeur[r]+self.nbr_S_par_routeur[r]):
                 Cases_num_routeur_co_esclave.append(Button(self.frame.interior, text=str(r), state=DISABLED, width=7))
                 Cases_esclaves_connexion_paquet.append(Button(self.frame.interior, text=str(s)+" (Esclave)", state=DISABLED, width=8))
-                CheckButt_Connexions_paquet_esclave.append(Checkbutton(self.frame.interior, variable=self.Connexions_paquets[r][s], width=5))
+                CheckButt_Connexions_paquet_esclave.append(Checkbutton(self.frame.interior, variable=self.Connexions_paquets[r][s], width=10))
                 
 
         
@@ -1501,8 +1501,8 @@ constant ROUTINGPORT15 	: regPORTADD:= "1111";
                 for r_esclave in range(self.nbr_R):
                     for s in range(self.nbr_S_par_routeur[r_esclave]):
                         if self.maitre_possede_decodage_adresse_esclave[r][m][r_esclave][s] == 1:
-                            fw.write("""constant 	ROUTER%d_MASTER%d_address_mapping_for_ROUTER%d_SLAVE%d_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"%s";\n""" %(r, m, r_esclave, s+self.nbr_M_par_routeur[r_esclave], self.table_maitre_decod_adr_basse[r][m][r_esclave][s]))
-                            fw.write("""constant 	ROUTER%d_MASTER%d_address_mapping_for_ROUTER%d_SLAVE%d_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"%s";\n""" %(r, m, r_esclave, s+self.nbr_M_par_routeur[r_esclave], self.table_maitre_decod_adr_haute[r][m][r_esclave][s]))
+                            fw.write("""constant 	ROUTER%d_MASTER%d_address_mapping_for_ROUTER%d_SLAVE%d_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"%s";\n""" %(r, m, r_esclave, s+self.nbr_M_par_routeur[r_esclave], self.interface_maitre_adresse_basse_decodage_esclave[r][m][r_esclave][s]))
+                            fw.write("""constant 	ROUTER%d_MASTER%d_address_mapping_for_ROUTER%d_SLAVE%d_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"%s";\n""" %(r, m, r_esclave, s+self.nbr_M_par_routeur[r_esclave], self.interface_maitre_adresse_haute_decodage_esclave[r][m][r_esclave][s]))
 
         fw.close()
         
@@ -1621,32 +1621,38 @@ constant from_ROUTER5_to_ROUTER4_destination_port : regPORTADD:= ROUTINGPORT2;
 	# (ROUTER5_MASTER0_address_mapping_for_ROUTER5_SLAVE1_BASE_ADD, ROUTER5_MASTER0_address_mapping_for_ROUTER5_SLAVE1_HIGH_ADD, SLAVE4, ROUTER5 & SLAVE4),
 	# (ROUTER5_MASTER0_address_mapping_for_ROUTER0_SLAVE4_BASE_ADD, ROUTER5_MASTER0_address_mapping_for_ROUTER0_SLAVE4_HIGH_ADD, from_ROUTER5_to_ROUTER0_destination_port, ROUTER0 & SLAVE4)
 	# );
-	
-    
-    
-	
-    
-    
+
     
         fw= open(outputdir + "/noc_config_configurable_part_9.vhd", 'w')
         fw.write("%s" %ch)
         
-        # for r in range(self.nbr_R):
-            # for m in range(self.nbr_M_par_routeur[r]):
-                # for r_esclave in range(self.nbr_R):
-                    # for s in range(self.nbr_S_par_routeur[r_esclave]):
-                        # fw.write("constant ROUTER%d_MASTER%d_ADDRESS_DECODER_TABLE : router%d_master%d_record_address_decod_table:=(" %(r,m,r,m))
+        for r in range(self.nbr_R):
+            for m in range(self.nbr_M_par_routeur[r]):
+            
+                if self.Taille_table_decodeur_adr_maitre[r][m] != 0:
+                    fw.write("constant ROUTER%d_MASTER%d_ADDRESS_DECODER_TABLE : router%d_master%d_record_address_decod_table:=(\n" %(r,m,r,m))
+                    i_nbr_decodage_adresse = 0
                     
-                        # if self.maitre_possede_decodage_adresse_esclave[r][m][r_esclave][s] == 1:
-                            # fw.write("constant 	ROUTER%d_MASTER%d_address_mapping_for_ROUTER%d_SLAVE%d_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"%s";\n" %(r, m, r_esclave, s+self.nbr_M_par_routeur[r_esclave], self.table_maitre_decod_adr_basse[r][m][r_esclave][s]))
-                            # fw.write("constant 	ROUTER%d_MASTER%d_address_mapping_for_ROUTER%d_SLAVE%d_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"%s";\n" %(r, m, r_esclave, s+self.nbr_M_par_routeur[r_esclave], self.table_maitre_decod_adr_haute[r][m][r_esclave][s]))
+                for r_esclave in range(self.nbr_R):
+                    for s in range(self.nbr_S_par_routeur[r_esclave]):
 
+                        if self.maitre_possede_decodage_adresse_esclave[r][m][r_esclave][s] == 1:
+                            if r_esclave == r:
+                                fw.write("  (ROUTER%d_MASTER%d_address_mapping_for_ROUTER%d_SLAVE%d_BASE_ADD, ROUTER%d_MASTER%d_address_mapping_for_ROUTER%d_SLAVE%d_HIGH_ADD, SLAVE%d, ROUTER%d & SLAVE%d)" %(r,m,r_esclave,s+self.nbr_M_par_routeur[r_esclave],r,m,r_esclave,s+self.nbr_M_par_routeur[r_esclave],s+self.nbr_M_par_routeur[r_esclave],r_esclave,s+self.nbr_M_par_routeur[r_esclave]))
+ 
+                            else:
+                                fw.write("  (ROUTER%d_MASTER%d_address_mapping_for_ROUTER%d_SLAVE%d_BASE_ADD, ROUTER%d_MASTER%d_address_mapping_for_ROUTER%d_SLAVE%d_HIGH_ADD, from_ROUTER%d_to_ROUTER%d_destination_port, ROUTER%d & SLAVE%d)" %(r,m,r_esclave,s+self.nbr_M_par_routeur[r_esclave],r,m,r_esclave,s+self.nbr_M_par_routeur[r_esclave],r,r_esclave,r_esclave,s+self.nbr_M_par_routeur[r_esclave]))
                             
+                            i_nbr_decodage_adresse += 1
                             
+                            if i_nbr_decodage_adresse == self.Taille_table_decodeur_adr_maitre[r][m]:
+                                fw.write(");\n\n")
+                            else:
+                                fw.write(",\n")
 
         
         
-        fw.write("-- => AGGREGATING ARRAY <= --\n")
+        fw.write("\n-- => AGGREGATING ARRAY <= --\n")
         fw.write("--aggregates all master address decoder rules : starting from ROUTER0 - MASTER0 - RULES0 => first increment RULE number, then increment MASTER number, and finally increment ROUTER number\n")
         fw.write("--concantenate all the rules with a &\n")
         fw.write("constant ALL_MASTER_ADDRESS_DECODER_TABLES : unconstrained_array_record_address_decod_table:=(\n")
@@ -1962,10 +1968,10 @@ if __name__ == "__main__":
     
     fenetre_tk = Tk()
     fenetre_tk.title("Outil de generation de configurations NoC (Version 0.i)")
-    #conf ubuntu
-    fenetre_tk.geometry('1290x800')
+    # conf ubuntu
+    # fenetre_tk.geometry('1290x800')
     #conf Windows
-    #fenetre_tk.geometry('1070x800')
+    fenetre_tk.geometry('1070x800')
     Outil_Python = MainInterface(fenetre_tk)
     
 
