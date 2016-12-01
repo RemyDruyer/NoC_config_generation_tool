@@ -28,16 +28,23 @@ class VerticalScrolledFrame(Frame):
         # create a canvas object and a vertical scrollbar for scrolling it
         vscrollbar = Scrollbar(self, orient=VERTICAL)
         vscrollbar.pack(fill=Y, side=RIGHT, expand=FALSE)
+        
+        LabelCanvas = Canvas(self, bd=0, highlightthickness=0, width = 200, height = 40)
+        LabelCanvas.pack(side=TOP, fill=BOTH, expand=TRUE)
+        
         canvas = Canvas(self, bd=0, highlightthickness=0, width = 200, height = 500, yscrollcommand=vscrollbar.set)
-        #canvas.config(scrollregion="0 0 110 110")
-        canvas.pack(side=LEFT, fill=BOTH, expand=TRUE)
+        canvas.pack(side=TOP, fill=BOTH, expand=TRUE)
         vscrollbar.config(command=canvas.yview)
 
+        
         # reset the view
         canvas.xview_moveto(0)
         canvas.yview_moveto(0)
 
         # create a frame inside the canvas which will be scrolled with it
+        self.Label_interior = Label_interior = Frame(LabelCanvas)
+        Label_interior_id = LabelCanvas.create_window(0, 0, window=Label_interior, anchor=NW )
+        
         self.interior = interior = Frame(canvas)
         interior_id = canvas.create_window(0, 0, window=interior, anchor=NW )
 
@@ -785,27 +792,36 @@ class MainInterface(Frame):
         Cases_Maitres                   = []
         Cases_Esclaves                  = []
         CheckButt_Connexions_locales    = []
-        self.flag_tout_connecter_local  = 1
-        Label_Espace   = Label(self.frame.interior, text="", width=6).grid(row=0, column=1)
-        Label_Routeurs  = Label(self.frame.interior, text="Routeur").grid(row=0, column=2)
-        Label_Maitres   = Label(self.frame.interior, text="Maitre").grid(row=0, column=3)
-        Label_Esclaves  = Label(self.frame.interior, text="Esclave").grid(row=0, column=4)
-        Label_Connexions_locales = Label(self.frame.interior, text="Connexion").grid(row=0, column=5)
+        Scrollable_Label_Colon          = []
+        Scrollable_Label_Arrow          = []
         
+        self.flag_tout_connecter_local  = 1
+        Label_Routeurs  = Label(self.frame.Label_interior, text="Routeur", width=7, justify = CENTER).grid(row=0, column=0)
+        Label_Empty_1   = Label(self.frame.Label_interior, text=" ", width=2, justify = CENTER).grid(row=0, column=1)
+        Label_Maitres   = Label(self.frame.Label_interior, text="Maitre", width=8, justify = CENTER).grid(row=0, column=2)
+        Label_Empty_2   = Label(self.frame.Label_interior, text=" ", width=8, justify = CENTER).grid(row=0, column=3)
+        Label_Esclaves  = Label(self.frame.Label_interior, text="Esclave", width=5, justify = CENTER).grid(row=0, column=4)
+        Label_Connexions_locales = Label(self.frame.Label_interior, text="Connexion", width=10, justify = CENTER).grid(row=0, column=5)
+
         #Placement des cases pour Maitre X(fois) Esclave pour chaque routeur 
         for r in range(self.nbr_R):
             for m in range(self.nbr_M_par_routeur[r]):
                 for s in range(self.nbr_S_par_routeur[r]):
-                    Cases_Routeurs  .append(Button(self.frame.interior, text="R" + str(r), state=DISABLED, width=10))
-                    Cases_Maitres   .append(Button(self.frame.interior, text="M" + str(m), state=DISABLED, width=10))
-                    Cases_Esclaves  .append(Button(self.frame.interior, text="E" + str(s+self.nbr_M_par_routeur[r]), state=DISABLED, width=10))
-                    CheckButt_Connexions_locales.append(Checkbutton(self.frame.interior, variable=self.Connexions_locales[r][m][s]))
-        
+                    Cases_Routeurs.append(Button(self.frame.interior, text= str(r), state=DISABLED, width=7))
+                    Cases_Maitres.append(Button(self.frame.interior, text= str(m), state=DISABLED, width=7))
+                    Cases_Esclaves.append(Button(self.frame.interior, text= str(s+self.nbr_M_par_routeur[r]), state=DISABLED, width=7))
+                    CheckButt_Connexions_locales.append(Checkbutton(self.frame.interior, variable=self.Connexions_locales[r][m][s], width=5))
+                    Scrollable_Label_Arrow.append(Label(self.frame.interior, text="<=>", width=7, justify = CENTER))
+                    Scrollable_Label_Colon.append(Label(self.frame.interior, text=":", width=2, justify = CENTER))
+                    
+
         for i in range(len(Cases_Routeurs)):
-            Cases_Routeurs[i]  .grid(row=i+1, column=2)
-            Cases_Maitres[i]   .grid(row=i+1, column=3)
-            Cases_Esclaves[i]  .grid(row=i+1, column=4)
-            CheckButt_Connexions_locales[i].grid(row=i+1, column=5)
+            Cases_Routeurs[i].grid(row=i, column=0)
+            Scrollable_Label_Colon[i].grid(row=i, column=1)
+            Cases_Maitres[i].grid(row=i, column=2)
+            Scrollable_Label_Arrow[i].grid(row=i, column=3)
+            Cases_Esclaves[i].grid(row=i, column=4)
+            CheckButt_Connexions_locales[i].grid(row=i, column=5)
             
         Button(Fenetre_ConnexionLocale, text="Tout connecter/deconnecter", width=22, command=_Bouton_ToutConnecter_Local_action).grid(row=1, column=0, pady=5)
         Button(Fenetre_ConnexionLocale, text="Ok", width=22, command=lambda:Fenetre_ConnexionLocale.destroy()).grid(row=2, column=0, pady=5)
@@ -847,47 +863,39 @@ class MainInterface(Frame):
         self.flag_bouton_tout_connecter_paquet  = 1
         
         
-        #déclaration des labels
-        Label_Espace = Label(self.frame.interior, text="", width=6)
-        Label_Routeur_co_maitre = Label(self.frame.interior, text="Routeur  ")
-        Label_Routeur_co_esclave = Label(self.frame.interior, text="Routeur  ")
-        Label_IP_co_maitre = Label(self.frame.interior, text="  IP ")
-        Label_IP_co_esclave = Label(self.frame.interior, text="  IP ")
-        Label_Connexion_co_maitre = Label(self.frame.interior, text="Connexion")
-        Label_Connexion_co_esclave = Label(self.frame.interior, text="Connexion")
+        #déclaration & positionnement des labels dans "Label_interior" de la "VerticalScrolledFrame"
+        Label_Routeur_co_maitre = Label(self.frame.Label_interior, text="Routeur", width=7, justify = CENTER).grid(row=0, column=0)
+        Label_Routeur_co_esclave = Label(self.frame.Label_interior, text="Routeur", width=7, justify = CENTER).grid(row=0, column=3)
+        Label_Interface_maitre = Label(self.frame.Label_interior, text="Interface", width=7, justify = CENTER).grid(row=0, column=1)
+        Label_Interface_esclave = Label(self.frame.Label_interior, text="Interface", width=7, justify = CENTER).grid(row=0, column=4)
+        Label_Connexion_co_maitre = Label(self.frame.Label_interior, text="Connexion \n paquet", width=10, justify = CENTER).grid(row=0, column=2)
+        Label_Connexion_co_esclave = Label(self.frame.Label_interior, text="Connexion \n paquet", width=10, justify = CENTER).grid(row=0, column=5)
 
        #déclaration des cases maitres
         for r in range(self.nbr_R):
             for m in range(self.nbr_M_par_routeur[r]):
                 Cases_num_routeur_co_maitre.append(Button(self.frame.interior, text=str(r), state=DISABLED, width=7))
-                Cases_maitres_connexion_paquet.append(Button(self.frame.interior, text=str(m)+" (Maitre)", state=DISABLED, width=7))
-                CheckButt_Connexions_paquet_maitre.append(Checkbutton(self.frame.interior, variable=self.Connexions_paquets[r][m]))
+                Cases_maitres_connexion_paquet.append(Button(self.frame.interior, text=str(m)+" (Maitre)", state=DISABLED, width=8))
+                CheckButt_Connexions_paquet_maitre.append(Checkbutton(self.frame.interior, variable=self.Connexions_paquets[r][m], width = 5))
         #déclaration des cases esclaves
         for r in range(self.nbr_R):
             for s in range(self.nbr_M_par_routeur[r],self.nbr_M_par_routeur[r]+self.nbr_S_par_routeur[r]):
                 Cases_num_routeur_co_esclave.append(Button(self.frame.interior, text=str(r), state=DISABLED, width=7))
-                Cases_esclaves_connexion_paquet.append(Button(self.frame.interior, text=str(s)+" (Esclave)", state=DISABLED, width=7))
-                CheckButt_Connexions_paquet_esclave.append(Checkbutton(self.frame.interior, variable=self.Connexions_paquets[r][s]))
+                Cases_esclaves_connexion_paquet.append(Button(self.frame.interior, text=str(s)+" (Esclave)", state=DISABLED, width=8))
+                CheckButt_Connexions_paquet_esclave.append(Checkbutton(self.frame.interior, variable=self.Connexions_paquets[r][s], width=5))
                 
-        #affichage des label
-        Label_Espace.grid(row=0, column=0)
-        Label_Routeur_co_maitre.grid(row=0, column=1)
-        Label_IP_co_maitre.grid(row=0, column=2)
-        Label_Connexion_co_maitre.grid(row=0, column=3)
-        Label_Routeur_co_esclave.grid(row=0, column=4)
-        Label_IP_co_esclave.grid(row=0, column=5)
-        Label_Connexion_co_esclave.grid(row=0, column=6)
+
         
         #affichage cases maitres
         for i in range(len(Cases_maitres_connexion_paquet)):
-            Cases_num_routeur_co_maitre[i]  .grid(row=i+1, column=1)
-            Cases_maitres_connexion_paquet[i]   .grid(row=i+1, column=2)
-            CheckButt_Connexions_paquet_maitre[i].grid(row=i+1, column=3)
+            Cases_num_routeur_co_maitre[i]  .grid(row=i, column=0)
+            Cases_maitres_connexion_paquet[i]   .grid(row=i, column=1)
+            CheckButt_Connexions_paquet_maitre[i].grid(row=i, column=2)
         #affichage cases esclaves
         for i in range(len(Cases_maitres_connexion_paquet),len(Cases_maitres_connexion_paquet)+len(Cases_esclaves_connexion_paquet)):
-            Cases_num_routeur_co_esclave[i-len(Cases_maitres_connexion_paquet)].grid(row=i-len(Cases_maitres_connexion_paquet)+1, column=4)
-            Cases_esclaves_connexion_paquet[i-len(Cases_maitres_connexion_paquet)].grid(row=i-len(Cases_maitres_connexion_paquet)+1, column=5)
-            CheckButt_Connexions_paquet_esclave[i-len(Cases_maitres_connexion_paquet)].grid(row=i-len(Cases_maitres_connexion_paquet)+1, column=6)
+            Cases_num_routeur_co_esclave[i-len(Cases_maitres_connexion_paquet)].grid(row=i-len(Cases_maitres_connexion_paquet), column=3)
+            Cases_esclaves_connexion_paquet[i-len(Cases_maitres_connexion_paquet)].grid(row=i-len(Cases_maitres_connexion_paquet), column=4)
+            CheckButt_Connexions_paquet_esclave[i-len(Cases_maitres_connexion_paquet)].grid(row=i-len(Cases_maitres_connexion_paquet), column=5)
          
         Button(Fenetre_ConnexionPaquet, text="Tout connecter/deconnecter", width=22, command= _Bouton_ToutConnecter_Paquet_action, pady=5).grid(row=2, column=0)
         Button(Fenetre_ConnexionPaquet, text="Ok", width=22, command=lambda:Fenetre_ConnexionPaquet.destroy(), pady=5).grid(row=3, column=0)
@@ -929,11 +937,11 @@ class MainInterface(Frame):
         Cases_Esclaves     = []
         Adresse_basse      = []
         Adresse_haute      = []
-        Label_Espace = Label(self.frame.interior, text="", width=6)
-        Label_Routeur = Label(self.frame.interior, text="Routeur")
-        Label_Esclave = Label(self.frame.interior, text="Esclave")
-        Label_Adresse_basse = Label(self.frame.interior, text="Adresse basse (Hex)  ")
-        Label_Adresse_haute = Label(self.frame.interior, text="Adresse haute (Hex)")
+        Label_Espace = Label(self.frame.LabelCanvas, text="", width=6)
+        Label_Routeur = Label(self.frame.LabelCanvas, text="Routeur")
+        Label_Esclave = Label(self.frame.LabelCanvas, text="Esclave")
+        Label_Adresse_basse = Label(self.frame.LabelCanvas, text="Adresse basse (Hex)  ")
+        Label_Adresse_haute = Label(self.frame.LabelCanvas, text="Adresse haute (Hex)")
             
         for r in range(0,self.nbr_R):
             for s in range(self.nbr_M_par_routeur[r],self.nbr_M_par_routeur[r]+self.nbr_S_par_routeur[r]):
@@ -1484,15 +1492,6 @@ constant ROUTINGPORT15 	: regPORTADD:= "1111";
 --for each slave -> define a BASE_ADD and a HIGH_ADD
 '''
 
-
-# constant 	ROUTER0_MASTER0_address_mapping_for_ROUTER0_SLAVE4_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"00000000";
-# constant 	ROUTER0_MASTER0_address_mapping_for_ROUTER0_SLAVE4_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"00FFFFFF";
-# constant 	ROUTER0_MASTER0_address_mapping_for_ROUTER0_SLAVE5_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"01000000";
-# constant 	ROUTER0_MASTER0_address_mapping_for_ROUTER0_SLAVE5_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"01FFFFFF";
-
-
-        
-        
         fw= open(outputdir + "/noc_config_configurable_part_6.vhd", 'w')
         fw.write("%s" %ch)
         
@@ -1503,13 +1502,7 @@ constant ROUTINGPORT15 	: regPORTADD:= "1111";
                         if self.maitre_possede_decodage_adresse_esclave[r][m][r_esclave][s] == 1:
                             fw.write("""constant 	ROUTER%d_MASTER%d_address_mapping_for_ROUTER%d_SLAVE%d_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"%s";\n""" %(r, m, r_esclave, s+self.nbr_M_par_routeur[r_esclave], self.table_maitre_decod_adr_basse[r][m][r_esclave][s]))
                             fw.write("""constant 	ROUTER%d_MASTER%d_address_mapping_for_ROUTER%d_SLAVE%d_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"%s";\n""" %(r, m, r_esclave, s+self.nbr_M_par_routeur[r_esclave], self.table_maitre_decod_adr_haute[r][m][r_esclave][s]))
-            s           
-        # self.maitre_possede_decodage_adresse_esclave = [[[[0 for s in range(self.nbr_S_par_routeur[r_esclave])] for r_esclave in range(self.nbr_R)] for m in range(self.nbr_M_par_routeur[r])] for r in range(self.nbr_R)]
 
-        # self.table_maitre_decod_adr_basse = [[[["" for s in range(self.nbr_S_par_routeur[r_esclave])] for r_esclave in range(self.nbr_R)] for m in range(self.nbr_M_par_routeur[r])] for r in range(self.nbr_R)]
-        # self.table_maitre_decod_adr_haute = [[[["" for s in range(self.nbr_S_par_routeur[r_esclave])] for r_esclave in range(self.nbr_R)] for m in range(self.nbr_M_par_routeur[r])] for r in range(self.nbr_R)]
-        
-        
         fw.close()
         
         
@@ -1599,6 +1592,7 @@ constant from_ROUTER5_to_ROUTER4_destination_port : regPORTADD:= ROUTINGPORT2;
 -- |    destination slave   |   destination slave 	    |   		   Routing table 				  | slave destination |   
 -- |	   base address	    | 	   high address         |	 	    local port noc address		  	  |      address      |
 '''
+
 # constant ROUTER0_MASTER0_ADDRESS_DECODER_TABLE : router0_master0_record_address_decod_table:=(
 	# (ROUTER0_MASTER0_address_mapping_for_ROUTER0_SLAVE4_BASE_ADD, ROUTER0_MASTER0_address_mapping_for_ROUTER0_SLAVE4_HIGH_ADD, SLAVE4, ROUTER0 & SLAVE4),	
 	# (ROUTER0_MASTER0_address_mapping_for_ROUTER0_SLAVE5_BASE_ADD, ROUTER0_MASTER0_address_mapping_for_ROUTER0_SLAVE5_HIGH_ADD, SLAVE5, ROUTER0 & SLAVE5),	
@@ -1627,12 +1621,28 @@ constant from_ROUTER5_to_ROUTER4_destination_port : regPORTADD:= ROUTINGPORT2;
 	# (ROUTER5_MASTER0_address_mapping_for_ROUTER0_SLAVE4_BASE_ADD, ROUTER5_MASTER0_address_mapping_for_ROUTER0_SLAVE4_HIGH_ADD, from_ROUTER5_to_ROUTER0_destination_port, ROUTER0 & SLAVE4)
 	# );
 	
+    
+    
 	
-
- 
+    
+    
+    
         fw= open(outputdir + "/noc_config_configurable_part_9.vhd", 'w')
         fw.write("%s" %ch)
         
+        # for r in range(self.nbr_R):
+            # for m in range(self.nbr_M_par_routeur[r]):
+                # for r_esclave in range(self.nbr_R):
+                    # for s in range(self.nbr_S_par_routeur[r_esclave]):
+                        # fw.write("constant ROUTER%d_MASTER%d_ADDRESS_DECODER_TABLE : router%d_master%d_record_address_decod_table:=(" %(r,m,r,m))
+                    
+                        # if self.maitre_possede_decodage_adresse_esclave[r][m][r_esclave][s] == 1:
+                            # fw.write("constant 	ROUTER%d_MASTER%d_address_mapping_for_ROUTER%d_SLAVE%d_BASE_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"%s";\n" %(r, m, r_esclave, s+self.nbr_M_par_routeur[r_esclave], self.table_maitre_decod_adr_basse[r][m][r_esclave][s]))
+                            # fw.write("constant 	ROUTER%d_MASTER%d_address_mapping_for_ROUTER%d_SLAVE%d_HIGH_ADD 	: std_logic_vector(ADD_SIZE-1 downto 0):= X"%s";\n" %(r, m, r_esclave, s+self.nbr_M_par_routeur[r_esclave], self.table_maitre_decod_adr_haute[r][m][r_esclave][s]))
+
+                            
+                            
+
         
         
         fw.write("-- => AGGREGATING ARRAY <= --\n")
