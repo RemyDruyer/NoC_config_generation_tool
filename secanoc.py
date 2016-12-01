@@ -86,19 +86,29 @@ class ScrollableTable(Frame):
         self.Canvas_principal.grid(row=0, column=0)
         
         # CANVAS EMPTY : positionne tout en haut a gauche contient une case vide
-        self.Canvas_empty = Canvas(self.Canvas_principal, width = 80, height = 35, highlightthickness=0)
-        self.Canvas_empty.grid(row=1, column=1, sticky=N+W)
+        #Ubuntu
+        self.Canvas_empty = Canvas(self.Canvas_principal, width = 108, height = 45, highlightthickness=0)
+        #Windows
+        #self.Canvas_empty = Canvas(self.Canvas_principal, width = 80, height = 35, highlightthickness=0)
+       	self.Canvas_empty.grid(row=1, column=1, sticky=N+W)
         self.Canvas_empty.grid_propagate(False)
         
         # CANVAS LEFT : axe vertical de numerotation des routeurs
         #affecte par la barre de defilement verticale
+        #Ubuntu
         self.Canvas_left = Canvas(self.Canvas_principal , width = 80, height = 520, highlightthickness=0, yscrollcommand = self.VerticalScrollBar.set)
+        #Windows
+        #self.Canvas_left = Canvas(self.Canvas_principal , width = 108, height = 520, highlightthickness=0, yscrollcommand = self.VerticalScrollBar.set)
+	self.Canvas_left = Canvas(self.Canvas_principal , width = 80, height = 520, highlightthickness=0, yscrollcommand = self.VerticalScrollBar.set)
         self.Canvas_left.grid(row=2, column=1, sticky=NW)
         self.Canvas_left.grid_propagate(False)
         
         # CANVAS TOP : axe horizontal de numerotation des routeurs
         #affecte par la barre de defilement horizontale
-        self.Canvas_top = Canvas(self.Canvas_principal, width = 950, height = 35, highlightthickness=0, xscrollcommand = self.HorizontalScrollBar.set)
+        #Ubuntu
+        self.Canvas_top = Canvas(self.Canvas_principal, width = 950, height = 45, highlightthickness=0, xscrollcommand = self.HorizontalScrollBar.set)
+   	#Windows
+	#self.Canvas_top = Canvas(self.Canvas_principal, width = 950, height = 35, highlightthickness=0, xscrollcommand = self.HorizontalScrollBar.set)
         self.Canvas_top.grid(row=1, column=2, sticky=N+W)
         self.Canvas_top.grid_propagate(False)
         
@@ -327,7 +337,10 @@ class MainInterface(Frame):
                 #sinon case de couleur normale
                 else:
                     self.liste_num_routeur_gauche.append( Button(self.Scrollable_Table.Canvas_left_interior_Frame, text ="%s" % (ligne-3), height = 1, width = 10, borderwidth=1))
-                self.liste_num_routeur_gauche[self.i_num_routeur_gauche].grid(row= ligne, column=colonne, sticky=W+E+N+S)
+                #ubuntu
+                self.liste_num_routeur_gauche[self.i_num_routeur_gauche].grid(row= ligne, column=colonne, pady=1)
+		#windows
+		#self.liste_num_routeur_gauche[self.i_num_routeur_gauche].grid(row= ligne, column=colonne, sticky=W+E+N+S)
                 self.i_num_routeur_gauche +=1
                 
             #Cases principales du damier
