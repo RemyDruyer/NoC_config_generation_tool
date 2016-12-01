@@ -303,10 +303,12 @@ class MainInterface(Frame):
             
             #Case horizontale "Connecté à routeur" dans Canvas_top_interior_frame    
             ligne = 2
-            ###conf ubuntu
-            #self.Case_Label_top_matrice =  Button(self.Scrollable_Table.Canvas_top_interior_Frame, borderwidth=2, text = "Connecte a routeur", height = 1, background = "gainsboro", width = self.nbr_R*3+10 ,padx = (self.nbr_R-1)*8)
-            ###conf windows
-            self.Case_Label_top_matrice =  Button(self.Scrollable_Table.Canvas_top_interior_Frame, borderwidth=2, text = "Connecte a routeur", height = 1, background = "gainsboro", width = self.nbr_R ,padx = (self.nbr_R-1)*8)
+
+            #config ubuntu
+            self.Case_Label_top_matrice =  Button(self.Scrollable_Table.Canvas_top_interior_Frame, borderwidth=2, text = "Connecte a routeur", height = 1, background = "gainsboro", width = self.nbr_R*3+10 ,padx = (self.nbr_R-1)*8)
+            #config windows
+            #self.Case_Label_top_matrice =  Button(self.Scrollable_Table.Canvas_top_interior_Frame, borderwidth=2, text = "Connecte a routeur", height = 1, background = "gainsboro", width = self.nbr_R ,padx = (self.nbr_R-1)*8)
+
             self.Case_Label_top_matrice.grid(row= ligne, column=self.nbr_R+self.offset_grid_colonne, sticky=N+W+S)
              
             #Placement des champs d'entête de saisie du nombre d'interface maître et esclave par routeurs dans Canvas_top_interior_frame
@@ -669,7 +671,6 @@ class MainInterface(Frame):
                             # print("Routeur %d  Maitre %d -> Routeur %d Esclave %d : %s" %(r,m,r_esclave,s+self.nbr_M_par_routeur[r_esclave],self.table_maitre_decod_adr_haute[r][m][r_esclave][s]))
                             # print("\n")
                             
-                
         #12) LOCAL CONNEXION   
         self.Matrices_connexions_locales = [[[0 for max_maitre in range(0,self.nbr_port_routeur_max+1)] for max_esclave in range(0,self.nbr_port_routeur_max+1)] for r in range(self.nbr_R)]
         
@@ -1961,10 +1962,10 @@ if __name__ == "__main__":
     
     fenetre_tk = Tk()
     fenetre_tk.title("Outil de generation de configurations NoC (Version 0.i)")
-    ###conf ubuntu
-    #fenetre_tk.geometry('1290x800')
-    ###conf windows
-    fenetre_tk.geometry('1070x800')
+    #conf ubuntu
+    fenetre_tk.geometry('1290x800')
+    #conf Windows
+    #fenetre_tk.geometry('1070x800')
     Outil_Python = MainInterface(fenetre_tk)
     
 
