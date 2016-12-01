@@ -86,19 +86,30 @@ class ScrollableTable(Frame):
         self.Canvas_principal.grid(row=0, column=0)
         
         # CANVAS EMPTY : positionne tout en haut a gauche contient une case vide
+        #Ubuntu
+        #self.Canvas_empty = Canvas(self.Canvas_principal, width = 108, height = 45, highlightthickness=0)
+        #Windows
         self.Canvas_empty = Canvas(self.Canvas_principal, width = 80, height = 35, highlightthickness=0)
+       
         self.Canvas_empty.grid(row=1, column=1, sticky=N+W)
         self.Canvas_empty.grid_propagate(False)
         
         # CANVAS LEFT : axe vertical de numerotation des routeurs
         #affecte par la barre de defilement verticale
+        #Ubuntu
+        #self.Canvas_left = Canvas(self.Canvas_principal , width = 108, height = 520, highlightthickness=0, yscrollcommand = self.VerticalScrollBar.set)
+        #Windows
         self.Canvas_left = Canvas(self.Canvas_principal , width = 80, height = 520, highlightthickness=0, yscrollcommand = self.VerticalScrollBar.set)
         self.Canvas_left.grid(row=2, column=1, sticky=NW)
         self.Canvas_left.grid_propagate(False)
         
         # CANVAS TOP : axe horizontal de numerotation des routeurs
         #affecte par la barre de defilement horizontale
+        #Ubuntu
+        #self.Canvas_top = Canvas(self.Canvas_principal, width = 950, height = 45, highlightthickness=0, xscrollcommand = self.HorizontalScrollBar.set)
+        #Windows
         self.Canvas_top = Canvas(self.Canvas_principal, width = 950, height = 35, highlightthickness=0, xscrollcommand = self.HorizontalScrollBar.set)
+
         self.Canvas_top.grid(row=1, column=2, sticky=N+W)
         self.Canvas_top.grid_propagate(False)
         
@@ -305,7 +316,7 @@ class MainInterface(Frame):
             ligne = 2
 
             #config ubuntu
-            # self.Case_Label_top_matrice =  Button(self.Scrollable_Table.Canvas_top_interior_Frame, borderwidth=2, text = "Connecte a routeur", height = 1, background = "gainsboro", width = self.nbr_R*3+10 ,padx = (self.nbr_R-1)*8)
+            #self.Case_Label_top_matrice =  Button(self.Scrollable_Table.Canvas_top_interior_Frame, borderwidth=2, text = "Connecte a routeur", height = 1, background = "gainsboro", width = self.nbr_R*3+10 ,padx = (self.nbr_R-1)*8)
             #config windows
             self.Case_Label_top_matrice =  Button(self.Scrollable_Table.Canvas_top_interior_Frame, borderwidth=2, text = "Connecte a routeur", height = 1, background = "gainsboro", width = self.nbr_R ,padx = (self.nbr_R-1)*8)
 
@@ -327,6 +338,9 @@ class MainInterface(Frame):
                 #sinon case de couleur normale
                 else:
                     self.liste_num_routeur_gauche.append( Button(self.Scrollable_Table.Canvas_left_interior_Frame, text ="%s" % (ligne-3), height = 1, width = 10, borderwidth=1))
+                #ubuntu
+                #self.liste_num_routeur_gauche[self.i_num_routeur_gauche].grid(row= ligne, column=colonne, pady=1)
+                #windows
                 self.liste_num_routeur_gauche[self.i_num_routeur_gauche].grid(row= ligne, column=colonne, sticky=W+E+N+S)
                 self.i_num_routeur_gauche +=1
                 
@@ -654,23 +668,7 @@ class MainInterface(Frame):
         self.interface_maitre_adresse_haute_decodage_esclave[3][1][0][1] = "0010FFFF"
 
         
-        
-        # for r in range (self.nbr_R):
-            # for m in range(self.nbr_M_par_routeur[r]):
-                 # for r_esclave in range (self.nbr_R):
-                    # for s in range (self.nbr_S_par_routeur[r_esclave]):
-                        # print("Routeur %d  Maitre %d -> Routeur %d Esclave %d : %d" %(r,m,r_esclave,s+self.nbr_M_par_routeur[r_esclave],self.maitre_possede_decodage_adresse_esclave[r][m][r_esclave][s]))
-
-        # for r in range (self.nbr_R):
-            # for m in range(self.nbr_M_par_routeur[r]):
-                 # for r_esclave in range (self.nbr_R):
-                    # for s in range (self.nbr_S_par_routeur[r_esclave]):
-                        # if self.maitre_possede_decodage_adresse_esclave[r][m][r_esclave][s] == 1:
-                            # print("\n")
-                            # print("Routeur %d  Maitre %d -> Routeur %d Esclave %d : %s" %(r,m,r_esclave,s+self.nbr_M_par_routeur[r_esclave],self.table_maitre_decod_adr_basse[r][m][r_esclave][s]))
-                            # print("Routeur %d  Maitre %d -> Routeur %d Esclave %d : %s" %(r,m,r_esclave,s+self.nbr_M_par_routeur[r_esclave],self.interface_maitre_adresse_haute_decodage_esclave[r][m][r_esclave][s]))
-                            # print("\n")
-                            
+       
         #12) LOCAL CONNEXION   
         self.Matrices_connexions_locales = [[[0 for max_maitre in range(0,self.nbr_port_routeur_max+1)] for max_esclave in range(0,self.nbr_port_routeur_max+1)] for r in range(self.nbr_R)]
         
@@ -902,7 +900,9 @@ class MainInterface(Frame):
         Button(Fenetre_ConnexionPaquet, text="Ok", width=22, command=lambda:Fenetre_ConnexionPaquet.destroy(), pady=5).grid(row=3, column=0)
             
 
-                #Méthode pour gerer la fenêtre secondaire de configuration des decodeurs d'adresses
+            
+            
+    #Méthode pour gerer la fenêtre secondaire de configuration des decodeurs d'adresses
     def FenetreSecondaire_DecodeurAdresse(self):
 
         def _on_buttonsave_clicked():
@@ -1579,78 +1579,44 @@ constant from_ROUTER5_to_ROUTER4_destination_port : regPORTADD:= ROUTINGPORT2;
         fw.write("type unconstrained_array_record_address_decod_table is array (natural range <>) of record_master_interface_address_decode_routing_table;\n")
         fw.close()
         
+        
 		
  # Génération VHDL : ------ 9) ADDRESS DECODER TABLES ------
     def generate_configurable_part_9(self):
         outputdir = "./Noc0__"
         if not os.path.exists(outputdir):
             os.makedirs(outputdir)
-
         ch='''
 ------ 9) ADDRESS DECODER TABLES ------
-
 -- constant ROUTERi_MASTERj_ADDRESS_DECODER_TABLE : router0_master0_record_address_decod_table:=(
 -- |    destination slave   |   destination slave 	    |   		   Routing table 				  | slave destination |   
 -- |	   base address	    | 	   high address         |	 	    local port noc address		  	  |      address      |
 '''
-
-# constant ROUTER0_MASTER0_ADDRESS_DECODER_TABLE : router0_master0_record_address_decod_table:=(
-	# (ROUTER0_MASTER0_address_mapping_for_ROUTER0_SLAVE4_BASE_ADD, ROUTER0_MASTER0_address_mapping_for_ROUTER0_SLAVE4_HIGH_ADD, SLAVE4, ROUTER0 & SLAVE4),	
-	# (ROUTER0_MASTER0_address_mapping_for_ROUTER0_SLAVE5_BASE_ADD, ROUTER0_MASTER0_address_mapping_for_ROUTER0_SLAVE5_HIGH_ADD, SLAVE5, ROUTER0 & SLAVE5),	
-	# (ROUTER0_MASTER0_address_mapping_for_ROUTER0_SLAVE6_BASE_ADD, ROUTER0_MASTER0_address_mapping_for_ROUTER0_SLAVE6_HIGH_ADD, SLAVE6, ROUTER0 & SLAVE6),	
-	# (ROUTER0_MASTER0_address_mapping_for_ROUTER0_SLAVE7_BASE_ADD, ROUTER0_MASTER0_address_mapping_for_ROUTER0_SLAVE7_HIGH_ADD, SLAVE7, ROUTER0 & SLAVE7),	
-	# (ROUTER0_MASTER0_address_mapping_for_ROUTER0_SLAVE8_BASE_ADD, ROUTER0_MASTER0_address_mapping_for_ROUTER0_SLAVE8_HIGH_ADD, SLAVE8, ROUTER0 & SLAVE8),	
-	# (ROUTER0_MASTER0_address_mapping_for_ROUTER1_SLAVE0_BASE_ADD, ROUTER0_MASTER0_address_mapping_for_ROUTER1_SLAVE0_HIGH_ADD, from_ROUTER0_to_ROUTER1_destination_port, ROUTER1 & SLAVE0),	
-	# (ROUTER0_MASTER0_address_mapping_for_ROUTER1_SLAVE1_BASE_ADD, ROUTER0_MASTER0_address_mapping_for_ROUTER1_SLAVE1_HIGH_ADD, from_ROUTER0_to_ROUTER1_destination_port, ROUTER1 & SLAVE1),
-	# (ROUTER0_MASTER0_address_mapping_for_ROUTER2_SLAVE4_BASE_ADD, ROUTER0_MASTER0_address_mapping_for_ROUTER2_SLAVE4_HIGH_ADD, from_ROUTER0_to_ROUTER2_destination_port, ROUTER2 & SLAVE4),
-	# (ROUTER0_MASTER0_address_mapping_for_ROUTER5_SLAVE1_BASE_ADD, ROUTER0_MASTER0_address_mapping_for_ROUTER5_SLAVE1_HIGH_ADD, from_ROUTER0_to_ROUTER5_destination_port, ROUTER5 & SLAVE1)
-	# );
-	
-# constant ROUTER0_MASTER1_ADDRESS_DECODER_TABLE : router0_master1_record_address_decod_table:=(
-	# (ROUTER0_MASTER1_address_mapping_for_ROUTER4_SLAVE4_BASE_ADD, ROUTER0_MASTER1_address_mapping_for_ROUTER4_SLAVE4_HIGH_ADD, from_ROUTER0_to_ROUTER4_destination_port, ROUTER4 & SLAVE4),	
-	# (ROUTER0_MASTER1_address_mapping_for_ROUTER0_SLAVE5_BASE_ADD, ROUTER0_MASTER1_address_mapping_for_ROUTER0_SLAVE5_HIGH_ADD, SLAVE5, ROUTER0 & SLAVE5),	
-	# (ROUTER0_MASTER1_address_mapping_for_ROUTER0_SLAVE6_BASE_ADD, ROUTER0_MASTER1_address_mapping_for_ROUTER0_SLAVE6_HIGH_ADD, SLAVE6, ROUTER0 & SLAVE6),	
-	# (ROUTER0_MASTER1_address_mapping_for_ROUTER0_SLAVE7_BASE_ADD, ROUTER0_MASTER1_address_mapping_for_ROUTER0_SLAVE7_HIGH_ADD, SLAVE7, ROUTER0 & SLAVE7),	
-	# (ROUTER0_MASTER1_address_mapping_for_ROUTER0_SLAVE8_BASE_ADD, ROUTER0_MASTER1_address_mapping_for_ROUTER0_SLAVE8_HIGH_ADD, SLAVE8, ROUTER0 & SLAVE8),	
-	# (ROUTER0_MASTER1_address_mapping_for_ROUTER1_SLAVE0_BASE_ADD, ROUTER0_MASTER1_address_mapping_for_ROUTER1_SLAVE0_HIGH_ADD, from_ROUTER0_to_ROUTER1_destination_port, ROUTER1 & SLAVE0),	
-	# (ROUTER0_MASTER1_address_mapping_for_ROUTER1_SLAVE1_BASE_ADD, ROUTER0_MASTER1_address_mapping_for_ROUTER1_SLAVE1_HIGH_ADD, from_ROUTER0_to_ROUTER1_destination_port, ROUTER1 & SLAVE1),
-	# (ROUTER0_MASTER1_address_mapping_for_ROUTER2_SLAVE4_BASE_ADD, ROUTER0_MASTER1_address_mapping_for_ROUTER2_SLAVE4_HIGH_ADD, from_ROUTER0_to_ROUTER2_destination_port, ROUTER2 & SLAVE4)
-	# );
-
-	# (ROUTER5_MASTER0_address_mapping_for_ROUTER4_SLAVE7_BASE_ADD, ROUTER5_MASTER0_address_mapping_for_ROUTER4_SLAVE7_HIGH_ADD, from_ROUTER5_to_ROUTER4_destination_port, ROUTER4 & SLAVE7),
-	# (ROUTER5_MASTER0_address_mapping_for_ROUTER5_SLAVE1_BASE_ADD, ROUTER5_MASTER0_address_mapping_for_ROUTER5_SLAVE1_HIGH_ADD, SLAVE4, ROUTER5 & SLAVE4),
-	# (ROUTER5_MASTER0_address_mapping_for_ROUTER0_SLAVE4_BASE_ADD, ROUTER5_MASTER0_address_mapping_for_ROUTER0_SLAVE4_HIGH_ADD, from_ROUTER5_to_ROUTER0_destination_port, ROUTER0 & SLAVE4)
-	# );
-
-    
         fw= open(outputdir + "/noc_config_configurable_part_9.vhd", 'w')
         fw.write("%s" %ch)
         
         for r in range(self.nbr_R):
             for m in range(self.nbr_M_par_routeur[r]):
-            
+                #écrire l'entête si il y a au moins une règle de décodage dans table
                 if self.Taille_table_decodeur_adr_maitre[r][m] != 0:
                     fw.write("constant ROUTER%d_MASTER%d_ADDRESS_DECODER_TABLE : router%d_master%d_record_address_decod_table:=(\n" %(r,m,r,m))
                     i_nbr_decodage_adresse = 0
-                    
                 for r_esclave in range(self.nbr_R):
                     for s in range(self.nbr_S_par_routeur[r_esclave]):
-
                         if self.maitre_possede_decodage_adresse_esclave[r][m][r_esclave][s] == 1:
+                            #Si esclave connecté au même routeur : port local de routage = "SLAVEj" 
                             if r_esclave == r:
-                                fw.write("  (ROUTER%d_MASTER%d_address_mapping_for_ROUTER%d_SLAVE%d_BASE_ADD, ROUTER%d_MASTER%d_address_mapping_for_ROUTER%d_SLAVE%d_HIGH_ADD, SLAVE%d, ROUTER%d & SLAVE%d)" %(r,m,r_esclave,s+self.nbr_M_par_routeur[r_esclave],r,m,r_esclave,s+self.nbr_M_par_routeur[r_esclave],s+self.nbr_M_par_routeur[r_esclave],r_esclave,s+self.nbr_M_par_routeur[r_esclave]))
- 
+                                fw.write("      (ROUTER%d_MASTER%d_address_mapping_for_ROUTER%d_SLAVE%d_BASE_ADD, ROUTER%d_MASTER%d_address_mapping_for_ROUTER%d_SLAVE%d_HIGH_ADD, SLAVE%d, ROUTER%d & SLAVE%d)" %(r,m,r_esclave,s+self.nbr_M_par_routeur[r_esclave],r,m,r_esclave,s+self.nbr_M_par_routeur[r_esclave],s+self.nbr_M_par_routeur[r_esclave],r_esclave,s+self.nbr_M_par_routeur[r_esclave]))
+                            #Sinon port local de routage = "from_ROUTERk_to_ROUTERl"
                             else:
-                                fw.write("  (ROUTER%d_MASTER%d_address_mapping_for_ROUTER%d_SLAVE%d_BASE_ADD, ROUTER%d_MASTER%d_address_mapping_for_ROUTER%d_SLAVE%d_HIGH_ADD, from_ROUTER%d_to_ROUTER%d_destination_port, ROUTER%d & SLAVE%d)" %(r,m,r_esclave,s+self.nbr_M_par_routeur[r_esclave],r,m,r_esclave,s+self.nbr_M_par_routeur[r_esclave],r,r_esclave,r_esclave,s+self.nbr_M_par_routeur[r_esclave]))
-                            
+                                fw.write("      (ROUTER%d_MASTER%d_address_mapping_for_ROUTER%d_SLAVE%d_BASE_ADD, ROUTER%d_MASTER%d_address_mapping_for_ROUTER%d_SLAVE%d_HIGH_ADD, from_ROUTER%d_to_ROUTER%d_destination_port, ROUTER%d & SLAVE%d)" %(r,m,r_esclave,s+self.nbr_M_par_routeur[r_esclave],r,m,r_esclave,s+self.nbr_M_par_routeur[r_esclave],r,r_esclave,r_esclave,s+self.nbr_M_par_routeur[r_esclave]))
                             i_nbr_decodage_adresse += 1
-                            
+                            #si denière règle de la table : mettre un point-virgule sinon une virgule
                             if i_nbr_decodage_adresse == self.Taille_table_decodeur_adr_maitre[r][m]:
                                 fw.write(");\n\n")
                             else:
                                 fw.write(",\n")
 
-        
         
         fw.write("\n-- => AGGREGATING ARRAY <= --\n")
         fw.write("--aggregates all master address decoder rules : starting from ROUTER0 - MASTER0 - RULES0 => first increment RULE number, then increment MASTER number, and finally increment ROUTER number\n")
@@ -1661,7 +1627,6 @@ constant from_ROUTER5_to_ROUTER4_destination_port : regPORTADD:= ROUTINGPORT2;
             for m in range(self.nbr_M_par_routeur[r]):
                 for t in range(self.Taille_table_decodeur_adr_maitre[r][m]):
                     fw.write("ROUTER%d_MASTER%d_ADDRESS_DECODER_TABLE(%d)"%(r,m,t))
-
                     if (r == self.nbr_R-1) and   (m == self.nbr_M_par_routeur[r]-1) and (t==self.Taille_table_decodeur_adr_maitre[r][m]-1) :
                         fw.write("\n );\n")
                     else:
@@ -1883,12 +1848,12 @@ end noc_address_pack;
         self.generate_configurable_part_2()
         self.generate_configurable_part_3()
         self.generate_configurable_part_4()
-        # self.generate_configurable_part_5()
+        self.generate_configurable_part_5()
         self.generate_configurable_part_6()
         self.generate_configurable_part_7()
         self.generate_configurable_part_8()
         self.generate_configurable_part_9()
-        # self.generate_configurable_part_10()
+        self.generate_configurable_part_10()
         self.generate_configurable_part_11()
         self.generate_configurable_part_12()
         self.generate_end_of_file_with_function()
@@ -1968,9 +1933,9 @@ if __name__ == "__main__":
     
     fenetre_tk = Tk()
     fenetre_tk.title("Outil de generation de configurations NoC (Version 0.i)")
-    # conf ubuntu
-    # fenetre_tk.geometry('1290x800')
-    #conf Windows
+    #Ubuntu
+    #fenetre_tk.geometry('1290x800')
+    #Windows
     fenetre_tk.geometry('1070x800')
     Outil_Python = MainInterface(fenetre_tk)
     
