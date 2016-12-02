@@ -188,7 +188,11 @@ class MainInterface(Frame):
         self.Connexions_paquet_esclave  = []
         self.IntVar_checkBouton_Connexions_Locales = IntVar()
         self.IntVar_checkBouton_Connexions_Paquets = IntVar()
-        self.flag_tout_connecter = 0
+        
+        self.maitre_possede_decodage_adresse_esclave = [[[[]]]]
+        self.interface_maitre_adresse_basse_decodage_esclave = [[[[]]]]
+        self.interface_maitre_adresse_haute_decodage_esclave = [[[[]]]]
+        self.Taille_table_decodeur_adr_maitre =[[]]
         
         # Espace Menu Barre
         # Creation de la menu barre
@@ -258,11 +262,11 @@ class MainInterface(Frame):
         self.bouton_generation_vhdl = Button(self, text="Generation \n du VHDL", command= self.on_buttonGenerate_clicked, state=DISABLED)
         self.bouton_generation_vhdl.grid(row= 4, column=5, sticky=NSEW)
         
- 
         self.bouton_chargement_save_exemple = Button(self, text="Chargement Save", command=self.Chargement_sauvegarde_exemple)
         self.bouton_chargement_save_exemple.grid(row=2, column=3, padx=2, pady=2)
-
-
+        
+        # self.bouton_pathfinding = Button(self, text="Pathfinding", command=self.bouton_pathfinding)
+        # self.bouton_pathfinding.grid(row=2, column=4, padx=2, pady=2)
             
     # Action du bouton "RUN/Generation de la matrice de connexions des routeurs"
     def run_action(self):
@@ -401,10 +405,8 @@ class MainInterface(Frame):
 
             #case inactive dans le coin en haut a gauche de la matrice/damier de connexions de routeurs 
             self.TopLeft_Corner_Case.destroy()
-            
             #Case label "Connecte a" en haut du damier des connexions routeurs placée dans Canvas_top_interior_frame
             self.Case_Label_top_matrice.destroy()
-                
             #Champs d'entête de saisie du nombre d'interface maître et esclave par routeurs dans Canvas_top_interior_frame
             self.Case_LabelNbrMaitre.destroy()
             self.Case_LabelNbrEsclave.destroy()
@@ -507,8 +509,8 @@ class MainInterface(Frame):
         #Nombre de port de routage par routeur et nombre total de port de routage(une connexion entre deux routeurs = 2 ports de routage -> 1 par routeur)
         #pour chaque routeur
         self.nbr_RP_par_routeur = [0 for i in range(self.nbr_R)]
-        for ligne in range (0,self.nbr_R):
-            for colonne in range (0,self.nbr_R):
+        for ligne in range (self.nbr_R):
+            for colonne in range (self.nbr_R):
                 #on ne prend que la partie au dessus/à droite de la diagonale pour générer compter les connexions et éviter de créer des doubles
                 if colonne > ligne:
                     #si la case est orange et donc qu'une connexion existe
@@ -545,45 +547,655 @@ class MainInterface(Frame):
         #par défaut toutes les interfaces maîtres, esclaves et port de routage possèdent une interface paquet
         #1 = maitre ; 2 = esclave ; 3 = port de routage ; 0 = aucune interface paquet
         for r in range(self.nbr_R):
-            index_int_paquet = 0
+            index_interface_paquet_du_routeur = 0
+            #rajoute une interface paquet maitre = '1' pour chaque interface maitre du routeur "self.nbr_M_par_routeur[r]"
             for m in range(self.nbr_M_par_routeur[r]):
-                self.Interfaces_paquets_routeur[r][index_int_paquet] = 1
-                index_int_paquet += 1
-                
+                self.Interfaces_paquets_routeur[r][index_interface_paquet_du_routeur] = 1
+                index_interface_paquet_du_routeur += 1
+            
+            #rajoute une interface paquet esclave = '2' pour chaque interface esclave du routeur "self.nbr_S_par_routeur[r]"
             for s in range(self.nbr_S_par_routeur[r]):
-                self.Interfaces_paquets_routeur[r][index_int_paquet] = 2
-                index_int_paquet += 1
+                self.Interfaces_paquets_routeur[r][index_interface_paquet_du_routeur] = 2
+                index_interface_paquet_du_routeur += 1
                 
+            #rajoute une interface paquet port de routage = '3' pour chaque connexion à un autre routeur (colonne de chaque autre autre routeur croisant celle du routeur r == "orange" -> connexion)
             for colonne in range(self.nbr_R):
                 if self.liste_Cases_Connexions_Routeur[r][colonne]["background"]=="orange":
-                    self.Interfaces_paquets_routeur[r][index_int_paquet] = 3
-                    index_int_paquet += 1
+                    self.Interfaces_paquets_routeur[r][index_interface_paquet_du_routeur] = 3
+                    index_interface_paquet_du_routeur += 1
                     
                     
         #5) ADD DECODER TABLE SIZE
         self.Taille_table_decodeur_adr_maitre = [[0 for m in range(self.nbr_M_par_routeur[r])] for r in range(self.nbr_R)]
         self.Nombre_total_regles_decodeur_adresse = 0
-
-                
-                
+   
         self.maitre_possede_decodage_adresse_esclave = [[[[IntVar(value=0) for s in range(self.nbr_S_par_routeur[r_esclave])] for r_esclave in range(self.nbr_R)] for m in range(self.nbr_M_par_routeur[r])] for r in range(self.nbr_R)]
 
         self.interface_maitre_adresse_basse_decodage_esclave = [[[[StringVar(value="00000000") for s in range(self.nbr_S_par_routeur[r_esclave])] for r_esclave in range(self.nbr_R)] for m in range(self.nbr_M_par_routeur[r])] for r in range(self.nbr_R)]
         self.interface_maitre_adresse_haute_decodage_esclave = [[[[StringVar(value="00000000") for s in range(self.nbr_S_par_routeur[r_esclave])] for r_esclave in range(self.nbr_R)] for m in range(self.nbr_M_par_routeur[r])] for r in range(self.nbr_R)]
-                
-       
-        #12) LOCAL CONNEXION   
-        self.Matrices_connexions_locales = [[[0 for max_maitre in range(0,self.nbr_port_routeur_max+1)] for max_esclave in range(0,self.nbr_port_routeur_max+1)] for r in range(self.nbr_R)]
-        
-        
 
+        #12) LOCAL CONNEXION   
+        self.Matrices_connexions_locales = [[[0 for max_maitre in range(self.nbr_port_routeur_max+1)] for max_esclave in range(self.nbr_port_routeur_max+1)] for r in range(self.nbr_R)]
+        
+    # def bouton_pathfinding(self):
+
+        # self.Routeurs_connectes = [[] for r in range (self.nbr_R)]
+        
+        # graph = { }
+        
+        # for Routeur_ligne in range (self.nbr_R):
+            # for Routeur_colonne in range (self.nbr_R):
+                # # #on ne prend que la partie au dessus/à droite de la diagonale pour générer compter les connexions et éviter de créer des doubles
+                # if Routeur_colonne > Routeur_ligne:
+                    # # #si la case est orange et donc qu'une connexion existe
+                    # if self.liste_Cases_Connexions_Routeur[Routeur_ligne][Routeur_colonne]["background"]=="orange":
+                        # self.Routeurs_connectes[Routeur_ligne].append(Routeur_colonne) 
+                        # # self.Routeurs_connectes[Routeur_colonne].append(Routeur_ligne)
+
+                        
+        # for r in range (self.nbr_R):
+            # # if len(self.Routeurs_connectes[r]) == 0:
+                # # print("Routeur %d sans connexion" %r)
+            # # else:
+            # for r_connectes in range (len(self.Routeurs_connectes[r])):
+
+                # # print("Routeur %d  - Routeur co %d " %(r, self.Routeurs_connectes[r][r_connectes]))
+                # graph[str(r)].append(self.Routeurs_connectes[r][r_connectes])
+        
+        
+        # # graph = {'A': ['B', 'C'],
+            # # 'B': ['C', 'D'],
+            # # 'C': ['D'],
+            # # 'D': ['C'],
+            # # 'E': ['F'],
+            # # 'F': ['C']}
+            
+            # # for k in range (int(graph)):
+                # # for v in graph[k]:
+                    # # print (graph[k][v])
+                    
+            # # for k, v in graph.items():
+                # # print("Key = %s, value = %s , v = %s, kv = %s" %(k,graph[k], v, graph[k][v]))
+                # # print("\n")
+                
+                
+        # print("Contenu du graph :")
+        # print(graph.items())    
+                
+            # # for y in graph[x]:
+                # # print (y,':',graph[x][y])
+            
+            # # for keys,values in graph.items():
+                # # print("Keys %s" %keys)
+                # # print("values %s" %values)
+                # # print("\n")
+        # # graph = { }
+        
+        
+        # # graph.update({'A': ['B', 'C']})
+        # # graph.update({'B': ['C', 'D'],
+                # # 'C': ['D'],
+                # # 'D': ['C'],
+                # # 'E': ['F'],
+                # # 'F': ['C']})
+                
+                
+        # # def find_path(graph, start, end, path=[]):
+                # # path = path + [start]
+                # # if start == end:
+                    # # return path
+                # # if start not in graph:
+                    # # return None
+                # # for node in graph[start]:
+                    # # if node not in path:
+                        # # newpath = find_path(graph, node, end, path)
+                        # # if newpath: return newpath
+                # # return None            
+
+        # # print(find_path(graph, 'A', 'D'))
+            
     def Chargement_sauvegarde_exemple(self):
         CHARGED_FROM_SAVE_nbr_routeur = 4
-        CHARGED_FROM_SAVE_nbr_M_par_routeur = [0,4,2,0]
-        CHARGED_FROM_SAVE_nbr_S_par_routeur = [0,2,0,3]
+        #chaque valeur correspond à un routeur
+        CHARGED_FROM_SAVE_nbr_M_par_routeur = [4,2,3,2]
+        CHARGED_FROM_SAVE_nbr_S_par_routeur = [2,2,3,0]
+        #pour chaque routeur, voir s'ils sont connectés aux autres routeurs (ne peuvent être connectés à eux-même)
         CHARGED_FROM_SAVE_connexions_routeurs = [[0,1,0,1],[1,0,1,0],[0,1,0,0],[1,0,0,0]]
-        CHARGED_FROM_SAVE_connexions_locales = [[[0]], [[1,1],[0,0],[1,0],[0,1]], [[0]], [[0]]]
-        CHARGED_FROM_SAVE_connexions_paquets = [[0],[0,0,1,0,0,1],[0,1],[1,0,0]]
+        #pour chaque maitre, définit si il est connecté à un esclave en local ('1' = connecté) -> [[0]] = aucune connexion dans le routeur
+        CHARGED_FROM_SAVE_connexions_locales = [[[1,1],[0,0],[0,0],[1,1]], [[1,1],[0,0]], [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], [[0]]]
+        #pour chaque maitre et chaque esclave définit si il est connecté en interface paquet ('1' = connecté) -> [[0]] = aucune connexion dans le routeur
+        CHARGED_FROM_SAVE_connexions_paquets = [[1,1,1,1,1,1],[0,0,1,1],[1,0,1,0,1,0],[0,0]]
+        #un entier pour chaque maitre de chaque routeur
+        CHARGED_FROM_SAVE_taille_table_decodage = [[4,2,3,5], [7,3], [1,2,3], [7,7]]
+            
+        #un entier (0 ou 1) pour chaque esclave -> chaque routeur_esclave -> chaque maitre -> de chaque routeur 
+        CHARGED_FROM_SAVE_decodage_esclave_actif =  [
+        [ #Routeur 0
+            [ #maitre0
+                [ #routeur0_esclave
+                    1,#esclave0
+                    1 #esclave1
+                ],
+                [ #routeur1_esclave
+                    1,#esclave0
+                    1 #esclave1
+                ],
+                [ #routeur2_esclave
+                    0, #esclave0
+                    0,#esclave1
+                    0 #esclave2
+                ]
+            ],
+            [ #maitre1
+                [ #routeur0_esclave
+                    0,#esclave0
+                    0 #esclave1
+                ],
+                [ #routeur1_esclave
+                    1,#esclave0
+                    1 #esclave1
+                ],
+                [ #routeur2_esclave
+                    0,#esclave0
+                    0,#esclave1
+                    0 #esclave2
+                ]
+            ],
+            [ #maitre2
+                [ #routeur0_esclave
+                    0,#esclave0
+                    0 #esclave1
+                ],
+                [ #routeur1_esclave
+                    0,#esclave0
+                    0 #esclave1
+                ],
+                [ #routeur2_esclave
+                    1,#esclave0
+                    1,#esclave1
+                    1 #esclave2
+                ]
+            ],
+            [ #maitre3
+                [ #routeur0_esclave
+                    1,#esclave0
+                    1 #esclave1
+                ],
+                [ #routeur1_esclave
+                    0,#esclave0
+                    0 #esclave1
+                ],
+                [ #routeur2_esclave
+                    1,#esclave0
+                    1,#esclave1
+                    1 #esclave2
+                ]
+            ]
+        ],
+        [ #Routeur 1
+            [ #maitre0
+                [ #routeur0_esclave
+                   1,#esclave0
+                   1 #esclave1
+                ],
+                [ #routeur1_esclave
+                   1,#esclave0
+                   1 #esclave1
+                ],
+                [ #routeur2_esclave
+                    1,#esclave0
+                    1,#esclave1
+                    1 #esclave2
+                ]
+            ],
+            [ #maitre1
+                [ #routeur0_esclave
+                    0,#esclave0
+                    0 #esclave1
+                ],
+                [ #routeur1_esclave
+                    0,#esclave0
+                    0#esclave1
+                ],
+                [ #routeur2_esclave
+                    1,#esclave0
+                    1,#esclave1
+                    1 #esclave2
+                ]
+            ]
+        ],
+        [ #Routeur 2
+            [ #maitre0
+                [ #routeur0_esclave
+                    0,#esclave0
+                    1 #esclave1
+                ],
+                [ #routeur1_esclave
+                    0,#esclave0
+                    0#esclave1
+                ],
+                [ #routeur2_esclave
+                    0,#esclave0
+                    0,#esclave1
+                    0 #esclave2
+                ]
+            ],
+            [ #maitre1
+                [ #routeur0_esclave
+                    1,#esclave0
+                    1 #esclave1
+                ],
+                [ #routeur1_esclave
+                    0,#esclave0
+                    0 #esclave1
+                ],
+                [ #routeur2_esclave
+                    0,#esclave0
+                    0,#esclave1
+                    0 #esclave2
+                ]
+            ],
+            [ #maitre2
+                [ #routeur0_esclave
+                    0,#esclave0
+                    0 #esclave1
+                ],
+                [ #routeur1_esclave
+                    0,#esclave0
+                    0#esclave1
+                ],
+                [ #routeur2_esclave
+                    1,#esclave0
+                    1,#esclave1
+                    1 #esclave2
+                ]
+            ]
+        ], 
+        [ #Routeur 3
+            
+            [ #maitre0
+                [ #routeur0_esclave
+                    1,#esclave0
+                    1 #esclave1
+                ],
+                [ #routeur1_esclave
+                    1,#esclave0
+                    1 #esclave1
+                ],
+                [ #routeur2_esclave
+                    1,#esclave0
+                    1,#esclave1
+                    1 #esclave2
+                ]
+            ],
+            [ #maitre1
+                [ #routeur0_esclave
+                    1,#esclave0
+                    1 #esclave1
+                ],
+                [ #routeur1_esclave
+                    1,#esclave0
+                    1 #esclave1
+                ],
+                [ #routeur2_esclave
+                    1,#esclave0
+                    1,#esclave1
+                    1 #esclave2
+                ]
+            ]
+        ]]
+        #une chaîne de caractère "" pour chaque esclave -> chaque routeur_esclave -> chaque maitre -> de chaque routeur
+        CHARGED_FROM_SAVE_adresses_basses = [
+        [ #Routeur 0
+            [ #maitre0
+                [ #routeur0_esclave
+                    "00000000", #esclave0
+                    "00000001" #esclave1
+                ],
+                [ #routeur1_esclave
+                    "00000010", #esclave0
+                    "00000011"#esclave1
+                ],
+                [ #routeur2_esclave
+                    "00000020", #esclave0
+                    "00000021", #esclave1
+                    "00000022" #esclave2
+                ]
+            ],
+            [ #maitre1
+                [ #routeur0_esclave
+                    "01000000", #esclave0
+                    "01000001" #esclave1
+                ],
+                [ #routeur1_esclave
+                    "01000010", #esclave0
+                    "01000011"#esclave1
+                ],
+                [ #routeur2_esclave
+                    "01000020", #esclave0
+                    "01000021", #esclave1
+                    "01000022" #esclave2
+                ]
+            ],
+            [ #maitre2
+                [ #routeur0_esclave
+                    "02000000", #esclave0
+                    "02000001" #esclave1
+                ],
+                [ #routeur1_esclave
+                    "02000010", #esclave0
+                    "02000011"#esclave1
+                ],
+                [ #routeur2_esclave
+                    "02000020", #esclave0
+                    "02000021", #esclave1
+                    "02000022" #esclave2
+                ]
+            ],
+            [ #maitre3
+                [ #routeur0_esclave
+                    "03000000", #esclave0
+                    "03000001" #esclave1
+                ],
+                [ #routeur1_esclave
+                    "03000010", #esclave0
+                    "03000011"#esclave1
+                ],
+                [ #routeur2_esclave
+                    "03000020", #esclave0
+                    "03000021", #esclave1
+                    "03000022" #esclave2
+                ]
+            ]
+        ],
+        [ #Routeur 1
+            [ #maitre0
+                [ #routeur0_esclave
+                    "10000000", #esclave0
+                    "10000001" #esclave1
+                ],
+                [ #routeur1_esclave
+                    "10000010", #esclave0
+                    "10000011"#esclave1
+                ],
+                [ #routeur2_esclave
+                    "10000020", #esclave0
+                    "10000021", #esclave1
+                    "10000022" #esclave2
+                ]
+            ],
+            [ #maitre1
+                [ #routeur0_esclave
+                    "11000000", #esclave0
+                    "11000001" #esclave1
+                ],
+                [ #routeur1_esclave
+                    "11000010", #esclave0
+                    "11000011"#esclave1
+                ],
+                [ #routeur2_esclave
+                    "11000020", #esclave0
+                    "11000021", #esclave1
+                    "11000022" #esclave2
+                ]
+            ]
+        ],
+        [ #Routeur 2
+            [ #maitre0
+                [ #routeur0_esclave
+                    "20000000", #esclave0
+                    "20000001" #esclave1
+                ],
+                [ #routeur1_esclave
+                    "20000010", #esclave0
+                    "20000011"#esclave1
+                ],
+                [ #routeur2_esclave
+                    "20000020", #esclave0
+                    "20000021", #esclave1
+                    "20000022" #esclave2
+                ]
+            ],
+            [ #maitre1
+                [ #routeur0_esclave
+                    "21000000", #esclave0
+                    "21000001" #esclave1
+                ],
+                [ #routeur1_esclave
+                    "21000010", #esclave0
+                    "21000011"#esclave1
+                ],
+                [ #routeur2_esclave
+                    "21000020", #esclave0
+                    "21000021", #esclave1
+                    "21000022" #esclave2
+                ]
+            ],
+            [ #maitre2
+                [ #routeur0_esclave
+                    "22000000", #esclave0
+                    "22000001" #esclave1
+                ],
+                [ #routeur1_esclave
+                    "22000010", #esclave0
+                    "22000011"#esclave1
+                ],
+                [ #routeur2_esclave
+                    "22000020", #esclave0
+                    "22000021", #esclave1
+                    "22000022" #esclave2
+                ]
+            ]
+        ], 
+        [ #Routeur 3
+            
+            [ #maitre0
+                [ #routeur0_esclave
+                    "30000000", #esclave0
+                    "30000001" #esclave1
+                ],
+                [ #routeur1_esclave
+                    "30000010", #esclave0
+                    "30000011"#esclave1
+                ],
+                [ #routeur2_esclave
+                    "30000020", #esclave0
+                    "30000021", #esclave1
+                    "30000022" #esclave2
+                ]
+            ],
+            [ #maitre1
+                [ #routeur0_esclave
+                    "31000000", #esclave0
+                    "31000001" #esclave1
+                ],
+                [ #routeur1_esclave
+                    "31000010", #esclave0
+                    "31000011"#esclave1
+                ],
+                [ #routeur2_esclave
+                    "31000020", #esclave0
+                    "31000021", #esclave1
+                    "31000022" #esclave2
+                ]
+            ]
+        ]]
+        #une chaîne de carctère "" pour chaque esclave -> chaque routeur_esclave -> chaque maitre -> de chaque routeur
+        CHARGED_FROM_SAVE_adresses_hautes = [
+        [ #Routeur 0
+            [ #maitre0
+                [ #routeur0_esclave
+                    "00000000", #esclave0
+                    "FFFF0001" #esclave1
+                ],
+                [ #routeur1_esclave
+                    "FFFF0010", #esclave0
+                    "FFFF0011"#esclave1
+                ],
+                [ #routeur2_esclave
+                    "FFFF0020", #esclave0
+                    "FFFF0021", #esclave1
+                    "FFFF0022" #esclave2
+                ]
+            ],
+            [ #maitre1
+                [ #routeur0_esclave
+                    "01FFFF00", #esclave0
+                    "01FFFF01" #esclave1
+                ],
+                [ #routeur1_esclave
+                    "01FFFF10", #esclave0
+                    "01FFFF11"#esclave1
+                ],
+                [ #routeur2_esclave
+                    "01FFFF20", #esclave0
+                    "01FFFF21", #esclave1
+                    "01FFFF22" #esclave2
+                ]
+            ],
+            [ #maitre2
+                [ #routeur0_esclave
+                    "02FFFF00", #esclave0
+                    "02FFFF01" #esclave1
+                ],
+                [ #routeur1_esclave
+                    "02FFFF10", #esclave0
+                    "02FFFF11"#esclave1
+                ],
+                [ #routeur2_esclave
+                    "02FFFF20", #esclave0
+                    "02FFFF21", #esclave1
+                    "02FFFF22" #esclave2
+                ]
+            ],
+            [ #maitre3
+                [ #routeur0_esclave
+                    "03FFFF00", #esclave0
+                    "03FFFF01" #esclave1
+                ],
+                [ #routeur1_esclave
+                    "03FFFF10", #esclave0
+                    "03FFFF11"#esclave1
+                ],
+                [ #routeur2_esclave
+                    "03FFFF20", #esclave0
+                    "03FFFF21", #esclave1
+                    "03FFFF22" #esclave2
+                ]
+            ]
+        ],
+        [ #Routeur 1
+            [ #maitre0
+                [ #routeur0_esclave
+                    "1FFFF000", #esclave0
+                    "1FFFF001" #esclave1
+                ],
+                [ #routeur1_esclave
+                    "1FFFF010", #esclave0
+                    "1FFFF011"#esclave1
+                ],
+                [ #routeur2_esclave
+                    "1FFFF020", #esclave0
+                    "1FFFF021", #esclave1
+                    "1FFFF022" #esclave2
+                ]
+            ],
+            [ #maitre1
+                [ #routeur0_esclave
+                    "11FFFF00", #esclave0
+                    "11FFFF01" #esclave1
+                ],
+                [ #routeur1_esclave
+                    "11FFFF10", #esclave0
+                    "11FFFF11"#esclave1
+                ],
+                [ #routeur2_esclave
+                    "11FFFF20", #esclave0
+                    "11FFFF21", #esclave1
+                    "11FFFF22" #esclave2
+                ]
+            ]
+        ],
+        [ #Routeur 2
+            [ #maitre0
+                [ #routeur0_esclave
+                    "2FFFF000", #esclave0
+                    "2FFFF001" #esclave1
+                ],
+                [ #routeur1_esclave
+                    "2FFFF010", #esclave0
+                    "2FFFF011"#esclave1
+                ],
+                [ #routeur2_esclave
+                    "2FFFF020", #esclave0
+                    "2FFFF021", #esclave1
+                    "2FFFF022" #esclave2
+                ]
+            ],
+            [ #maitre1
+                [ #routeur0_esclave
+                    "21FFFF00", #esclave0
+                    "21FFFF01" #esclave1
+                ],
+                [ #routeur1_esclave
+                    "21FFFF10", #esclave0
+                    "21FFFF11"#esclave1
+                ],
+                [ #routeur2_esclave
+                    "21FFFF20", #esclave0
+                    "21FFFF21", #esclave1
+                    "21FFFF22" #esclave2
+                ]
+            ],
+            [ #maitre2
+                [ #routeur0_esclave
+                    "22FFFF00", #esclave0
+                    "22FFFF01" #esclave1
+                ],
+                [ #routeur1_esclave
+                    "22FFFF10", #esclave0
+                    "22FFFF11"#esclave1
+                ],
+                [ #routeur2_esclave
+                    "22FFFF20", #esclave0
+                    "22FFFF21", #esclave1
+                    "22FFFF22" #esclave2
+                ]
+            ]
+        ], 
+        [ #Routeur 3
+            
+            [ #maitre0
+                [ #routeur0_esclave
+                    "3FFFF000", #esclave0
+                    "3FFFF001" #esclave1
+                ],
+                [ #routeur1_esclave
+                    "3FFFF010", #esclave0
+                    "3FFFF011"#esclave1
+                ],
+                [ #routeur2_esclave
+                    "3FFFF020", #esclave0
+                    "3FFFF021", #esclave1
+                    "3FFFF022" #esclave2
+                ]
+            ],
+            [ #maitre1
+                [ #routeur0_esclave
+                    "31FFFF00", #esclave0
+                    "31FFFF01" #esclave1
+                ],
+                [ #routeur1_esclave
+                    "31FFFF10", #esclave0
+                    "31FFFF11"#esclave1
+                ],
+                [ #routeur2_esclave
+                    "31FFFF20", #esclave0
+                    "31FFFF21", #esclave1
+                    "31FFFF22" #esclave2
+                ]
+            ]
+        ]]
         
         #chargement du nbr de routeur
         self.EntryNbrRouteur.delete(0,END)
@@ -592,8 +1204,8 @@ class MainInterface(Frame):
         self.run_action()
   
         #chargement des connexions entre les routeurs (self.nbr_R initisalité dans run_action() donc utilisable)
-        for ligne in range (0,self.nbr_R):
-            for colonne in range (0,self.nbr_R):
+        for ligne in range (self.nbr_R):
+            for colonne in range (self.nbr_R):
                 if CHARGED_FROM_SAVE_connexions_routeurs[ligne][colonne] == 1:
                     self.liste_Cases_Connexions_Routeur[ligne][colonne]["background"]="orange"
         
@@ -618,7 +1230,18 @@ class MainInterface(Frame):
             for m_s in range(self.nbr_M_par_routeur[r]+self.nbr_S_par_routeur[r]):
                 self.Connexions_paquets[r][m_s].set(value=CHARGED_FROM_SAVE_connexions_paquets[r][m_s])
                 
-
+        #chargement des adresses basses & hautes des décodeurs ainsi que des tailles de des tables de décodage d'adresse pour chaque maître
+        for r in range(self.nbr_R):
+            for m in range(self.nbr_M_par_routeur[r]):
+                self.Taille_table_decodeur_adr_maitre[r][m] = CHARGED_FROM_SAVE_taille_table_decodage[r][m]
+                for r_esclave in range(self.nbr_R):
+                    for s in range(self.nbr_S_par_routeur[r_esclave]):
+                        self.interface_maitre_adresse_basse_decodage_esclave[r][m][r_esclave][s].set(value=CHARGED_FROM_SAVE_adresses_basses[r][m][r_esclave][s])
+                        self.interface_maitre_adresse_haute_decodage_esclave[r][m][r_esclave][s].set(value=CHARGED_FROM_SAVE_adresses_hautes[r][m][r_esclave][s])
+                        self.maitre_possede_decodage_adresse_esclave[r][m][r_esclave][s].set(CHARGED_FROM_SAVE_decodage_esclave_actif[r][m][r_esclave][s])
+                
+                
+                
     def checkbouton_moniteur_securite_action(self):
         if self.flag_checkbouton_moniteur_securite == 0:
             self.bouton_moniteur_securite.config(state = DISABLED)
@@ -860,7 +1483,7 @@ class MainInterface(Frame):
             
             #déclaration et placement des cases pour chaque esclaves du réseau dans la "VerticalScrolledFrame"
             i_grid_row = 0
-            for r in range(0,self.nbr_R):
+            for r in range(self.nbr_R):
                 for s in range(self.nbr_S_par_routeur[r]):
                     #ajout des widgets dans leurs listes respectives
                     Cases_Routeurs.append(Button(self.frame.interior, text=str(r), state=DISABLED, width=8))
@@ -885,7 +1508,7 @@ class MainInterface(Frame):
             
             #met à jour l'état de d'activation des champs de saisies en fonction de l'état actuel des checkbutt (donné par l'attribut "self.maitre_possede_decodage_adresse_esclave")
             i_grid_row = 0
-            for r in range(0,self.nbr_R):
+            for r in range(self.nbr_R):
                 for s in range(self.nbr_S_par_routeur[r]):
                     if self.maitre_possede_decodage_adresse_esclave[self.i_routeur_precedent_maitre_selectionne][self.i_precedent_maitre_selectionne][r][s].get() == 1:
                         Cases_Adresse_basse[i_grid_row].configure(state = NORMAL)
@@ -912,7 +1535,7 @@ class MainInterface(Frame):
                 #à partir "ligne_de_la_case_cliquee" on retrouve le rangs du routeur et de l'esclave auxquels la ligne est associée
                 i_grid_row = 0
                 flag_rang_trouve = 0
-                for r in range(0,self.nbr_R):
+                for r in range(self.nbr_R):
                     for s in range(self.nbr_S_par_routeur[r]):
                         if i_grid_row == ligne_de_la_case_cliquee:
                             flag_rang_trouve = 1
@@ -930,10 +1553,12 @@ class MainInterface(Frame):
                 #si le checkbutton cliqué est coché -> permettre de modifier les adresse de décodages pour l'esclave correspondant (state=NORMAL)
                 #sinon -> griser les champs de saisies d'adresse de décodage (state=DISABLED)
                 if self.maitre_possede_decodage_adresse_esclave[self.i_routeur_precedent_maitre_selectionne][self.i_precedent_maitre_selectionne][i_routeur_de_la_case][i_esclave_de_la_case].get() == 0:
+                    # self.maitre_possede_decodage_adresse_esclave[self.i_routeur_precedent_maitre_selectionne][self.i_precedent_maitre_selectionne][i_routeur_de_la_case][i_esclave_de_la_case].set(value=1)
                     self.Taille_table_decodeur_adr_maitre[self.i_routeur_precedent_maitre_selectionne][self.i_precedent_maitre_selectionne] += 1
                     Cases_Adresse_basse[ligne_de_la_case_cliquee].configure(state = NORMAL)
                     Cases_Adresse_haute[ligne_de_la_case_cliquee].configure(state = NORMAL)
                 else:
+                    # self.maitre_possede_decodage_adresse_esclave[self.i_routeur_precedent_maitre_selectionne][self.i_precedent_maitre_selectionne][i_routeur_de_la_case][i_esclave_de_la_case].set(value=0)
                     self.Taille_table_decodeur_adr_maitre[self.i_routeur_precedent_maitre_selectionne][self.i_precedent_maitre_selectionne] -= 1
                     Cases_Adresse_basse[ligne_de_la_case_cliquee].configure(state = DISABLED)
                     Cases_Adresse_haute[ligne_de_la_case_cliquee].configure(state = DISABLED)
@@ -978,7 +1603,7 @@ class MainInterface(Frame):
                
                 #destruction des cases précédentes
                 i_grid_row = 0
-                for r in range(0,self.nbr_R):
+                for r in range(self.nbr_R):
                     for s in range(self.nbr_S_par_routeur[r]):
                         Cases_Adresse_basse[i_grid_row].destroy()
                         Cases_Adresse_haute[i_grid_row].destroy()
@@ -987,7 +1612,7 @@ class MainInterface(Frame):
                         
                 #placement des nouvelles cases  
                 i_grid_row = 0
-                for r in range(0,self.nbr_R):
+                for r in range(self.nbr_R):
                     for s in range(self.nbr_S_par_routeur[r]):
                         Cases_Adresse_basse[i_grid_row] = Entry(self.frame.interior, justify = CENTER, width=20, textvariable = self.interface_maitre_adresse_basse_decodage_esclave[i_routeur_selectionne][i_maitre_selectionne][r][s])
                         Cases_Adresse_haute[i_grid_row] = Entry(self.frame.interior, justify = CENTER, width=20, textvariable = self.interface_maitre_adresse_haute_decodage_esclave[i_routeur_selectionne][i_maitre_selectionne][r][s])
@@ -1008,7 +1633,7 @@ class MainInterface(Frame):
                 
                 #met à jour l'état de d'activation des champs de saisies en fonction de l'état actuel des checkbutt (donné par l'attribut "self.maitre_possede_decodage_adresse_esclave")
                 i_grid_row = 0
-                for r in range(0,self.nbr_R):
+                for r in range(self.nbr_R):
                     for s in range(self.nbr_S_par_routeur[r]):
                         if self.maitre_possede_decodage_adresse_esclave[self.i_routeur_precedent_maitre_selectionne][self.i_precedent_maitre_selectionne][r][s].get() == 1:
                             Cases_Adresse_basse[i_grid_row].configure(state = NORMAL)
@@ -1361,12 +1986,12 @@ constant ROUTINGPORT15 	: regPORTADD:= "1111";
         fw= open(outputdir + "/noc_config_configurable_part_1.vhd", 'w')
         fw.write("%s" %ch)
         fw.write("\n")
-        for r in range (0,self.nbr_R):
+        for r in range (self.nbr_R):
             fw.write("constant R%d_MASTER_SLAVE_ROUTPORT_NB : record_master_routport_slave_nb_by_router :=(%d,%d,%d);\n" %(r, self.nbr_M_par_routeur[r], self.nbr_S_par_routeur[r], self.nbr_RP_par_routeur[r]))
         fw.write("\n -- => AGGREGATING ARRAY <= --\n")
         fw.write("--aggregate all the 'Ri_MASTER_SLAVE_ROUTPORT_NB' in this array\n")
         fw.write(" constant ALL_ROUTER_MASTER_SLAVE_ROUTPORT_NB : array_all_record_master_routport_slave_nb_by_router:=(\n")
-        for r in range (0,self.nbr_R-1):
+        for r in range (self.nbr_R-1):
             fw.write("      R%d_MASTER_SLAVE_ROUTPORT_NB,\n" %r)
             
         fw.write("      R%d_MASTER_SLAVE_ROUTPORT_NB\n" %(self.nbr_R-1))
@@ -1628,8 +2253,8 @@ constant from_ROUTER5_to_ROUTER4_destination_port : regPORTADD:= ROUTINGPORT2;
 '''
         fw= open(outputdir + "/noc_config_configurable_part_8.vhd", 'w')
         fw.write("%s" %ch)
-        for r in range(0,self.nbr_R):
-            for m in range (0, self.nbr_M_par_routeur[r]):
+        for r in range(self.nbr_R):
+            for m in range (self.nbr_M_par_routeur[r]):
                 fw.write("type router%d_master%d_record_address_decod_table is array (0 to ROUTER%d_MASTER%d_ADD_DECOD_TABLE_SIZE-1) of record_master_interface_address_decode_routing_table;\n" %(r,m,r,m))
                 if (m == self.nbr_M_par_routeur[r]-1):
                     fw.write("\n")
@@ -1766,7 +2391,7 @@ constant ADD_DECODER_PARAMETER_MX :  matrix_add_decoder_parameter :=(
                      
         fw.write("\n -- => AGGREGATING ARRAY <= --\n")
         fw.write("constant ALL_ROUTING_TABLES : array_all_routing_tables:=(\n")
-        for r in range (0,self.nbr_R-1):
+        for r in range (self.nbr_R-1):
             fw.write("      ROUTER%d_ROUTING_TABLE,\n" %r)
         fw.write("      ROUTER%d_ROUTING_TABLE\n" %(self.nbr_R-1))
         fw.write(" );\n\n")
