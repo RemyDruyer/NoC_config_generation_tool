@@ -2,9 +2,9 @@
 # -*- coding: iso-8859-1 -*-
 #--------------------------------------------------------------
 #-- FILE NAME  : SECANOC.py                                  --
-#-- AUTHORS   : Adel BENSAAD & Rémy DRUYER                   --
-#-- DATE     : 1er décembre 2016                             --
-#-- VERSION  : 1.4                                           --
+#-- AUTHORS   : Adel BENSAAD, Remy DRUYER                   --
+#-- DATE     : 3 décembre 2016                             --
+#-- VERSION  : 1.5                                           --
 #--------------------------------------------------------------
 
 from tkinter import *
@@ -193,6 +193,7 @@ class MainInterface(Frame):
         self.interface_maitre_adresse_basse_decodage_esclave = [[[[]]]]
         self.interface_maitre_adresse_haute_decodage_esclave = [[[[]]]]
         self.Taille_table_decodeur_adr_maitre =[[]]
+        self.Premier_routeur_du_chemin_entre_2_routeurs = [[]]
         
         # Espace Menu Barre
         # Creation de la menu barre
@@ -262,11 +263,9 @@ class MainInterface(Frame):
         self.bouton_generation_vhdl = Button(self, text="Generation \n du VHDL", command= self.on_buttonGenerate_clicked, state=DISABLED)
         self.bouton_generation_vhdl.grid(row= 4, column=5, sticky=NSEW)
         
-        self.bouton_chargement_save_exemple = Button(self, text="Chargement Save", command=self.Chargement_sauvegarde_exemple)
-        self.bouton_chargement_save_exemple.grid(row=2, column=3, padx=2, pady=2)
-        
-        # self.bouton_pathfinding = Button(self, text="Pathfinding", command=self.bouton_pathfinding)
-        # self.bouton_pathfinding.grid(row=2, column=4, padx=2, pady=2)
+        # self.bouton_chargement_save_exemple = Button(self, text="Chargement Save", command=self.Chargement_sauvegarde_exemple)
+        # self.bouton_chargement_save_exemple.grid(row=2, column=3, padx=2, pady=2)
+
             
     # Action du bouton "RUN/Generation de la matrice de connexions des routeurs"
     def run_action(self):
@@ -565,94 +564,17 @@ class MainInterface(Frame):
                     index_interface_paquet_du_routeur += 1
                     
                     
-        #5) ADD DECODER TABLE SIZE
+        #5) ADD DECODER TABLE SIZE, 6) SLAVE ADDRESS MAPPING (32-bits), 9) ADDRESS DECODER TABLES, 10) ADDRESS DECODER PARAMETER MATRIX
         self.Taille_table_decodeur_adr_maitre = [[0 for m in range(self.nbr_M_par_routeur[r])] for r in range(self.nbr_R)]
         self.Nombre_total_regles_decodeur_adresse = 0
-   
         self.maitre_possede_decodage_adresse_esclave = [[[[IntVar(value=0) for s in range(self.nbr_S_par_routeur[r_esclave])] for r_esclave in range(self.nbr_R)] for m in range(self.nbr_M_par_routeur[r])] for r in range(self.nbr_R)]
-
         self.interface_maitre_adresse_basse_decodage_esclave = [[[[StringVar(value="00000000") for s in range(self.nbr_S_par_routeur[r_esclave])] for r_esclave in range(self.nbr_R)] for m in range(self.nbr_M_par_routeur[r])] for r in range(self.nbr_R)]
         self.interface_maitre_adresse_haute_decodage_esclave = [[[[StringVar(value="00000000") for s in range(self.nbr_S_par_routeur[r_esclave])] for r_esclave in range(self.nbr_R)] for m in range(self.nbr_M_par_routeur[r])] for r in range(self.nbr_R)]
 
         #12) LOCAL CONNEXION   
         self.Matrices_connexions_locales = [[[0 for max_maitre in range(self.nbr_port_routeur_max+1)] for max_esclave in range(self.nbr_port_routeur_max+1)] for r in range(self.nbr_R)]
+       
         
-    # def bouton_pathfinding(self):
-
-        # self.Routeurs_connectes = [[] for r in range (self.nbr_R)]
-        
-        # graph = { }
-        
-        # for Routeur_ligne in range (self.nbr_R):
-            # for Routeur_colonne in range (self.nbr_R):
-                # # #on ne prend que la partie au dessus/à droite de la diagonale pour générer compter les connexions et éviter de créer des doubles
-                # if Routeur_colonne > Routeur_ligne:
-                    # # #si la case est orange et donc qu'une connexion existe
-                    # if self.liste_Cases_Connexions_Routeur[Routeur_ligne][Routeur_colonne]["background"]=="orange":
-                        # self.Routeurs_connectes[Routeur_ligne].append(Routeur_colonne) 
-                        # # self.Routeurs_connectes[Routeur_colonne].append(Routeur_ligne)
-
-                        
-        # for r in range (self.nbr_R):
-            # # if len(self.Routeurs_connectes[r]) == 0:
-                # # print("Routeur %d sans connexion" %r)
-            # # else:
-            # for r_connectes in range (len(self.Routeurs_connectes[r])):
-
-                # # print("Routeur %d  - Routeur co %d " %(r, self.Routeurs_connectes[r][r_connectes]))
-                # graph[str(r)].append(self.Routeurs_connectes[r][r_connectes])
-        
-        
-        # # graph = {'A': ['B', 'C'],
-            # # 'B': ['C', 'D'],
-            # # 'C': ['D'],
-            # # 'D': ['C'],
-            # # 'E': ['F'],
-            # # 'F': ['C']}
-            
-            # # for k in range (int(graph)):
-                # # for v in graph[k]:
-                    # # print (graph[k][v])
-                    
-            # # for k, v in graph.items():
-                # # print("Key = %s, value = %s , v = %s, kv = %s" %(k,graph[k], v, graph[k][v]))
-                # # print("\n")
-                
-                
-        # print("Contenu du graph :")
-        # print(graph.items())    
-                
-            # # for y in graph[x]:
-                # # print (y,':',graph[x][y])
-            
-            # # for keys,values in graph.items():
-                # # print("Keys %s" %keys)
-                # # print("values %s" %values)
-                # # print("\n")
-        # # graph = { }
-        
-        
-        # # graph.update({'A': ['B', 'C']})
-        # # graph.update({'B': ['C', 'D'],
-                # # 'C': ['D'],
-                # # 'D': ['C'],
-                # # 'E': ['F'],
-                # # 'F': ['C']})
-                
-                
-        # # def find_path(graph, start, end, path=[]):
-                # # path = path + [start]
-                # # if start == end:
-                    # # return path
-                # # if start not in graph:
-                    # # return None
-                # # for node in graph[start]:
-                    # # if node not in path:
-                        # # newpath = find_path(graph, node, end, path)
-                        # # if newpath: return newpath
-                # # return None            
-
-        # # print(find_path(graph, 'A', 'D'))
             
     def Chargement_sauvegarde_exemple(self):
         CHARGED_FROM_SAVE_nbr_routeur = 4
@@ -1291,7 +1213,16 @@ class MainInterface(Frame):
                 for i in range(len(CheckButt_Connexions_locales)):
                     CheckButt_Connexions_locales[i].deselect()
                 self.flag_tout_connecter_local = 0
-                
+        
+        def _Bouton_Ok_action():
+            #initialisation de l'activation du décodage d'adresse (pour chaque maitre) pour esclaves connectés en local au maitre 
+            for r in range (self.nbr_R):
+                for m in range (self.nbr_M_par_routeur[r]):
+                    for s in range (self.nbr_S_par_routeur[r]):
+                        if self.Connexions_locales[r][m][s].get() == 1:
+                            self.maitre_possede_decodage_adresse_esclave[r][m][r][s].set(value=1)
+            
+            Fenetre_ConnexionLocale.destroy()
                 
         def _on_buttonsave_clicked():
             print("Configuration des connexions locales")    
@@ -1340,7 +1271,7 @@ class MainInterface(Frame):
             CheckButt_Connexions_locales[i].grid(row=i, column=5)
             
         Button(Fenetre_ConnexionLocale, text="Tout connecter/deconnecter", width=22, command=_Bouton_ToutConnecter_Local_action).grid(row=1, column=0, pady=5)
-        Button(Fenetre_ConnexionLocale, text="Ok", width=22, command=lambda:Fenetre_ConnexionLocale.destroy()).grid(row=2, column=0, pady=5)
+        Button(Fenetre_ConnexionLocale, text="Ok", width=22, command=_Bouton_Ok_action).grid(row=2, column=0, pady=5)
 
         
     #methode pour gerer la fenêtre des connexions en paquets
@@ -1553,12 +1484,10 @@ class MainInterface(Frame):
                 #si le checkbutton cliqué est coché -> permettre de modifier les adresse de décodages pour l'esclave correspondant (state=NORMAL)
                 #sinon -> griser les champs de saisies d'adresse de décodage (state=DISABLED)
                 if self.maitre_possede_decodage_adresse_esclave[self.i_routeur_precedent_maitre_selectionne][self.i_precedent_maitre_selectionne][i_routeur_de_la_case][i_esclave_de_la_case].get() == 0:
-                    # self.maitre_possede_decodage_adresse_esclave[self.i_routeur_precedent_maitre_selectionne][self.i_precedent_maitre_selectionne][i_routeur_de_la_case][i_esclave_de_la_case].set(value=1)
                     self.Taille_table_decodeur_adr_maitre[self.i_routeur_precedent_maitre_selectionne][self.i_precedent_maitre_selectionne] += 1
                     Cases_Adresse_basse[ligne_de_la_case_cliquee].configure(state = NORMAL)
                     Cases_Adresse_haute[ligne_de_la_case_cliquee].configure(state = NORMAL)
                 else:
-                    # self.maitre_possede_decodage_adresse_esclave[self.i_routeur_precedent_maitre_selectionne][self.i_precedent_maitre_selectionne][i_routeur_de_la_case][i_esclave_de_la_case].set(value=0)
                     self.Taille_table_decodeur_adr_maitre[self.i_routeur_precedent_maitre_selectionne][self.i_precedent_maitre_selectionne] -= 1
                     Cases_Adresse_basse[ligne_de_la_case_cliquee].configure(state = DISABLED)
                     Cases_Adresse_haute[ligne_de_la_case_cliquee].configure(state = DISABLED)
@@ -2041,7 +1970,7 @@ constant ROUTINGPORT15 	: regPORTADD:= "1111";
         ch='''
 ------ 3) ROUTER CONNEXIONS (topology)------
 --define a record for each connexion between routers
---wgeb two routers are connected : only one ROUTER_CONNEXION constant must be defined
+--when two routers are connected : only one ROUTER_CONNEXION constant must be defined
 --4 values to define for each connexion:
 -- 1) SOURCE_ROUTER					
 -- 2) SOURCE_ROUTING_PORT				
@@ -2199,47 +2128,78 @@ constant ROUTINGPORT15 	: regPORTADD:= "1111";
 ---- 7) ROUTING TABLE CONTENTS ------
 --define the address port that must take a packet to reach the DESTINATION ROUTER FROM the current ROUTER
 --for each router a port address must be defined to reach all the other routers of the network
-constant from_ROUTER0_to_ROUTER1_destination_port : regPORTADD:= ROUTINGPORT9;
-constant from_ROUTER0_to_ROUTER2_destination_port : regPORTADD:= ROUTINGPORT9;
-constant from_ROUTER0_to_ROUTER3_destination_port : regPORTADD:= ROUTINGPORT10;
-constant from_ROUTER0_to_ROUTER4_destination_port : regPORTADD:= ROUTINGPORT9;
-constant from_ROUTER0_to_ROUTER5_destination_port : regPORTADD:= ROUTINGPORT10;
+'''
+        #Création d'une liste pour chaque routeur contenant tous les routeurs avec lesquels il est directement connecté 
+        Routeurs_directement_connectes = [[] for r in range (self.nbr_R)]
+        for Routeur_ligne in range (self.nbr_R):
+            for Routeur_colonne in range (self.nbr_R):
+                # #si la case est orange et donc qu'une connexion existe
+                if self.liste_Cases_Connexions_Routeur[Routeur_ligne][Routeur_colonne]["background"]=="orange":
+                    Routeurs_directement_connectes[Routeur_ligne].append(Routeur_colonne) 
+                    
+                    
+        #Création d'un graph de type dictionnaire
+        graph = dict()
+        #initialisation du graph dictionnaire -> à partir de "Routeurs_directement_connectes"
+        #format exemple : Routeur0 [1,2] ; Routeur1 [0,3], Routeur2 [0], Router3 [1]
+        for r in range (self.nbr_R):
+            graph["Routeur" + str(r)] = []
+            for r_connectes in range (len(Routeurs_directement_connectes[r])):
+                   graph["Routeur" + str(r)].append("Routeur" + str(Routeurs_directement_connectes[r][r_connectes]))
+                           
+        #fonction de recherche du plus court chemin
+        def find_shortest_path(graph, start, end, path=[]):
+            path = path + [start]
+            if start == end:
+                return path
+            if start not in graph:
+                return None
+            shortest = None
+            for node in graph[start]:
+                if node not in path:
+                    newpath = find_shortest_path(graph, node, end, path)
+                    if newpath:
+                        if not shortest or len(newpath) < len(shortest):
+                            shortest = newpath
+            return shortest
 
-constant from_ROUTER1_to_ROUTER0_destination_port : regPORTADD:= ROUTINGPORT2;
-constant from_ROUTER1_to_ROUTER2_destination_port : regPORTADD:= ROUTINGPORT3;
-constant from_ROUTER1_to_ROUTER3_destination_port : regPORTADD:= ROUTINGPORT4;
-constant from_ROUTER1_to_ROUTER4_destination_port : regPORTADD:= ROUTINGPORT5;
-constant from_ROUTER1_to_ROUTER5_destination_port : regPORTADD:= ROUTINGPORT5;
 
-constant from_ROUTER2_to_ROUTER0_destination_port : regPORTADD:= ROUTINGPORT5;
-constant from_ROUTER2_to_ROUTER1_destination_port : regPORTADD:= ROUTINGPORT5;
-constant from_ROUTER2_to_ROUTER3_destination_port : regPORTADD:= ROUTINGPORT5;
-constant from_ROUTER2_to_ROUTER4_destination_port : regPORTADD:= ROUTINGPORT5;
-constant from_ROUTER2_to_ROUTER5_destination_port : regPORTADD:= ROUTINGPORT5;
+        #Initialisation de l'objet "self.Premier_routeur_du_chemin_entre_2_routeurs" avec la valeur du premier routeur traversé dans le plus court chemin entre chaque paire de routeur du réseau
+        self.Premier_routeur_du_chemin_entre_2_routeurs = [["" for r in range (self.nbr_R)] for r in range (self.nbr_R)]
+        for Routeur_source in range (self.nbr_R):
+            for Routeur_destination in range (self.nbr_R):
+                if Routeur_source != Routeur_destination:
+                    if find_shortest_path(graph, 'Routeur' + str(Routeur_source), 'Routeur' + str(Routeur_destination)) != None:
+                        self.Premier_routeur_du_chemin_entre_2_routeurs[Routeur_source][Routeur_destination] = find_shortest_path(graph, 'Routeur' + str(Routeur_source), 'Routeur' + str(Routeur_destination))[1]
 
-constant from_ROUTER3_to_ROUTER0_destination_port : regPORTADD:= ROUTINGPORT3;
-constant from_ROUTER3_to_ROUTER1_destination_port : regPORTADD:= ROUTINGPORT4;
-constant from_ROUTER3_to_ROUTER2_destination_port : regPORTADD:= ROUTINGPORT4;
-constant from_ROUTER3_to_ROUTER4_destination_port : regPORTADD:= ROUTINGPORT5;
-constant from_ROUTER3_to_ROUTER5_destination_port : regPORTADD:= ROUTINGPORT5;
+       
 
-constant from_ROUTER4_to_ROUTER0_destination_port : regPORTADD:= ROUTINGPORT8;
-constant from_ROUTER4_to_ROUTER1_destination_port : regPORTADD:= ROUTINGPORT10;
-constant from_ROUTER4_to_ROUTER2_destination_port : regPORTADD:= ROUTINGPORT10;
-constant from_ROUTER4_to_ROUTER3_destination_port : regPORTADD:= ROUTINGPORT8;
-constant from_ROUTER4_to_ROUTER5_destination_port : regPORTADD:= ROUTINGPORT9;
+        #Comptage de toutes les interfaces maitre & esclaves de chaque routeur
+        for r in range (self.nbr_R):
+            self.nbr_interface_routeur[r] = self.nbr_M_par_routeur[r] + self.nbr_S_par_routeur[r]
+        
+        #pour chaque routeur
+        for ligne in range (self.nbr_R):
+            for colonne in range (self.nbr_R):
+                #si la case est orange et donc qu'une connexion existe
+                if self.liste_Cases_Connexions_Routeur[ligne][colonne]["background"]=="orange":
+                    for index_r in range (self.nbr_R):
+                        #pour chaque routeur destination dans "Premier_routeur_du_chemin_entre_2_routeurs" le remplacer le port de routage correspondant
+                        if self.Premier_routeur_du_chemin_entre_2_routeurs[ligne][index_r] == "Routeur" + str(colonne):
+                            self.Premier_routeur_du_chemin_entre_2_routeurs[ligne][index_r] = "ROUTINGPORT" + str(self.nbr_interface_routeur[ligne])
+                    self.nbr_interface_routeur[ligne] += 1
 
-constant from_ROUTER5_to_ROUTER0_destination_port : regPORTADD:= ROUTINGPORT2;
-constant from_ROUTER5_to_ROUTER1_destination_port : regPORTADD:= ROUTINGPORT2;
-constant from_ROUTER5_to_ROUTER2_destination_port : regPORTADD:= ROUTINGPORT2;
-constant from_ROUTER5_to_ROUTER3_destination_port : regPORTADD:= ROUTINGPORT2;
-constant from_ROUTER5_to_ROUTER4_destination_port : regPORTADD:= ROUTINGPORT2;
-
-        '''
+        #écriture dans le fichier VHDL
         fw= open(outputdir + "/noc_config_configurable_part_7.vhd", 'w')
         fw.write("%s" %ch)
+        for ligne in range (self.nbr_R):
+            for colonne in range (self.nbr_R):
+                if ligne != colonne:
+                    fw.write("constant from_ROUTER%d_to_ROUTER%d_destination port : regPORTADD:= %s;\n" %(ligne, colonne, self.Premier_routeur_du_chemin_entre_2_routeurs[ligne][colonne]))
+            fw.write("\n")
         fw.close()
-        
+                
+                
  # Génération VHDL : ------ 8) ADDRESS DECODER TYPES ------
     def generate_configurable_part_8(self):
         outputdir = "./Noc0__"
@@ -2261,7 +2221,7 @@ constant from_ROUTER5_to_ROUTER4_destination_port : regPORTADD:= ROUTINGPORT2;
         fw.write("type unconstrained_array_record_address_decod_table is array (natural range <>) of record_master_interface_address_decode_routing_table;\n")
         fw.close()
         
-        
+
 		
  # Génération VHDL : ------ 9) ADDRESS DECODER TABLES ------
     def generate_configurable_part_9(self):
@@ -2594,8 +2554,8 @@ end noc_address_pack;
                     for line in old_file:   
                         new_file.write(line)
 				
-            os.remove(outputdir + "/noc_config_configurable_part_0.vhd")
             os.remove(outputdir + "/noc_config_fixed_part.vhd")
+            os.remove(outputdir + "/noc_config_configurable_part_0.vhd")
             os.remove(outputdir + "/noc_config_configurable_part_1.vhd")
             os.remove(outputdir + "/noc_config_configurable_part_2.vhd")
             os.remove(outputdir + "/noc_config_configurable_part_3.vhd")
