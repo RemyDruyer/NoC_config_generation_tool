@@ -1200,7 +1200,6 @@ class MainInterface(Frame):
                         self.maitre_possede_decodage_adresse_esclave[r][m][r_esclave][s].set(CHARGED_FROM_SAVE_decodage_esclave_actif[r][m][r_esclave][s])
                 
                 
-                
     def checkbouton_moniteur_securite_action(self):
         if self.flag_checkbouton_moniteur_securite == 0:
             self.bouton_moniteur_securite.config(state = DISABLED)
@@ -1234,7 +1233,6 @@ class MainInterface(Frame):
         else:
             self.Bouton_Connexions_Paquets.config(state = NORMAL)
 
-           
 
     #Méthode pour gérer le paramètrage des connexions locales
     def FenetreSecondaire_ConnexionLocale(self):
@@ -1405,7 +1403,27 @@ class MainInterface(Frame):
                
     #Méthode pour gerer la fenêtre secondaire de configuration des decodeurs d'adresses
     def FenetreSecondaire_DecodeurAdresse(self):
+        
+        def _reinit_decodeur_adresse():
+            if askyesno("Demande de confirmation", "Voulez-vous totalement reinitialiser la configuration des decodeurs d'adresse ?"):
+   
+                for r in range (self.nbr_R):
+                    for m in range (self.nbr_M_par_routeur[r]):
+                        for r_esclave in range (self.nbr_R):
+                            for s in range (self.nbr_S_par_routeur[r_esclave]):
+                                self.maitre_possede_decodage_adresse_esclave[r][m][r_esclave][s].set(value=0)
+                                self.interface_maitre_adresse_basse_decodage_esclave[r][m][r_esclave][s].set(value="")
+                                self.interface_maitre_adresse_haute_decodage_esclave[r][m][r_esclave][s].set(value="")
                                 
+                for r in range (self.nbr_R):
+                    for m in range (self.nbr_M_par_routeur[r]):
+                        self.Taille_table_decodeur_adr_maitre[r][m] = 0
+
+                self.Nombre_total_regles_decodeur_adresse = 0
+ 
+
+                   
+                   
         #recherche du rang du n° du routeur contenant premier maitre dans la configuration (le n° du premier maitre est forcement 0)
         i_routeur_premier_maitre = 0
         flag_presence_maitre = 0
@@ -1437,6 +1455,9 @@ class MainInterface(Frame):
             #déclaration de l'étiquette "Label_taille_table_adr_decod_maitre" et placement dans "Taille_Table_Label_Frame"
             self.Label_Total_taille_table_adr_decod_maitre = Label(Fenetre_DecodeurAdresse, justify = CENTER, underline =1, textvariable = self.StringVar_Label_Total_Taille_Table_Decodeur_Adresse_Maitre).grid(row=1,column=1, sticky = N+S+E+W)            
 
+            Bouton_reinitialisation_decod_adr = Button(Fenetre_DecodeurAdresse, text = "Reinit.\ndecodeur adresse", command = _reinit_decodeur_adresse)
+            Bouton_reinitialisation_decod_adr.grid(row=0, column=0, sticky = N+S)
+            
             
             #déclaration d'un encadré avec une barre de défilement
             self.frame = VerticalScrolledFrame(Fenetre_DecodeurAdresse, Largeur_Frame=350, Hauteur_Frame=500)
