@@ -178,7 +178,9 @@ class MainInterface(Frame):
         self.nbr_RP_par_routeur = []
         self.somme_tot_nbr_M = 0
         self.somme_tot_nbr_S = 0
+        self.somme_tot_connexions_R = 0
         self.somme_tot_nbr_RP = 0
+        self.security_monitor_activation = IntVar(value=0)
         self.rang_nbr_M = []
         self.rang_nbr_S = []
         self.nbr_interface_routeur = []
@@ -244,7 +246,7 @@ class MainInterface(Frame):
         self.bouton_save_param.grid(row=0, column=0, padx=2, pady=2)
         
         # Case a cocher "Activation des moniteurs de securite"
-        self.checkbouton_moniteur_securite = Checkbutton(self, text="Activation des moniteurs \n de securite", command= self.checkbouton_moniteur_securite_action, state=DISABLED)
+        self.checkbouton_moniteur_securite = Checkbutton(self, text="Activation des moniteurs \n de securite", command= self.checkbouton_moniteur_securite_action, variable= self.security_monitor_activation, state=DISABLED)
         self.checkbouton_moniteur_securite.grid(row=3, column=0, sticky=NSEW)
         # Bouton - appel fenêtre secondaire "Configuration des moniteurs de securite"
         self.bouton_moniteur_securite = Button(self, text="Configuration des moniteurs \n de securite", command=self.quit, state=DISABLED)
@@ -540,6 +542,7 @@ class MainInterface(Frame):
                             self.nbr_RP_par_routeur[ligne] += 1
                             self.nbr_RP_par_routeur[colonne] += 1
                             self.somme_tot_nbr_RP += 2
+                            self.somme_tot_connexions_R +=1
                             
             #Calcul du rang du premier maitre et premier esclave pour chaque routeur dans le vecteur contenant toutes les signaux d'interfaces maitre et esclave (contraintes conception VHDL)
             self.rang_nbr_M = [0 for i in range(self.nbr_R)]
@@ -1695,8 +1698,10 @@ package noc_config is
         fw.write("%s" %ch)
         fw.write('constant TOTAL_MASTER_NB          : integer := %d ;\n' %self.somme_tot_nbr_M)
         fw.write('constant TOTAL_SLAVE_NB           : integer := %d ;\n' %self.somme_tot_nbr_S)
+        fw.write('constant TOTAL_ROUTER_CONNEXIONS  : integer := %d ;\n' %self.somme_tot_connexions_R)
         fw.write('constant TOTAL_ROUTING_PORT_NB    : integer := %d ;\n' %self.somme_tot_nbr_RP)
         fw.write('constant TOTAL_ROUTER_NB          : integer := %d ;\n' %self.nbr_R)
+        fw.write('constant SECURITY_MONITOR_ACTIVATION : integer := %d ;\n' %self.security_monitor_activation.get())
         fw.close()
 
 
@@ -2174,7 +2179,7 @@ constant ROUTINGPORT15 	: regPORTADD:= "1111";
                         
                         
         fw.write(" --define the total number of address decoding rules (for all the masters)\n")
-        fw.write("constant TOTAL_ADDRESS_DECOD_SIZE 				: integer := %d\n\n" % self.Nombre_total_regles_decodeur_adresse)
+        fw.write("constant TOTAL_ADDRESS_DECOD_SIZE 				: integer := %d;\n\n" % self.Nombre_total_regles_decodeur_adresse)
         
         fw.close()
 
@@ -2281,7 +2286,7 @@ constant ROUTINGPORT15 	: regPORTADD:= "1111";
         for ligne in range (self.nbr_R):
             for colonne in range (self.nbr_R):
                 if ligne != colonne:
-                    fw.write("constant from_ROUTER%d_to_ROUTER%d_destination port : regPORTADD:= %s;\n" %(ligne, colonne, self.Premier_routeur_du_chemin_entre_2_routeurs[ligne][colonne]))
+                    fw.write("constant from_ROUTER%d_to_ROUTER%d_destination_port : regPORTADD:= %s;\n" %(ligne, colonne, self.Premier_routeur_du_chemin_entre_2_routeurs[ligne][colonne]))
             fw.write("\n")
         fw.close()
                 
@@ -2397,9 +2402,10 @@ constant ADD_DECODER_PARAMETER_MX :  matrix_add_decoder_parameter :=(
             for m in range (self.nbr_M_par_routeur[r]):
                 fw.write(" (%d,%d)" %(taille_table_decodeur_adresse_maitre_cumulees,self.Taille_table_decodeur_adr_maitre[r][m]))
                 taille_table_decodeur_adresse_maitre_cumulees += self.Taille_table_decodeur_adr_maitre[r][m]
-                if m != (self.nbr_M_par_routeur[r]-1):
+                if m != (15-self.nbr_M_par_routeur[r]-1):
                     fw.write(",")
-            
+
+                
             #si il n'y pas 15 interfaces maitre au routeur, remplir le reste de (0,0),
             for o in range (15-self.nbr_M_par_routeur[r]):
                 fw.write(" (0,0)")
@@ -2542,10 +2548,11 @@ constant ADD_DECODER_PARAMETER_MX :  matrix_add_decoder_parameter :=(
             os.makedirs(outputdir)
 
         ch='''
+    --- FUNCTION DECLARATION ---
+    function or_reduce(V: std_logic_vector) return std_logic;
+end noc_config;
 
-end noc_address_pack;
-
-package body noc_address_pack is
+package body noc_config is
 
     ---- FUNCTION DEFINTION ----
     --function that apply a logic OR to all bits of a std_logic_vector
@@ -2564,7 +2571,7 @@ package body noc_address_pack is
         return result;
     end or_reduce;
 
-end noc_address_pack;
+end noc_config;
         
         '''
         fw= open(outputdir + "/noc_config_end_of_file_with_function.vhd", 'w')
