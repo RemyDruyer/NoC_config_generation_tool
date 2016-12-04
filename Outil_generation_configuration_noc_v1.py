@@ -1,5 +1,5 @@
+# -*- coding: utf-8 -*-
 #!/usr/bin/python
-# -*- coding: iso-8859-1 -*-
 #--------------------------------------------------------------
 #-- FILE NAME  : SECANOC.py                                  --
 #-- AUTHORS   : Adel BENSAAD, Remy DRUYER                   --
@@ -180,14 +180,15 @@ class MainInterface(Frame):
         self.somme_tot_nbr_S = 0
         self.somme_tot_connexions_R = 0
         self.somme_tot_nbr_RP = 0
+        self.master_address_decoder_range = StringVar(value=32)
         self.security_monitor_activation = IntVar(value=0)
         self.rang_nbr_M = []
         self.rang_nbr_S = []
         self.nbr_interface_routeur = []
         self.type_interface_par_routeur = []
         self.type_interface_par_routeur.append([])
-        self.Connexions_paquet_maitre   = []
-        self.Connexions_paquet_esclave  = []
+        self.Connexions_locales = [[]]
+        self.Connexions_paquets = [[]]
         self.IntVar_checkBouton_Connexions_Locales = IntVar()
         self.IntVar_checkBouton_Connexions_Paquets = IntVar()
         
@@ -201,6 +202,8 @@ class MainInterface(Frame):
         self.precedent_nbr_S_par_routeur = []
         self.Taille_decodeur_adr_maitre_est_de_un =[[]]
         self.offset_taille_total_decod_maitre = 0
+        
+        self.Rapport_d_erreur = ""
         
         # Espace Menu Barre
         # Creation de la menu barre
@@ -234,22 +237,20 @@ class MainInterface(Frame):
         # Bouton RUN
         self.bouton_run = Button(self, text=" Generation de la matrice de connexions des routeurs ", command=self.run_action)
         self.bouton_run.grid(row=0, column=3, sticky = W)
-        
         # Bouton d'information
-        self.bouton_info = Button(self, text=" ? ", command=self.bouton_info_action, width=2)
+        self.bouton_info = Button(self, text=" ? ", command=self.bouton_info_action, width=2, bg = "orange")
         self.bouton_info.grid(row=0, column=5, sticky = E)
-  
+        # Encadré du bouton de sauvegarde des paramètres généraux du réseau
         self.Label_Frame_save_param = LabelFrame(self, text="Etat : sauvegarde non a jour.")
         self.Label_Frame_save_param.grid(row=2, column=2, pady=10)
         # Bouton sauvegarde des paramètres de connexions et d'interfaces
         self.bouton_save_param = Button(self.Label_Frame_save_param, text="Sauvegarde des parametres\ngeneraux des routeurs", command=self.Bouton_sauvegarde_parametre_generaux_routeur, state=DISABLED)
-        self.bouton_save_param.grid(row=0, column=0, padx=2, pady=2)
-        
+        self.bouton_save_param.grid(row=0, column=0)
         # Case a cocher "Activation des moniteurs de securite"
         self.checkbouton_moniteur_securite = Checkbutton(self, text="Activation des moniteurs \n de securite", command= self.checkbouton_moniteur_securite_action, variable= self.security_monitor_activation, state=DISABLED)
         self.checkbouton_moniteur_securite.grid(row=3, column=0, sticky=NSEW)
         # Bouton - appel fenêtre secondaire "Configuration des moniteurs de securite"
-        self.bouton_moniteur_securite = Button(self, text="Configuration des moniteurs \n de securite", command=self.quit, state=DISABLED)
+        self.bouton_moniteur_securite = Button(self, text="Configuration des moniteurs \n de securite", state=DISABLED)
         self.bouton_moniteur_securite.grid(row=4, column=0, sticky=NSEW)
         # # Case a cocher "Interfaces toutes connectees en local"
         self.checkBouton_Connexions_Locales = Checkbutton(self, text="Interfaces toutes \n connectees en local", command= self.checkBouton_Connexions_Locales_action, variable = self.IntVar_checkBouton_Connexions_Locales, state=DISABLED)
@@ -497,110 +498,153 @@ class MainInterface(Frame):
             _generation_grille_routeur(self)
             self.bouton_save_param.config(state=NORMAL)
                             
-                        
+
+               
     def bouton_info_action(self):
-        showinfo("Fonctionnement de l'outil", "Cet outil permet de :\n- Selectionner le nombre de routeurs que vous souhaiter dans le reseau et lancer la generation de la grille d'initialisation des connexions entre les routeurs.\n- Choisir le nombre d'interface maitre et esclave que possede chaque routeur (attention pour chaque routeur : le nombre d'interface maitre, esclave et le nombre de connexions a d'autre routeurs ne doit pas depasser 16, car chaque routeur a 16 ports maximum).\n ATTENTION : modifier le nombre de routeurs et relancer une generation de la grille reinitialise toute la configuration.\n- Etablir des connexions en paquet entre les routeurs en cliquant sur la case correspondante (la case reciproque est automatiquement cochee).\n- Configurer les connexions locales des interfaces (si la case entre une interface maitre et une interface esclave est cochee , ces deux interfaces pourront communiquer entre elles au niveau local).\n- Configurer les connexions en paquets (les communications paquets permettent aux interfaces n'appartenant pas au meme routeur de communiquer entre elles).\n- Configurer le decodage d'adresse de chaque interface esclave pour chaque interface maitre (chaque maitre voit chaque esclave a une certaine adresse de 32 bits pouvant etre specifique).\n- Configurer la taille des tables de decodage d'adresse de chaque maitre : les maitres n'ont besoins de posseder seulement les adresses des esclaves avec lesquels ils souhaitent communiquer.\n- Une fois tous ces parametres enregistres -> lancer la generation du fichier de configuration du NoC : noc_config.vhd.\n\nInfo :\n- Les routeurs sont numerotes de 0 a i (nb de routeurs du reseau compris entre 3 et 64).\n- Pour chaque routeur les interfaces sont numerotees de 0 a j : d'abord les interfaces maitre, puis suivent les interfaces esclaves et en dernier les interfaces entre les routeurs (nb d'interface par routeur est compris entre 1 et 16).\n Attention : il faut s'assurer que tous les routeurs appartiennent au meme reseau via les connexions entre les routeurs.")
-                        
-                        
+        showinfo("Fonctionnement de l'outil", "Cet outil permet de générer les fichiers de configuration noc_config.vhd et noc_security.conf.vhd ainsi qu’un rapport d’erreur sous format texte : \n- Sélectionner le nombre de routeurs dans le réseau et le nombre d’interface maitre et esclave pour chaque routeur. \n- Dans la matrice des routeurs, chaque ligne et chaque colonne correspond à un routeur. Pour établir une connexion entre deux routeurs il suffit de cliquer sur la case à l’intersection de la ligne et de la colonne correspondant aux deux routeurs à connecter (la case réciproque est automatiquement cochée). \n- Les connexions locales définissent les interfaces maitres et esclaves pouvant communiquer ensemble au sein d’un même routeur. \n- Les connexions en paquets permettent aux interfaces maitres et esclaves n’appartenant pas au même routeur de communiquer entre elles.\n- Pour chaque maitre le décodage d adresse définit avec quelle interface esclave il peut communiquer dans le réseau (en mode paquet ou local) et à quelle adresse il peut l’atteindre. \n- Une fois tous ces paramètres enregistres -> lancer la génération des fichiers de configuration du NoC : noc_config.vhd et noc_security_conf.vhd. \n ATTENTION : modifier le nombre de routeurs ou les paramètres généraux et relancer une génération risque d’entrainer une pertes des configurations déjà établies. \n\nAutres :\n- Numérotation des routeurs : de 0 a i. \n- Nombre minimal de routeur = 3 ; nombre maximale de routeur = 64. \n- Nombre maximum d’interfaces maitre et esclave confondues pour chaque routeur = 15.\n- Nombre maximum interface maitre, interface esclave et connexion a d’autre routeur pour chaque routeur = 16.\n- Ordre de numérotation des interfaces : de 0 à j : d’abord les interfaces maitre, puis interfaces esclaves et enfin les interfaces entre les routeurs (port de routage).")
+    
+    
+    def checkbouton_moniteur_securite_action(self):
+        if self.security_monitor_activation.get() == 1:
+            self.bouton_moniteur_securite.config(state=NORMAL)
+        else:
+            self.bouton_moniteur_securite.config(state=DISABLED)
+               
+    def controle_parametre_generaux(self):
+        flag_erreur_detectee = 0
+        
+        
+        #Comptage et initialisation du nombre d'interface Maitre et Esclave par routeur
+        self.nbr_M_par_routeur = [0 for i in range(self.nbr_R)]
+        self.nbr_S_par_routeur = [0 for i in range(self.nbr_R)] 
+
+        for r in range(self.nbr_R):
+            self.nbr_M_par_routeur[r] = int(self.liste_EntryNbrMaitre[r].get())
+            self.nbr_S_par_routeur[r] = int(self.liste_EntryNbrEsclave[r].get())
+
+        #Somme totale d'interface maître et esclave de tous les routeurs
+        for r in range(self.nbr_R):
+            self.somme_tot_nbr_M += self.nbr_M_par_routeur[r]
+            self.somme_tot_nbr_S += self.nbr_S_par_routeur[r]
+            
+        #Nombre de port de routage par routeur et nombre total de port de routage(une connexion entre deux routeurs = 2 ports de routage -> 1 par routeur)
+        #pour chaque routeur
+        self.nbr_RP_par_routeur = [0 for i in range(self.nbr_R)]
+        for ligne in range (self.nbr_R):
+            for colonne in range (self.nbr_R):
+                #on ne prend que la partie au dessus/à droite de la diagonale pour générer compter les connexions et éviter de créer des doubles
+                if colonne > ligne:
+                    #si la case est orange et donc qu'une connexion existe
+                    if self.liste_Cases_Connexions_Routeur[ligne][colonne]["background"]=="orange":
+                        #incrémentation de l'index du nombre de port de routage pour les deux routeurs de la connexion
+                        self.nbr_RP_par_routeur[ligne] += 1
+                        self.nbr_RP_par_routeur[colonne] += 1
+                        self.somme_tot_nbr_RP += 2
+                        self.somme_tot_connexions_R +=1
+        
+        
+        #Controles
+        for r in range (self.nbr_R):
+            if self.nbr_M_par_routeur[r] + self.nbr_S_par_routeur[r]  > 15:
+                showerror("Impossible de poursuivre", "Au moins une erreur detectee : Nombre cumulé d'interface maitre et esclave du Routeur %d est supérieur au maximum autorisé de 15" %r)
+                flag_erreur_detectee = 1
+                
+            if self.nbr_M_par_routeur[r] + self.nbr_S_par_routeur[r] + self.nbr_RP_par_routeur[r] > 16:
+                showerror("Impossible de poursuivre", "Au moins une erreur detectee : Nombre cumulé d'interface maitre, esclave et connexion vers d'autre routeur du Routeur %d est supérieur au maximum autorisé de 16" %r)
+                flag_erreur_detectee = 1
+            
+            if flag_erreur_detectee:
+                break
+                
+        if flag_erreur_detectee:
+            return "erreur"
+        else:
+            return "Ok"
+    
     def Bouton_sauvegarde_parametre_generaux_routeur(self):
         if askyesno("Attention", "Vous etes sur le point de sauvegarder les parametres generaux du reseau pour pouvoir acceder aux configurations avancees.\n\nSi vous effectuez des modifications plus tard, vous devrez effectuer a nouveau une sauvegarde pour que les changements soient pris en compte dans les configurations avances et dans ce cas vous risquez de perdre des donnees deja renseignees dans vos configurations avancees.\n\nVoulez-vous continuer aux configurations avancees ?"):
-            #mise à jour du label frame du bouton de sauvegarde des paramètres généraux
-            self.Label_Frame_save_param.config(text="Etat : sauvegarde Ok")
-            #permettre l'accès aux boutons de configurations avancees
-            self.checkBouton_Connexions_Locales.config(state=NORMAL)
-            self.Bouton_Connexions_Locales.config(state=NORMAL)
-            self.checkBouton_Connexions_Paquets.config(state=NORMAL)
-            self.Bouton_Connexions_Paquets.config(state=NORMAL)
-            self.bouton_decodeurs_adresses.config(state=NORMAL)
-            self.bouton_generation_vhdl.config(state=NORMAL)
-            
-            # if self.flag_sauvegarde_parametre_generaux == 0:
-                # self.flag_sauvegarde_parametre_generaux = 1
-            #Nombre d'interface Maitre et Esclave par routeur
-            self.nbr_M_par_routeur = [0 for i in range(self.nbr_R)]
-            self.nbr_S_par_routeur = [0 for i in range(self.nbr_R)] 
+            if self.controle_parametre_generaux() == "Ok":
+                
+                #mise à jour du label frame du bouton de sauvegarde des paramètres généraux
+                self.Label_Frame_save_param.config(text="Etat : sauvegarde Ok")
+                #permettre l'accès aux boutons de configurations avancees
+                self.checkBouton_Connexions_Locales.config(state=NORMAL)
+                self.Bouton_Connexions_Locales.config(state=NORMAL)
+                self.checkBouton_Connexions_Paquets.config(state=NORMAL)
+                self.Bouton_Connexions_Paquets.config(state=NORMAL)
+                self.bouton_decodeurs_adresses.config(state=NORMAL)
+                self.bouton_generation_vhdl.config(state=NORMAL)
+                self.checkbouton_moniteur_securite.config(state=NORMAL)
+                
 
-            for r in range(self.nbr_R):
-                self.nbr_M_par_routeur[r] = int(self.liste_EntryNbrMaitre[r].get())
-                self.nbr_S_par_routeur[r] = int(self.liste_EntryNbrEsclave[r].get())
+                                
+                #Calcul du rang du premier maitre et premier esclave pour chaque routeur dans le vecteur contenant toutes les signaux d'interfaces maitre et esclave (contraintes conception VHDL)
+                self.rang_nbr_M = [0 for i in range(self.nbr_R)]
+                self.rang_nbr_S = [0 for i in range(self.nbr_R)]
+                #variables temporaires
+                var_somme_rang_nbr_M = 0
+                var_somme_rang_nbr_S = 0
+                for r in range(1, self.nbr_R):
+                    self.rang_nbr_M[r] = self.nbr_M_par_routeur[r-1] + var_somme_rang_nbr_M
+                    var_somme_rang_nbr_M += self.nbr_M_par_routeur[r-1]
+                    self.rang_nbr_S[r] = self.nbr_S_par_routeur[r-1] + var_somme_rang_nbr_S
+                    var_somme_rang_nbr_S += self.nbr_S_par_routeur[r-1]
+                       
+                       
+                #interface paquet des ports de routages
+                self.Interfaces_paquets_routeur = [[0 for port_routeur in range(self.nbr_port_routeur_max)] for r in range(self.nbr_R)]
                 
-            #Somme totale d'interface maître et esclave de tous les routeurs
-            for r in range(self.nbr_R):
-                self.somme_tot_nbr_M += self.nbr_M_par_routeur[r]
-                self.somme_tot_nbr_S += self.nbr_S_par_routeur[r]
+                #3) ROUTEUR CONNEXIONS
+                self.nbr_interface_routeur = [0 for i in range(self.nbr_R)]
                 
-            #Nombre de port de routage par routeur et nombre total de port de routage(une connexion entre deux routeurs = 2 ports de routage -> 1 par routeur)
-            #pour chaque routeur
-            self.nbr_RP_par_routeur = [0 for i in range(self.nbr_R)]
-            for ligne in range (self.nbr_R):
-                for colonne in range (self.nbr_R):
-                    #on ne prend que la partie au dessus/à droite de la diagonale pour générer compter les connexions et éviter de créer des doubles
-                    if colonne > ligne:
-                        #si la case est orange et donc qu'une connexion existe
-                        if self.liste_Cases_Connexions_Routeur[ligne][colonne]["background"]=="orange":
-                            #incrémentation de l'index du nombre de port de routage pour les deux routeurs de la connexion
-                            self.nbr_RP_par_routeur[ligne] += 1
-                            self.nbr_RP_par_routeur[colonne] += 1
-                            self.somme_tot_nbr_RP += 2
-                            self.somme_tot_connexions_R +=1
-                            
-            #Calcul du rang du premier maitre et premier esclave pour chaque routeur dans le vecteur contenant toutes les signaux d'interfaces maitre et esclave (contraintes conception VHDL)
-            self.rang_nbr_M = [0 for i in range(self.nbr_R)]
-            self.rang_nbr_S = [0 for i in range(self.nbr_R)]
-            #variables temporaires
-            var_somme_rang_nbr_M = 0
-            var_somme_rang_nbr_S = 0
-            for r in range(1, self.nbr_R):
-                self.rang_nbr_M[r] = self.nbr_M_par_routeur[r-1] + var_somme_rang_nbr_M
-                var_somme_rang_nbr_M += self.nbr_M_par_routeur[r-1]
-                self.rang_nbr_S[r] = self.nbr_S_par_routeur[r-1] + var_somme_rang_nbr_S
-                var_somme_rang_nbr_S += self.nbr_S_par_routeur[r-1]
-                   
-                   
-            #interface paquet des ports de routages
-            self.Interfaces_paquets_routeur = [[0 for port_routeur in range(self.nbr_port_routeur_max)] for r in range(self.nbr_R)]
-            
-            #3) ROUTEUR CONNEXIONS
-            self.nbr_interface_routeur = [0 for i in range(self.nbr_R)]
-            
-            #4) PACKET INTERFACE
-            #identifie le type d'interface paquet de chaque port de chaque routeur
-            #par défaut toutes les interfaces maîtres, esclaves et port de routage possèdent une interface paquet
-            #1 = maitre ; 2 = esclave ; 3 = port de routage ; 0 = aucune interface paquet
-            for r in range(self.nbr_R):
-                index_interface_paquet_du_routeur = 0
-                #rajoute une interface paquet maitre = '1' pour chaque interface maitre du routeur "self.nbr_M_par_routeur[r]"
-                for m in range(self.nbr_M_par_routeur[r]):
-                    self.Interfaces_paquets_routeur[r][index_interface_paquet_du_routeur] = 1
-                    index_interface_paquet_du_routeur += 1
-                
-                #rajoute une interface paquet esclave = '2' pour chaque interface esclave du routeur "self.nbr_S_par_routeur[r]"
-                for s in range(self.nbr_S_par_routeur[r]):
-                    self.Interfaces_paquets_routeur[r][index_interface_paquet_du_routeur] = 2
-                    index_interface_paquet_du_routeur += 1
-                    
-                #rajoute une interface paquet port de routage = '3' pour chaque connexion à un autre routeur (colonne de chaque autre autre routeur croisant celle du routeur r == "orange" -> connexion)
-                for colonne in range(self.nbr_R):
-                    if self.liste_Cases_Connexions_Routeur[r][colonne]["background"]=="orange":
-                        self.Interfaces_paquets_routeur[r][index_interface_paquet_du_routeur] = 3
+                #4) PACKET INTERFACE
+                #identifie le type d'interface paquet de chaque port de chaque routeur
+                #par défaut toutes les interfaces maîtres, esclaves et port de routage possèdent une interface paquet
+                #1 = maitre ; 2 = esclave ; 3 = port de routage ; 0 = aucune interface paquet
+                for r in range(self.nbr_R):
+                    index_interface_paquet_du_routeur = 0
+                    #rajoute une interface paquet maitre = '1' pour chaque interface maitre du routeur "self.nbr_M_par_routeur[r]"
+                    for m in range(self.nbr_M_par_routeur[r]):
+                        self.Interfaces_paquets_routeur[r][index_interface_paquet_du_routeur] = 1
                         index_interface_paquet_du_routeur += 1
-                   
-
-            #Connexions paquets & locales
-            self.Connexions_locales = [[[IntVar(value=1) for s in range (self.nbr_S_par_routeur[r])] for m in range (self.nbr_M_par_routeur[r])] for r in range (self.nbr_R)]
-            self.Connexions_paquets = [[IntVar(value=1) for m_s in range(self.nbr_M_par_routeur[r]+self.nbr_S_par_routeur[r])] for r in range(self.nbr_R)]
+                    
+                    #rajoute une interface paquet esclave = '2' pour chaque interface esclave du routeur "self.nbr_S_par_routeur[r]"
+                    for s in range(self.nbr_S_par_routeur[r]):
+                        self.Interfaces_paquets_routeur[r][index_interface_paquet_du_routeur] = 2
+                        index_interface_paquet_du_routeur += 1
                         
-                        
-            #5) ADD DECODER TABLE SIZE, 6) SLAVE ADDRESS MAPPING (32-bits), 9) ADDRESS DECODER TABLES, 10) ADDRESS DECODER PARAMETER MATRIX
-            self.Taille_table_decodeur_adr_maitre = [[0 for m in range(self.nbr_M_par_routeur[r])] for r in range(self.nbr_R)]
-            self.Nombre_total_regles_decodeur_adresse = 0
-            self.maitre_possede_decodage_adresse_esclave = [[[[IntVar(value=0) for s in range(self.nbr_S_par_routeur[r_esclave])] for r_esclave in range(self.nbr_R)] for m in range(self.nbr_M_par_routeur[r])] for r in range(self.nbr_R)]
-            self.interface_maitre_adresse_basse_decodage_esclave = [[[[StringVar(value="00000000") for s in range(self.nbr_S_par_routeur[r_esclave])] for r_esclave in range(self.nbr_R)] for m in range(self.nbr_M_par_routeur[r])] for r in range(self.nbr_R)]
-            self.interface_maitre_adresse_haute_decodage_esclave = [[[[StringVar(value="00000000") for s in range(self.nbr_S_par_routeur[r_esclave])] for r_esclave in range(self.nbr_R)] for m in range(self.nbr_M_par_routeur[r])] for r in range(self.nbr_R)]
+                    #rajoute une interface paquet port de routage = '3' pour chaque connexion à un autre routeur (colonne de chaque autre autre routeur croisant celle du routeur r == "orange" -> connexion)
+                    for colonne in range(self.nbr_R):
+                        if self.liste_Cases_Connexions_Routeur[r][colonne]["background"]=="orange":
+                            self.Interfaces_paquets_routeur[r][index_interface_paquet_du_routeur] = 3
+                            index_interface_paquet_du_routeur += 1
+                       
 
-            #12) LOCAL CONNEXION   
-            self.Matrices_connexions_locales = [[[0 for max_maitre in range(self.nbr_port_routeur_max+1)] for max_esclave in range(self.nbr_port_routeur_max+1)] for r in range(self.nbr_R)]
-               
+                #Connexions paquets & locales
+                self.Connexions_locales = [[[IntVar(value=1) for s in range (self.nbr_S_par_routeur[r])] for m in range (self.nbr_M_par_routeur[r])] for r in range (self.nbr_R)]
+                self.Connexions_paquets = [[IntVar(value=1) for m_s in range(self.nbr_M_par_routeur[r]+self.nbr_S_par_routeur[r])] for r in range(self.nbr_R)]
+                            
+                            
+                #5) ADD DECODER TABLE SIZE, 6) SLAVE ADDRESS MAPPING (32-bits), 9) ADDRESS DECODER TABLES, 10) ADDRESS DECODER PARAMETER MATRIX
+                self.Taille_table_decodeur_adr_maitre = [[0 for m in range(self.nbr_M_par_routeur[r])] for r in range(self.nbr_R)]
+                self.Nombre_total_regles_decodeur_adresse = 0
+                self.maitre_possede_decodage_adresse_esclave = [[[[IntVar(value=0) for s in range(self.nbr_S_par_routeur[r_esclave])] for r_esclave in range(self.nbr_R)] for m in range(self.nbr_M_par_routeur[r])] for r in range(self.nbr_R)]
+                self.interface_maitre_adresse_basse_decodage_esclave = [[[[StringVar(value="00000000") for s in range(self.nbr_S_par_routeur[r_esclave])] for r_esclave in range(self.nbr_R)] for m in range(self.nbr_M_par_routeur[r])] for r in range(self.nbr_R)]
+                self.interface_maitre_adresse_haute_decodage_esclave = [[[[StringVar(value="00000000") for s in range(self.nbr_S_par_routeur[r_esclave])] for r_esclave in range(self.nbr_R)] for m in range(self.nbr_M_par_routeur[r])] for r in range(self.nbr_R)]
+
+                #12) LOCAL CONNEXION   
+                self.Matrices_connexions_locales = [[[0 for max_maitre in range(self.nbr_port_routeur_max+1)] for max_esclave in range(self.nbr_port_routeur_max+1)] for r in range(self.nbr_R)]
+            
+            #erreur detectee dans la configuration
+            else:
+                #permettre l'accès aux boutons de configurations avancees
+                self.checkBouton_Connexions_Locales.config(state=DISABLED)
+                self.Bouton_Connexions_Locales.config(state=DISABLED)
+                self.checkBouton_Connexions_Paquets.config(state=DISABLED)
+                self.Bouton_Connexions_Paquets.config(state=DISABLED)
+                self.bouton_decodeurs_adresses.config(state=DISABLED)
+                self.bouton_generation_vhdl.config(state=DISABLED)
+                self.checkbouton_moniteur_securite.config(state=DISABLED)
 
                 # self.nbr_R
                
@@ -1201,16 +1245,7 @@ class MainInterface(Frame):
                         self.interface_maitre_adresse_basse_decodage_esclave[r][m][r_esclave][s].set(value=CHARGED_FROM_SAVE_adresses_basses[r][m][r_esclave][s])
                         self.interface_maitre_adresse_haute_decodage_esclave[r][m][r_esclave][s].set(value=CHARGED_FROM_SAVE_adresses_hautes[r][m][r_esclave][s])
                         self.maitre_possede_decodage_adresse_esclave[r][m][r_esclave][s].set(CHARGED_FROM_SAVE_decodage_esclave_actif[r][m][r_esclave][s])
-                
-                
-    def checkbouton_moniteur_securite_action(self):
-        if self.flag_checkbouton_moniteur_securite == 0:
-            self.bouton_moniteur_securite.config(state = DISABLED)
-            self.flag_checkbouton_moniteur_securite = 1
-        elif self.flag_checkbouton_moniteur_securite ==1:
-            self.bouton_moniteur_securite.config(state = NORMAL)
-            self.flag_checkbouton_moniteur_securite = 0
-    
+               
 
     def checkBouton_Connexions_Locales_action(self):
         #tout connecter
@@ -1425,8 +1460,7 @@ class MainInterface(Frame):
                 self.Nombre_total_regles_decodeur_adresse = 0
  
 
-                   
-                   
+                  
         #recherche du rang du n° du routeur contenant premier maitre dans la configuration (le n° du premier maitre est forcement 0)
         i_routeur_premier_maitre = 0
         flag_presence_maitre = 0
@@ -1529,8 +1563,12 @@ class MainInterface(Frame):
                     i_grid_row += 1
                     
             
+
+            Label(Fenetre_DecodeurAdresse, text="Taille de la plage de\ndecodage d'adresse (en bits)").grid(row=3, column=0)
+            Entry(Fenetre_DecodeurAdresse, textvariable = self.master_address_decoder_range, width = 5, justify = CENTER).grid(row=4, column=0)
+            
             #Bouton pour quitter la fenêtre
-            Button(Fenetre_DecodeurAdresse, text="Ok", width=12, command=lambda:Fenetre_DecodeurAdresse.destroy()).grid(row=3, column=1)
+            Button(Fenetre_DecodeurAdresse, text="Ok", width=12, command=lambda:Fenetre_DecodeurAdresse.destroy()).grid(row=4, column=1)
                         
             
             ##Fonction appelée lors du clic d'une case cochable (checkbutton) ayant pour but :
@@ -1702,6 +1740,8 @@ package noc_config is
         fw.write('constant TOTAL_ROUTING_PORT_NB    : integer := %d ;\n' %self.somme_tot_nbr_RP)
         fw.write('constant TOTAL_ROUTER_NB          : integer := %d ;\n' %self.nbr_R)
         fw.write('constant SECURITY_MONITOR_ACTIVATION : integer := %d ;\n' %self.security_monitor_activation.get())
+        fw.write('constant MASTER_ADDRESS_DECODER_RANGE	: integer := %s;\n' %self.master_address_decoder_range.get())
+
         fw.close()
 
 
@@ -2262,7 +2302,8 @@ constant ROUTINGPORT15 	: regPORTADD:= "1111";
                 if Routeur_source != Routeur_destination:
                     if find_shortest_path(graph, 'Routeur' + str(Routeur_source), 'Routeur' + str(Routeur_destination)) != None:
                         self.Premier_routeur_du_chemin_entre_2_routeurs[Routeur_source][Routeur_destination] = find_shortest_path(graph, 'Routeur' + str(Routeur_source), 'Routeur' + str(Routeur_destination))[1]
-
+                    else:
+                        self.Rapport_d_erreur += ("\nAucun chemin trouvé menant du Routeur " + str(Routeur_source) + " au Routeur" + str(Routeur_destination) + ".")
        
 
         #Comptage de toutes les interfaces maitre & esclaves de chaque routeur
@@ -2578,14 +2619,128 @@ end noc_config;
         fw.write("%s" %ch)
         fw.close()
 
+    def generate_noc_security_conf(self):
+        outputdir = "./Noc0__"
+        if not os.path.exists(outputdir):
+            os.makedirs(outputdir)
+        ch0='''
+--------------------------------------------------------------
+-- IP   		: noc_security_conf PACKAGE              	--
+-- DESCRIPTION 	: security monitor configuration			--
+-- AUTHOR 		: R.Druyer                              	--
+-- DATE   		: 3 décembre 2016                        	--
+-- VERSION		: 2.0                                   	--
+--------------------------------------------------------------
 
+library IEEE;
+use IEEE.std_logic_1164.all;
+use work.noc_config.all;
+
+package noc_security_conf is
+        '''
+        
+        ch1='''
+constant	ACCESS_RIGHT_SIZE							: integer := 8;	
+constant	SECURITY_MONITOR_CONFIGURATION_PACKET_SIZE	: integer := 16;	
+ 
+subtype		regACCESS_RIGHT		is std_logic_vector((ACCESS_RIGHT_SIZE-1) downto 0);
+subtype		regCONF_PACKET		is std_logic_vector((SECURITY_MONITOR_CONFIGURATION_PACKET_SIZE-1) downto 0);
+subtype		reg5bits			is std_logic_vector(4 downto 0);
+subtype		reg3bits			is std_logic_vector(2 downto 0);
+		
+type	arrayCONF_PACKET			is array(natural RANGE <>) of regCONF_PACKET;
+		
+type master_monitor_security_rule_record is record
+	SLAVE_BASE_ADD 					: regADD;
+	SLAVE_HIGH_ADD					: regADD;
+	SECURITY_POLICY 				: regACCESS_RIGHT;
+end record;
+
+type slave_monitor_security_rule_record is record
+	SOURCE_ROUTER_ADD 				: regROUTERADD;
+	SOURCE_MASTER_ADD 				: regPORTADD;
+	SLAVE_BASE_ADD					: regADD;
+	SLAVE_HIGH_ADD					: regADD;
+	SECURITY_POLICY 				: regACCESS_RIGHT;
+end record;
+
+type security_monitor_configuration_record is record
+	SECURITY_MONITOR_TABLE_RANK			: integer;
+	SECURITY_MONITOR_TABLE_SIZE			: integer;
+end record;
+
+
+constant RULE_ACTIVATED			 : std_logic :='1';
+constant RULE_DEACTIVATED		 : std_logic :='0';
+	
+constant WRITE_AUTHORIZED		 : std_logic :='1';
+constant WRITE_DENIED			 : std_logic :='0';
+constant READ_AUTHORIZED		 : std_logic :='1';
+constant READ_DENIED			 : std_logic :='0';
+	
+constant DATA_CYCLE				 : std_logic_vector(1 downto 0) :="00";
+constant KEY_CYCLE				 : std_logic_vector(1 downto 0) :="01";
+constant IV_CYCLE				 : std_logic_vector(1 downto 0) :="10";
+constant CONTEXT_CYCLE			 : std_logic_vector(1 downto 0) :="11";
+	
+constant reg5_null_bits			 : reg5bits :=(others =>'0');
+constant reg3_null_bits			 : reg3bits :=(others =>'0');
+
+type monitor_configuration_table_size_vector is array (0 to 15) of security_monitor_configuration_record;
+type security_monitor_configuration_matrix is array (0 to TOTAL_ROUTER_NB-1) of monitor_configuration_table_size_vector;
+
+
+type integer_router_monitor_reconfigurability is array (0 to 17) of integer;
+type router_monitor_reconfigurability_matrix is array (0 to TOTAL_ROUTER_NB-1) of integer_router_monitor_reconfigurability;
+
+type unconstrained_array_master_security_monitor is array (natural range <>) of master_monitor_security_rule_record;
+type unconstrained_array_slave_security_monitor is array (natural range <>) of slave_monitor_security_rule_record;
+
+------------------------     # CONFIGURABLE PART #      ------------------------
+'''
+
+        ch_security_monitor_deactivated='''
+        ### SECURITY MONITORS DEACTIVATED ###
+constant MASTER_SECURITY_MONITOR_CONFIGURATION_MX   : security_monitor_configuration_matrix 		:=(others =>(others => (0,0)));
+constant SLAVE_SECURITY_MONITOR_CONFIGURATION_MX    : security_monitor_configuration_matrix 		:=(others =>(others => (0,0))); 	  
+constant SECURITY_MONITOR_RECONFIGURABILITY_MX 		: router_monitor_reconfigurability_matrix 		:=(others =>(others => 0));
+constant ALL_MASTER_SECURITY_MONITOR_RULES 			: unconstrained_array_master_security_monitor(0 to 2)	:=(others =>((others => '0'),(others => '0'),(others => '0')));
+constant ALL_SLAVE_SECURITY_MONITOR_RULES 			: unconstrained_array_slave_security_monitor(0 to 2)	:=(others =>((others => '0'),(others => '0'),(others => '0'),(others => '0'),(others => '0')));
+    '''
+        
+        fw= open(outputdir + "/noc_security_conf.vhd", 'w')
+        fw.write("%s" %ch0)
+        fw.write("%s" %ch1)
+        if self.security_monitor_activation.get() == 0:
+            fw.write("%s" %ch_security_monitor_deactivated)
+        else:
+            fw.write("Security monitor activated\n")
+        
+        fw.close()
+
+    def generate_error_report(self):
+        outputdir = "./Noc0__"
+        if not os.path.exists(outputdir):
+            os.makedirs(outputdir)
+            
+        fw= open(outputdir + "/rapport_erreur_config_noc.txt", 'w')
+    
+        
+        if self.Rapport_d_erreur == "":
+            fw.write("Pas d'erreur détectée dans la configuration.")
+        else:
+            fw.write(self.Rapport_d_erreur)
+        fw.close()
+
+            
+            
     def generate_vhdl_file(self):
         error_found=0
         #Verifier que le dossier existe, il est cree si necessaire
         outputdir = "./Noc0__"
         if not os.path.exists(outputdir):
             os.makedirs(outputdir)
-        generated_files=["/noc_config_configurable_part_0.vhd","/noc_config_fixed_part.vhd","/noc_config_configurable_part_1.vhd","/noc_config_configurable_part_2.vhd","/noc_config_configurable_part_3.vhd","/noc_config_configurable_part_4.vhd","/noc_config_configurable_part_5.vhd","/noc_config_configurable_part_6.vhd","/noc_config_configurable_part_7.vhd","/noc_config_configurable_part_8.vhd","/noc_config_configurable_part_9.vhd","/noc_config_configurable_part_10.vhd","/noc_config_configurable_part_11.vhd","/noc_config_configurable_part_12.vhd","/noc_config_end_of_file_with_function.vhd"]
+        generated_files=["/noc_config_configurable_part_0.vhd","/noc_config_fixed_part.vhd","/noc_config_configurable_part_1.vhd","/noc_config_configurable_part_2.vhd","/noc_config_configurable_part_3.vhd","/noc_config_configurable_part_4.vhd","/noc_config_configurable_part_5.vhd","/noc_config_configurable_part_6.vhd","/noc_config_configurable_part_7.vhd","/noc_config_configurable_part_8.vhd","/noc_config_configurable_part_9.vhd","/noc_config_configurable_part_10.vhd","/noc_config_configurable_part_11.vhd","/noc_config_configurable_part_12.vhd","/noc_config_end_of_file_with_function.vhd","/noc_security_conf.vhd"]
         self.generate_configurable_part_0()
         self.generate_fixed_part()
         self.generate_configurable_part_1()
@@ -2601,6 +2756,8 @@ end noc_config;
         self.generate_configurable_part_11()
         self.generate_configurable_part_12()
         self.generate_end_of_file_with_function()
+        self.generate_noc_security_conf()
+        self.generate_error_report()
         for i in range(len(generated_files)):
             if not os.path.exists(outputdir+generated_files[i]):
                 error_found=1
@@ -2654,7 +2811,6 @@ end noc_config;
                 with open(outputdir + "/noc_config_end_of_file_with_function.vhd") as old_file:
                     for line in old_file:   
                         new_file.write(line)
-
                         
 				
             os.remove(outputdir + "/noc_config_fixed_part.vhd")
