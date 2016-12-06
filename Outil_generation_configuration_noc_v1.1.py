@@ -4,7 +4,7 @@
 #-- FILE NAME   : SECANOC.py                                 --
 #-- AUTHORS     : Adel BENSAAD, Remy DRUYER                  --
 #-- DATE        : 6 décembre 2016                            --
-#-- VERSION     :  1.0                                       --
+#-- VERSION     : 1.1                                       --
 #--------------------------------------------------------------
 
 from tkinter import *
@@ -511,7 +511,7 @@ class MainInterface(Frame):
 
 
     def bouton_info_action(self):
-        showinfo("Fonctionnement de l'outil", "Cet outil permet de générer les fichiers de configuration noc_config.vhd et noc_security.conf.vhd ainsi qu’un rapport d’erreur sous format texte : \n- Sélectionner le nombre de routeurs dans le réseau et le nombre d’interface maitre et esclave pour chaque routeur. \n- Dans la matrice des routeurs, chaque ligne et chaque colonne correspond à un routeur. Pour établir une connexion entre deux routeurs il suffit de cliquer sur la case à l’intersection de la ligne et de la colonne correspondant aux deux routeurs à connecter (la case réciproque est automatiquement cochée). \n- Les connexions locales définissent les interfaces maitres et esclaves pouvant communiquer ensemble au sein d’un même routeur. \n- Les connexions en paquets permettent aux interfaces maitres et esclaves n’appartenant pas au même routeur de communiquer entre elles.\n- Pour chaque maitre le décodage d’adresse définit avec quelle interface esclave il peut communiquer dans le réseau (en mode paquet ou local) et à quelle adresse il peut l’atteindre. Le décodage d’adresse pour les IP étant connectées en local est automatiquement activé. \n- Un algorithme du plus court chemin est utilisé pour initialiser le contenu des tables de routage mais il ne comprend pas une notion de « poids » qui ferait le choix entre deux chemins de taille égale en fonction de leur utilisation. Pour l’instant, c’est le premier plus court chemin entre deux routeurs qui est sélectionné.\n\nContenu du rapport d’erreur:\n- Détection de l’existence d’au moins un chemin entre tous les routeurs.\n- Format des adresses de décodage des esclaves (8 caractères hexadécimaux pour les adresses en 32 bits).\n- Chaque interface maitre et esclave possède au moins une interface locale ou paquet.\n\n ATTENTION : modifier le nombre de routeurs ou les paramètres généraux et relancer une génération risque d’entrainer une perte des configurations déjà établies. \n\nAutres :\n- Numérotation des routeurs : de 0 a i. \n- Nombre minimal de routeur = 3 ; nombre maximale de routeur = 64. \n- Nombre maximum d’interfaces maitre et esclave confondues pour chaque routeur = 15.\n- Nombre maximum interface maitre, interface esclave et connexion a d’autre routeur pour chaque routeur = 16.\n- Ordre de numérotation des interfaces : de 0 à j : d’abord les interfaces maitre, puis interfaces esclaves et enfin les interfaces entre les routeurs (port de routage).")
+        showinfo("Fonctionnement de l'outil", "Cet outil permet de générer les fichiers de configuration noc_config.vhd et noc_security.conf.vhd ainsi qu’un rapport d’erreur/résumé de configuration sous format texte : \n- Sélectionner le nombre de routeurs dans le réseau et le nombre d’interface maitre et esclave pour chaque routeur. \n- Dans la matrice des routeurs, chaque ligne et chaque colonne correspond à un routeur. Pour établir une connexion entre deux routeurs il suffit de cliquer sur la case à l’intersection de la ligne et de la colonne correspondant aux deux routeurs à connecter (la case réciproque est automatiquement cochée). \n- Les connexions locales définissent les interfaces maitres et esclaves pouvant communiquer ensemble au sein d’un même routeur. \n- Les connexions en paquets permettent aux interfaces maitres et esclaves n’appartenant pas au même routeur de communiquer entre elles.\n- Pour chaque maitre le décodage d’adresse définit avec quelle interface esclave il peut communiquer dans le réseau (en mode paquet ou local) et à quelle adresse il peut l’atteindre. Le décodage d’adresse pour les IP étant connectées en local est automatiquement activé. \n- Un algorithme du plus court chemin est utilisé pour initialiser le contenu des tables de routage mais il ne comprend pas une notion de « poids » qui ferait le choix entre deux chemins de taille égale en fonction de leur utilisation. Pour l’instant, c’est le premier plus court chemin entre deux routeurs qui est sélectionné.\n\nContenu du rapport d’erreur:\n- Détection de l’existence d’au moins un chemin entre tous les routeurs.\n- Format des adresses de décodage des esclaves (8 caractères hexadécimaux pour les adresses en 32 bits).\n- Chaque interface maitre et esclave possède au moins une interface locale ou paquet.\n\n ATTENTION : modifier le nombre de routeurs ou les paramètres généraux et relancer une génération risque d’entrainer une perte des configurations déjà établies. \n\nAutres :\n- Numérotation des routeurs : de 0 a i. \n- Nombre minimal de routeur = 3 ; nombre maximale de routeur = 64. \n- Nombre maximum d’interfaces maitre et esclave confondues pour chaque routeur = 15.\n- Nombre maximum interface maitre, interface esclave et connexion a d’autre routeur pour chaque routeur = 16.\n- Ordre de numérotation des interfaces : de 0 à j : d’abord les interfaces maitre, puis interfaces esclaves et enfin les interfaces entre les routeurs (port de routage).")
    
 
 
@@ -1369,7 +1369,7 @@ class MainInterface(Frame):
         Label_Maitres   = Label(self.frame.Label_interior, text="Maitre", width=8, justify = CENTER).grid(row=0, column=2)
         Label_Empty_2   = Label(self.frame.Label_interior, text=" ", width=8, justify = CENTER).grid(row=0, column=3)
         Label_Esclaves  = Label(self.frame.Label_interior, text="Esclave", width=5, justify = CENTER).grid(row=0, column=4)
-        Label_Connexions_locales = Label(self.frame.Label_interior, text="Connexion", width=10, justify = CENTER).grid(row=0, column=5)
+        Label_Connexions_locales = Label(self.frame.Label_interior, text="Connexion locale", width=15, justify = CENTER).grid(row=0, column=5)
 
         #Placement des cases pour Maitre X(fois) Esclave pour chaque routeur
         for r in range(self.nbr_R):
@@ -1378,7 +1378,7 @@ class MainInterface(Frame):
                     Cases_Routeurs.append(Button(self.frame.interior, text= str(r), state=DISABLED, width=7))
                     Cases_Maitres.append(Button(self.frame.interior, text= str(m), state=DISABLED, width=7))
                     Cases_Esclaves.append(Button(self.frame.interior, text= str(s+self.nbr_M_par_routeur[r]), state=DISABLED, width=7))
-                    CheckButt_Connexions_locales.append(Checkbutton(self.frame.interior, variable=self.Connexions_locales[r][m][s], width=5))
+                    CheckButt_Connexions_locales.append(Checkbutton(self.frame.interior, variable=self.Connexions_locales[r][m][s], width=10))
                     Scrollable_Label_Arrow.append(Label(self.frame.interior, text="<=>", width=7, justify = CENTER))
                     Scrollable_Label_Colon.append(Label(self.frame.interior, text=":", width=2, justify = CENTER))
 
@@ -2804,6 +2804,8 @@ constant ALL_SLAVE_SECURITY_MONITOR_RULES 			: unconstrained_array_slave_securit
                                 self.Rapport_d_erreur_format_adresse_decodage += ("Erreur : format invalide de l'adresse de décodage BASSE du Routeur %d - maitre %d pour l'esclave Routeur %d esclave %d : %s\n" %(r,m,r_esclave,s, self.interface_maitre_adresse_basse_decodage_esclave[r][m][r_esclave][s].get()))
                             if not(re.match("^[A-Fa-f0-9_-]*$", self.interface_maitre_adresse_haute_decodage_esclave[r][m][r_esclave][s].get())) or len(self.interface_maitre_adresse_haute_decodage_esclave[r][m][r_esclave][s].get())!=8:
                                 self.Rapport_d_erreur_format_adresse_decodage += ("Erreur : format invalide de l'adresse de décodage HAUTE du Routeur %d - maitre %d pour l'esclave Routeur %d esclave %d : %s\n" %(r,m,r_esclave,s, self.interface_maitre_adresse_haute_decodage_esclave[r][m][r_esclave][s].get()))
+                            if int(self.interface_maitre_adresse_basse_decodage_esclave[r][m][r_esclave][s].get(),16) > int(self.interface_maitre_adresse_haute_decodage_esclave[r][m][r_esclave][s].get(),16):
+                                self.Rapport_d_erreur_format_adresse_decodage += ("Erreur : adresse de décodage basse est supérieure à l'adresse haute du Routeur %d - maitre %d pour l'esclave Routeur %d esclave %d : adresse basse %s > adresse haute %s\n" %(r,m,r_esclave,s, self.interface_maitre_adresse_basse_decodage_esclave[r][m][r_esclave][s].get(), self.interface_maitre_adresse_haute_decodage_esclave[r][m][r_esclave][s].get()))
                     
                 if maitre_possede_au_moins_une_adresse_decodage_esclave == 0:
                     self.Rapport_d_erreur_format_adresse_decodage += ("Erreur : Routeur %d - maitre %d ne possède aucune adresse de décodage d'esclave -> sa table de décodage d'adresse est vide.\n" %(r,m))
@@ -2814,23 +2816,7 @@ constant ALL_SLAVE_SECURITY_MONITOR_RULES 			: unconstrained_array_slave_securit
                     self.Rapport_d_erreur_format_adresse_decodage += ("Erreur : Routeur %d - esclave %d n'est présent dans aucune table de décodage de maitre.\n" %(r,s))
         
         
-        #format des adresses de décodage d'esclave
-        for r in range(self.nbr_R):
-            for m in range(self.nbr_M_par_routeur[r]):
-                maitre_possede_au_moins_une_adresse_decodage_esclave = 0
-                for r_esclave in range(self.nbr_R):
-                    for s in range(self.nbr_S_par_routeur[r_esclave]):
-                        if self.maitre_possede_decodage_adresse_esclave[r][m][r_esclave][s].get() == 1:
-                            maitre_possede_au_moins_une_adresse_decodage_esclave = 1
-                            if not(re.match("^[A-Fa-f0-9_-]*$", self.interface_maitre_adresse_basse_decodage_esclave[r][m][r_esclave][s].get())) or len(self.interface_maitre_adresse_basse_decodage_esclave[r][m][r_esclave][s].get())!=8:
-                                self.Rapport_d_erreur_format_adresse_decodage += ("Erreur : format invalide de l'adresse de décodage BASSE du Routeur %d - maitre %d pour l'esclave Routeur %d esclave %d : %s\n" %(r,m,r_esclave,s, self.interface_maitre_adresse_basse_decodage_esclave[r][m][r_esclave][s].get()))
-                            if not(re.match("^[A-Fa-f0-9_-]*$", self.interface_maitre_adresse_haute_decodage_esclave[r][m][r_esclave][s].get())) or len(self.interface_maitre_adresse_haute_decodage_esclave[r][m][r_esclave][s].get())!=8:
-                                self.Rapport_d_erreur_format_adresse_decodage += ("Erreur : format invalide de l'adresse de décodage HAUTE du Routeur %d - maitre %d pour l'esclave Routeur %d esclave %d : %s\n" %(r,m,r_esclave,s, self.interface_maitre_adresse_haute_decodage_esclave[r][m][r_esclave][s].get()))
-                    
-                if maitre_possede_au_moins_une_adresse_decodage_esclave == 0:
-                    self.Rapport_d_erreur_format_adresse_decodage += ("Erreur : Routeur %d - maitre %d ne possède aucune adresse de décodage d'esclave -> sa table de décodage d'adresse est vide.\n" %(r,m))
-                    
-                    
+
         
         # - contrôle du format des adresses de décodage des esclaves (8 caractères hexadecimaux pour les adresses en 32 bits)
 
